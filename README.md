@@ -33,6 +33,8 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 全球运营商预设来自 MIT 许可的 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，编码依据 [ITU-T E.212](https://www.itu.int/rec/T-REC-E.212/en)；具体筛选规则与来源版本见 `app/src/main/assets/carriers.NOTICE.txt`。
 
+Android 版本、API、DPI、网络和语言等内置预设集中维护在 `app/src/main/res/raw/presets.json`，避免把数据散落在 UI 代码中。
+
 目前主要模块：
 
 - `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。

@@ -98,7 +98,7 @@ fun SearchBox(value: String, onValueChange: (String) -> Unit) {
             shadowElevation = 3.dp,
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier
-                .padding(horizontal = 35.dp, vertical = 3.dp)
+                .padding(horizontal = 15.dp, vertical = 3.dp)
                 .fillMaxWidth()
         ) {
             Row(

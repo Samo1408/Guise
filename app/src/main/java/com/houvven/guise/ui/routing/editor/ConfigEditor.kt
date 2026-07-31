@@ -40,11 +40,7 @@ import com.houvven.guise.R
 import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.PresetAdapter
 import com.houvven.guise.module.preset.CarrierPresetRepository
-import com.houvven.guise.module.preset.DensityPreset
-import com.houvven.guise.module.preset.LanguagePreset
-import com.houvven.guise.module.preset.NetworkPreset
-import com.houvven.guise.module.preset.ReleasePreset
-import com.houvven.guise.module.preset.SdkPreset
+import com.houvven.guise.module.preset.PresetRepository
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
@@ -74,6 +70,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 
     val context = LocalContext.current
     val carrierPresets = remember(context) { CarrierPresetRepository.get(context) }
+    val presetCatalog = remember(context) { PresetRepository.get(context) }
 
 
     Title(text = stringResource(R.string.title_device_parameter), topPadding = 1.dp)
@@ -115,7 +112,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state.androidVersion,
         stringResource(R.string.device_system_android_version),
-        preset = ReleasePreset.values().toList().reversed(),
+        preset = presetCatalog.androidVersions.reversed(),
     ) { value ->
         state.androidVersion.value = value.substringBefore('|')
         value.substringAfter('|', missingDelimiterValue = "")
@@ -125,12 +122,12 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state = state.sdkInt,
         label = stringResource(R.string.device_system_api_level),
-        preset = SdkPreset.values().toList().reversed(),
+        preset = presetCatalog.sdkLevels.reversed(),
     )
     PresetInputBox(
         state = state.densityDpi,
         label = stringResource(R.string.device_display_density),
-        preset = DensityPreset.values().toList().reversed(),
+        preset = presetCatalog.densityDpi.reversed(),
         validate = { value -> value.length <= 4 && value.all(Char::isDigit) },
     )
     InputBox(state.fingerPrint, stringResource(R.string.device_system_finger_print))
@@ -140,7 +137,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state = state.networkType,
         label = stringResource(R.string.net_type),
-        preset = NetworkPreset.values().toList()
+        preset = presetCatalog.networks,
     )
     InputBox(state.wifiSSID, stringResource(R.string.net_wifi_ssid))
     InputBox(state.wifiBSSID, stringResource(R.string.net_wifi_bssid))
@@ -195,7 +192,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state.language,
         stringResource(R.string.other_language),
-        LanguagePreset.values().toList()
+        presetCatalog.languages,
     )
     ContainerSwitch(
         state.allowForceScreenshots,

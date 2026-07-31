@@ -3,8 +3,8 @@ package com.houvven.guise.ui.utils
 import android.content.Context
 import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.ktx.runThread
-import com.houvven.guise.module.preset.NetworkPreset
 import com.houvven.guise.module.preset.CarrierPresetRepository
+import com.houvven.guise.module.preset.PresetRepository
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
 
@@ -22,7 +22,7 @@ fun oneClickRandom(state: ModuleConfigState, context: Context) {
 
             fingerPrint.value = Randoms.randomFingerPrint()
 
-            networkType.value = NetworkPreset.values().random().value
+            networkType.value = PresetRepository.get(context).networks.random().value
 
             wifiSSID.value = Randoms.randomString(10)
             wifiBSSID.value = Randoms.randomMacAddress()
