@@ -191,7 +191,17 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 
 
     Title(text = stringResource(R.string.title_other))
-    InputBox(state.batteryLevel, stringResource(R.string.other_battery_level))
+    RandomInputBox(
+        state = state.batteryLevel,
+        label = stringResource(R.string.other_battery_level),
+        validate = { value ->
+            value.isEmpty() || (
+                value.all(Char::isDigit) &&
+                    value.toIntOrNull()?.let { it in 0..100 } == true
+                )
+        },
+        randomGenerator = { Randoms.randomBatteryLevel().toString() },
+    )
     PresetInputBox(
         state.language,
         stringResource(R.string.other_language),

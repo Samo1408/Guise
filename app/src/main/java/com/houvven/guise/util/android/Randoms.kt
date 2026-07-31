@@ -116,6 +116,8 @@ object Randoms {
         return fingerprint.toString()
     }
 
+    fun randomBatteryLevel(): Int = Random().nextInt(101)
+
 
     fun randomLatLac(): PointF {
         val random = Random()

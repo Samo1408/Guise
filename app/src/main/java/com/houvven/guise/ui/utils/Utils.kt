@@ -43,7 +43,7 @@ fun oneClickRandom(state: ModuleConfigState, context: Context) {
             imei.value = Randoms.randomIMEI()
             phoneNum.value = Randoms.randomPhoneNum()
 
-            batteryLevel.value = Randoms.randomInt(2).toString()
+            batteryLevel.value = Randoms.randomBatteryLevel().toString()
         }
     }
 
