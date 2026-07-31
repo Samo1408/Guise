@@ -18,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +61,10 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     val resetPendingMessage = stringResource(R.string.config_reset_pending_save)
     var exitDialog by rememberSaveable { mutableStateOf(EditorExitDialog.NONE) }
     var savedChangesNeedApply by rememberSaveable { mutableStateOf(false) }
+    var savedSnapshotGeneration by remember { mutableIntStateOf(0) }
+    val hasUnsavedChanges by remember(moduleConfigManager, savedSnapshotGeneration) {
+        derivedStateOf(moduleConfigManager::hasUnsavedChanges)
+    }
 
     fun leaveEditor() {
         exitDialog = EditorExitDialog.NONE
@@ -81,7 +87,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
 
     fun requestExit() {
         when {
-            moduleConfigManager.hasUnsavedChanges() ->
+            hasUnsavedChanges ->
                 exitDialog = EditorExitDialog.SAVE_CHANGES
 
             savedChangesNeedApply -> requestApplyChoice()
@@ -92,6 +98,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     fun saveChanges() {
         val changed = moduleConfigManager.hasUnsavedChanges()
         moduleConfigManager.save()
+        savedSnapshotGeneration++
         if (changed) savedChangesNeedApply = true
     }
 
@@ -129,10 +136,13 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
                     GlobalSnackbarHost.showByDismissPrevious(resetPendingMessage)
                 }) { SimplifyIcon(Icons.Outlined.Delete) }
 
-                IconButton({
-                    saveChanges()
-                    GlobalSnackbarHost.showSuccess()
-                }) { SimplifyIcon(Icons.Outlined.Save) }
+                IconButton(
+                    onClick = {
+                        saveChanges()
+                        GlobalSnackbarHost.showSuccess()
+                    },
+                    enabled = hasUnsavedChanges,
+                ) { SimplifyIcon(Icons.Outlined.Save) }
 
                 var expanded by remember { mutableStateOf(false) }
                 IconButton({ expanded = true }) {

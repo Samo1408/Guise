@@ -97,6 +97,7 @@ private fun FieldIconButton(
 private fun BasicInputBox(
     state: MutableState<String>,
     label: String,
+    supportingText: String? = null,
     validate: (String) -> Boolean = { true },
     trailingIcon: @Composable () -> Unit = {},
 ) {
@@ -109,6 +110,9 @@ private fun BasicInputBox(
         modifier = modifier,
         singleLine = true,
         label = { Text(text = label) },
+        supportingText = supportingText?.let { text ->
+            { Text(text = text) }
+        },
         trailingIcon = trailingIcon,
     )
 }
@@ -120,7 +124,7 @@ internal fun InputBox(
     label: String,
     validate: (String) -> Boolean = { true },
 ) {
-    BasicInputBox(state, label, validate) {
+    BasicInputBox(state = state, label = label, validate = validate) {
         state.value.isNotBlank().let {
             if (it) FieldIconButton(
                 Icons.TwoTone.Delete,
@@ -139,6 +143,7 @@ internal fun InputBox(
 internal fun OperateInputBox(
     state: MutableState<String>,
     label: String,
+    supportingText: String? = null,
     showOperateIcon: Boolean = true,
     validate: (String) -> Boolean = { true },
     operateIcon: ImageVector = Icons.AutoMirrored.TwoTone.List,
@@ -161,7 +166,7 @@ internal fun OperateInputBox(
         clickable()
     }
 
-    BasicInputBox(state, label, validate) {
+    BasicInputBox(state, label, supportingText, validate) {
         Row {
             if (showOperateIcon) {
                 FieldIconButton(

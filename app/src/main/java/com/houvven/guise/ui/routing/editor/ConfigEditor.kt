@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import com.houvven.guise.module.preset.PresetRepository
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
+import kotlin.math.roundToInt
 
 
 private val localSetValue = mutableStateOf({ _: String -> })
@@ -58,10 +60,11 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         state: MutableState<String>,
         label: String,
         preset: List<PresetAdapter>,
+        supportingText: String? = null,
         showOperateIcon: Boolean = true,
         validate: (String) -> Boolean = { true },
         setValue: (String) -> Unit = { value -> state.value = value },
-    ) = OperateInputBox(state, label, showOperateIcon, validate) {
+    ) = OperateInputBox(state, label, supportingText, showOperateIcon, validate) {
         localPreset.value = preset
         localSetValue.value = setValue
         launch()
@@ -69,8 +72,18 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 
 
     val context = LocalContext.current
+    val localConfiguration = LocalConfiguration.current
     val carrierPresets = remember(context) { CarrierPresetRepository.get(context) }
     val presetCatalog = remember(context) { PresetRepository.get(context) }
+    val equivalentSmallestWidthDp = state.densityDpi.value.toIntOrNull()
+        ?.takeIf { it in 72..1000 && localConfiguration.smallestScreenWidthDp > 0 }
+        ?.let { targetDensityDpi ->
+            (localConfiguration.smallestScreenWidthDp *
+                localConfiguration.densityDpi.toFloat() / targetDensityDpi).roundToInt()
+        }
+    val densitySummary = equivalentSmallestWidthDp?.let {
+        stringResource(R.string.device_display_density_summary_with_dp, it)
+    } ?: stringResource(R.string.device_display_density_summary)
 
 
     Title(text = stringResource(R.string.title_device_parameter), topPadding = 1.dp)
@@ -128,6 +141,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         state = state.densityDpi,
         label = stringResource(R.string.device_display_density),
         preset = presetCatalog.densityDpi.reversed(),
+        supportingText = densitySummary,
         validate = { value -> value.length <= 4 && value.all(Char::isDigit) },
     )
     RandomInputBox(

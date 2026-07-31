@@ -33,7 +33,9 @@
     <string name="device_board">رمز اللوحة</string>
     <string name="device_system_android_version">نسخة أندرويد</string>
     <string name="device_system_api_level">مستوى API</string>
-    <string name="device_display_density">حجم العرض (DPI)</string>
+    <string name="device_display_density">كثافة العرض (DPI)</string>
+    <string name="device_display_density_summary">كلما زادت القيمة، ظهرت عناصر الواجهة بحجم أكبر</string>
+    <string name="device_display_density_summary_with_dp">كلما زادت القيمة، كبرت عناصر الواجهة · تعادل تقريبًا %1$d dp لخيار «أصغر عرض» في خيارات المطوّر</string>
     <string name="device_cpu">كود وحدة المعالجة المركزية</string>
     <string name="net_type">نوع الإنترنت</string>
     <string name="net_wifi_ssid">شبكة WiFi-SSID</string>

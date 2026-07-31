@@ -30,7 +30,9 @@
     <string name="device_board">主板代号</string>
     <string name="device_system_android_version">Android版本</string>
     <string name="device_system_api_level">SDK版本</string>
-    <string name="device_display_density">显示大小（DPI）</string>
+    <string name="device_display_density">显示密度（DPI）</string>
+    <string name="device_display_density_summary">数值越大，界面元素越大</string>
+    <string name="device_display_density_summary_with_dp">数值越大，界面元素越大；约等于开发者选项“最小宽度”%1$d dp</string>
     <string name="device_cpu">CPU代号</string>
     <string name="net_type">网络类型</string>
     <string name="net_wifi_ssid">WiFi名称</string>
