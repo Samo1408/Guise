@@ -98,7 +98,7 @@ private val reverseOrder by derivedStateOf {
 private val searchKeyWorld by derivedStateOf { mutableStateOf("") }
 
 
-private fun generateApps(prioritizedPackages: Set<String>): List<AppInfo> {
+private fun generateApps(prioritizedPackages: Collection<String>): List<AppInfo> {
     var result = LauncherState.apps.value
     if (!displaySystemApp.value) result = result.filterNot { it.isSystemApp }
 
@@ -190,9 +190,9 @@ fun DeployScreen() {
     var displayMenu by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
     var refreshing by rememberSaveable { mutableStateOf(false) }
-    var prioritizedPackages by remember {
+    var prioritizedPackages by rememberSaveable {
         mutableStateOf(
-            LauncherState.apps.value.filter { it.isEnable }.mapTo(mutableSetOf()) { it.packageName }
+            LauncherState.apps.value.filter { it.isEnable }.map { it.packageName }
         )
     }
     val listState = rememberLazyListState()
@@ -213,7 +213,7 @@ fun DeployScreen() {
                 com.houvven.guise.module.apps.AppInfoProvider.getList()
             }
             LauncherState.apps.value = apps
-            prioritizedPackages = apps.filter { it.isEnable }.mapTo(mutableSetOf()) { it.packageName }
+            prioritizedPackages = apps.filter { it.isEnable }.map { it.packageName }
             refreshing = false
         }
     }
