@@ -2,7 +2,6 @@ package com.houvven.guise.client
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
@@ -14,7 +13,6 @@ import com.houvven.guise.util.MY_USER_ID
 import com.houvven.guise.util.createModuleApplications
 import com.houvven.guise.util.putModuleScope
 import com.houvven.guise.util.removeModuleScope
-import com.topjohnwu.superuser.ipc.RootService
 import io.github.houvven.lservice.ILServiceBridge
 import io.github.houvven.lservice.LServiceBridgeRootService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -68,15 +66,13 @@ object LServiceBridgeClient {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun start(context: Context) {
-        val intent = Intent(context, LServiceBridgeRootService::class.java)
-        intent.putExtra(LServiceBridgeRootService.MANAGER_APK_PATH, context.managerApkPath)
         try {
             Runtime.getRuntime().exec("su")
         } catch (e: Exception) {
             _statusFlow.update { Status.Error.RootRequired }
             return
         }
-        RootService.bind(intent, connection)
+        LServiceBridgeRootService.bind(context, connection, context.managerApkPath)
 
         GlobalScope.launch { // watch the connection status
             val startTime = System.currentTimeMillis()

@@ -8,7 +8,8 @@ plugins {
 
 android {
     namespace = "com.houvven.guise.hook"
-    compileSdk = 34
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         minSdk = 24

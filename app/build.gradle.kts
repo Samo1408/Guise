@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.konan.properties.loadProperties
 
 plugins {
@@ -13,7 +12,8 @@ plugins {
 
 android {
     namespace = "com.houvven.guise"
-    compileSdk = 34
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = namespace
@@ -28,16 +28,26 @@ android {
             useSupportLibrary = true
         }
     }
+    val signingPropertiesFile = rootProject.file("local.properties")
+    val signingProperties = signingPropertiesFile
+        .takeIf(File::exists)
+        ?.let { loadProperties(it.path) }
+    val hasReleaseSigning = listOf(
+        "sign.store.file",
+        "sign.store.password",
+        "sign.key.alias",
+        "sign.key.password"
+    ).all { signingProperties?.getProperty(it).isNullOrBlank().not() }
+
     signingConfigs {
-        create("release") {
+        if (hasReleaseSigning) create("release") {
             enableV1Signing = true
             enableV2Signing = true
             enableV3Signing = true
-            val properties = loadProperties(rootProject.file("local.properties").path)
-            storeFile = File(properties.getProperty("sign.store.file"))
-            storePassword = properties.getProperty("sign.store.password")
-            keyAlias = properties.getProperty("sign.key.alias")
-            keyPassword = properties.getProperty("sign.key.password")
+            storeFile = File(signingProperties!!.getProperty("sign.store.file"))
+            storePassword = signingProperties.getProperty("sign.store.password")
+            keyAlias = signingProperties.getProperty("sign.key.alias")
+            keyPassword = signingProperties.getProperty("sign.key.password")
         }
     }
     buildTypes {
@@ -48,7 +58,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {
@@ -77,10 +87,6 @@ android {
             reset()
             include("arm64-v8a", "x86_64")
         }
-    }
-    buildOutputs.all {
-        this as BaseVariantOutputImpl
-        outputFileName = "${rootProject.name}-${name}.apk"
     }
 }
 
@@ -122,6 +128,7 @@ dependencies {
     implementation(libs.kotlin.serialization.json)
     implementation(libs.betterandroid.extension.system)
     implementation(libs.lservice)
-    implementation(libs.libsu.io)
+    implementation(libs.libsu.core)
+    implementation(libs.libsu.service)
     implementation(libs.hiddenapibypass)
 }
