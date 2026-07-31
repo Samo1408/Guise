@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Guise"
 include(":app")
 include(":ktx-xposed")
+include(":guise-test")

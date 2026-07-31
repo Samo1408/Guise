@@ -33,6 +33,21 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 - `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。
 - `ktx-xposed`：基于 Modern Xposed API 的 Hook 适配层和模块日志基础设施。
+- `guise-test`：独立的 API 37 测试应用，用真实 Android API 核验各项伪装结果，不依赖 Guise 的配置对象。
+
+## Guise Test
+
+测试应用包名为 `com.daxiaamu.guise.test`。它可检查应用版本、设备与系统字段、Android ID、IMEI、手机号、网络、Wi-Fi、SIM、基站、定位、电池、语言地区、联系人/媒体空白通行和截图限制，并完整支持英文、简体中文、日文和阿拉伯文。
+
+使用时先安装测试 APK，在 Guise 中为“Guise Test”配置容易识别的值并同步作用域，然后强行停止并重新打开测试应用。测试应用直接读取系统 API；权限不足、设备无 SIM 或接口不受支持时会显示具体异常，不会把它们误判为 Hook 成功。版本值与编译值不同、或空白通行查询得到 `null` 游标时，界面会给出明确的 Hook 检测提示。
+
+单独构建和检查测试应用：
+
+```powershell
+.\gradlew.bat :guise-test:assembleDebug :guise-test:lintDebug
+```
+
+产物位于 `guise-test/build/outputs/apk/debug/guise-test-debug.apk`，使用 Android 默认调试签名。
 
 ## 构建
 

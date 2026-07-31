@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Guise 测试</string><string name="refresh">刷新</string>
+    <string name="test_instructions_title">测试方法</string>
+    <string name="test_instructions">将本应用（com.daxiaamu.guise.test）加入 Guise，配置容易识别的伪装值并同步作用域，然后强行停止并重新打开本应用。请将下列结果与 Guise 配置对照。</string>
+    <string name="hook_toast_hint">若启用了“Hook 成功提示”，冷启动时还应出现 Guise Toast。</string>
+    <string name="permissions_explanation">电话、位置、联系人、附近设备和媒体权限只用于调用待测 Android API。权限被拒或设备不支持时会显示错误，不会崩溃。</string>
+    <string name="grant_permissions">授予测试权限</string><string name="permission_required">需要位置权限</string><string name="waiting">正在等待位置更新…</string>
+    <string name="not_available">不可用</string><string name="null_value">null</string><string name="hook_detected">与编译值不同或游标为 null：已检测到 Guise Hook</string>
+    <string name="section_version">应用版本</string><string name="section_device">设备与系统</string><string name="section_identifiers">唯一标识</string>
+    <string name="section_network">网络与 Wi-Fi</string><string name="section_sim">SIM 与基站</string><string name="section_location">位置</string>
+    <string name="section_battery">电池</string><string name="section_locale">语言与地区</string><string name="section_blank_pass">空白通行</string><string name="section_screenshot">截图标志</string>
+    <string name="package_name">包名</string><string name="compiled_version">编译时 BuildConfig 版本</string><string name="package_manager_version">PackageManager 版本</string>
+    <string name="brand">品牌</string><string name="manufacturer">制造商</string><string name="model">型号</string><string name="product">产品</string><string name="device">设备</string><string name="board">主板</string><string name="hardware">硬件</string><string name="fingerprint">构建指纹</string><string name="sdk">SDK 级别</string><string name="release">Android 版本</string><string name="base_os">基础系统</string>
+    <string name="android_id_secure">Android ID（Secure）</string><string name="android_id_system">Android ID（System）</string><string name="imei">IMEI（卡槽 0）</string><string name="phone_number">手机号码</string>
+    <string name="network_legacy">活动 NetworkInfo（Hook 目标）</string><string name="network_modern">NetworkCapabilities（对照）</string><string name="wifi_state">Wi-Fi 状态</string><string name="wifi_ssid">SSID</string><string name="wifi_bssid">BSSID</string><string name="wifi_mac">Wi-Fi MAC</string>
+    <string name="sim_operator">SIM 运营商代码</string><string name="network_operator">网络运营商代码</string><string name="sim_name">SIM 运营商名称</string><string name="network_name">网络运营商名称</string><string name="sim_country">SIM 国家/地区</string><string name="network_country">网络国家/地区</string><string name="mobile_network_type">移动网络类型</string><string name="subscriptions">活动订阅</string><string name="cell_info">基站信息</string>
+    <string name="last_location">最后 GPS 位置</string><string name="location_providers">位置提供程序</string><string name="battery_property">BatteryManager 电量</string><string name="battery_intent">电池广播电量 / 总刻度</string>
+    <string name="locale_language">Locale 语言</string><string name="locale_country">Locale 国家/地区</string><string name="locale_tag">Locale 语言标签</string><string name="locale_text">Locale.toString()</string>
+    <string name="contacts_query">联系人查询</string><string name="images_query">图片查询</string><string name="videos_query">视频查询</string><string name="audio_query">音频查询</string>
+    <string name="null_cursor">null 游标</string><string name="cursor_count">游标数量 = %1$d</string><string name="secure_enabled">FLAG_SECURE = 已启用</string><string name="secure_disabled">FLAG_SECURE = 未启用</string>
+    <string name="screenshot_explanation">“禁止截图”应在启动后启用该标志；“允许截图”应阻止或清除该标志。还请实际尝试截屏。</string><string name="add_secure">添加标志</string><string name="clear_secure">清除标志</string>
+    <string name="live_location">实时位置回调</string><string name="not_requested">尚未请求</string><string name="request_location">请求一次 GPS 更新</string>
+</resources>

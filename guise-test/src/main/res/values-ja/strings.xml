@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Guise テスト</string><string name="refresh">更新</string>
+    <string name="test_instructions_title">テスト方法</string>
+    <string name="test_instructions">このアプリ（com.daxiaamu.guise.test）を Guise に追加し、判別しやすい偽装値を設定してスコープを同期します。その後、アプリを強制停止して再度開き、以下の値を Guise の設定と比較してください。</string>
+    <string name="hook_toast_hint">「Hook 成功通知」が有効な場合、コールドスタート時に Guise のトーストも表示されます。</string>
+    <string name="permissions_explanation">電話、位置情報、連絡先、付近のデバイス、メディアの権限は、テスト対象の Android API を呼び出すためだけに使用します。拒否または非対応の場合は、クラッシュせずエラーを表示します。</string>
+    <string name="grant_permissions">テスト権限を許可</string><string name="permission_required">位置情報の権限が必要です</string><string name="waiting">位置情報の更新を待機中…</string>
+    <string name="not_available">利用不可</string><string name="null_value">null</string><string name="hook_detected">コンパイル値と異なる、またはカーソルが null：Guise Hook を検出</string>
+    <string name="section_version">アプリのバージョン</string><string name="section_device">デバイスとシステム</string><string name="section_identifiers">固有識別子</string>
+    <string name="section_network">ネットワークと Wi-Fi</string><string name="section_sim">SIM と基地局</string><string name="section_location">位置情報</string><string name="section_battery">バッテリー</string><string name="section_locale">言語と地域</string><string name="section_blank_pass">空データ化</string><string name="section_screenshot">スクリーンショットフラグ</string>
+    <string name="package_name">パッケージ名</string><string name="compiled_version">コンパイル時の BuildConfig バージョン</string><string name="package_manager_version">PackageManager バージョン</string>
+    <string name="brand">ブランド</string><string name="manufacturer">メーカー</string><string name="model">モデル</string><string name="product">製品</string><string name="device">デバイス</string><string name="board">ボード</string><string name="hardware">ハードウェア</string><string name="fingerprint">ビルドフィンガープリント</string><string name="sdk">SDK レベル</string><string name="release">Android リリース</string><string name="base_os">ベース OS</string>
+    <string name="android_id_secure">Android ID（Secure）</string><string name="android_id_system">Android ID（System）</string><string name="imei">IMEI（スロット 0）</string><string name="phone_number">電話番号</string>
+    <string name="network_legacy">有効な NetworkInfo（Hook 対象）</string><string name="network_modern">NetworkCapabilities（比較用）</string><string name="wifi_state">Wi-Fi の状態</string><string name="wifi_ssid">SSID</string><string name="wifi_bssid">BSSID</string><string name="wifi_mac">Wi-Fi MAC</string>
+    <string name="sim_operator">SIM 事業者コード</string><string name="network_operator">ネットワーク事業者コード</string><string name="sim_name">SIM 事業者名</string><string name="network_name">ネットワーク事業者名</string><string name="sim_country">SIM の国</string><string name="network_country">ネットワークの国</string><string name="mobile_network_type">モバイルネットワーク種別</string><string name="subscriptions">有効なサブスクリプション</string><string name="cell_info">基地局情報</string>
+    <string name="last_location">最後の GPS 位置</string><string name="location_providers">位置情報プロバイダー</string><string name="battery_property">BatteryManager の容量</string><string name="battery_intent">バッテリー通知のレベル / 最大値</string>
+    <string name="locale_language">Locale の言語</string><string name="locale_country">Locale の国</string><string name="locale_tag">Locale の言語タグ</string><string name="locale_text">Locale.toString()</string>
+    <string name="contacts_query">連絡先クエリ</string><string name="images_query">画像クエリ</string><string name="videos_query">動画クエリ</string><string name="audio_query">音声クエリ</string>
+    <string name="null_cursor">null カーソル</string><string name="cursor_count">カーソル件数 = %1$d</string><string name="secure_enabled">FLAG_SECURE = 有効</string><string name="secure_disabled">FLAG_SECURE = 無効</string>
+    <string name="screenshot_explanation">「スクリーンショットを禁止」は起動後にフラグを有効にし、「スクリーンショットを許可」はフラグを阻止または解除します。実際のスクリーンショットも試してください。</string><string name="add_secure">フラグを追加</string><string name="clear_secure">フラグを解除</string>
+    <string name="live_location">リアルタイム位置コールバック</string><string name="not_requested">未要求</string><string name="request_location">GPS 更新を 1 回要求</string>
+</resources>

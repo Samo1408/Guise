@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">اختبار Guise</string><string name="refresh">تحديث</string>
+    <string name="test_instructions_title">طريقة الاختبار</string>
+    <string name="test_instructions">أضف هذا التطبيق (com.daxiaamu.guise.test) إلى Guise، واضبط قيماً مزيّفة يسهل تمييزها، ثم زامن النطاق وأوقف التطبيق بالقوة وافتحه مجدداً. قارن القيم أدناه بإعدادات Guise.</string>
+    <string name="hook_toast_hint">إذا كان «إشعار نجاح Hook» مفعّلاً، فيفترض أن تظهر أيضاً رسالة Guise عند التشغيل البارد.</string>
+    <string name="permissions_explanation">تُستخدم أذونات الهاتف والموقع وجهات الاتصال والأجهزة القريبة والوسائط فقط لاستدعاء واجهات Android قيد الاختبار. يُعرض الخطأ بدلاً من التعطل عند الرفض أو عدم الدعم.</string>
+    <string name="grant_permissions">منح أذونات الاختبار</string><string name="permission_required">إذن الموقع مطلوب</string><string name="waiting">بانتظار تحديث الموقع…</string>
+    <string name="not_available">غير متاح</string><string name="null_value">null</string><string name="hook_detected">القيمة مختلفة عن قيمة البناء أو المؤشر null: تم اكتشاف Guise Hook</string>
+    <string name="section_version">إصدار التطبيق</string><string name="section_device">الجهاز والنظام</string><string name="section_identifiers">المعرّفات الفريدة</string>
+    <string name="section_network">الشبكة وWi-Fi</string><string name="section_sim">SIM والخلية</string><string name="section_location">الموقع</string><string name="section_battery">البطارية</string><string name="section_locale">اللغة والمنطقة</string><string name="section_blank_pass">تمرير فارغ</string><string name="section_screenshot">علامة لقطة الشاشة</string>
+    <string name="package_name">اسم الحزمة</string><string name="compiled_version">إصدار BuildConfig وقت البناء</string><string name="package_manager_version">إصدار PackageManager</string>
+    <string name="brand">العلامة التجارية</string><string name="manufacturer">الشركة المصنّعة</string><string name="model">الطراز</string><string name="product">المنتج</string><string name="device">الجهاز</string><string name="board">اللوحة</string><string name="hardware">العتاد</string><string name="fingerprint">بصمة البناء</string><string name="sdk">مستوى SDK</string><string name="release">إصدار Android</string><string name="base_os">نظام التشغيل الأساسي</string>
+    <string name="android_id_secure">Android ID ‏(Secure)</string><string name="android_id_system">Android ID ‏(System)</string><string name="imei">IMEI، الفتحة 0</string><string name="phone_number">رقم الهاتف</string>
+    <string name="network_legacy">NetworkInfo النشط (هدف Hook)</string><string name="network_modern">NetworkCapabilities (للمقارنة)</string><string name="wifi_state">حالة Wi-Fi</string><string name="wifi_ssid">SSID</string><string name="wifi_bssid">BSSID</string><string name="wifi_mac">عنوان Wi-Fi MAC</string>
+    <string name="sim_operator">رمز مشغّل SIM</string><string name="network_operator">رمز مشغّل الشبكة</string><string name="sim_name">اسم مشغّل SIM</string><string name="network_name">اسم مشغّل الشبكة</string><string name="sim_country">بلد SIM</string><string name="network_country">بلد الشبكة</string><string name="mobile_network_type">نوع شبكة الهاتف</string><string name="subscriptions">الاشتراكات النشطة</string><string name="cell_info">معلومات الخلية</string>
+    <string name="last_location">آخر موقع GPS</string><string name="location_providers">موفرو الموقع</string><string name="battery_property">سعة BatteryManager</string><string name="battery_intent">مستوى بث البطارية / المقياس</string>
+    <string name="locale_language">لغة Locale</string><string name="locale_country">بلد Locale</string><string name="locale_tag">وسم لغة Locale</string><string name="locale_text">Locale.toString()</string>
+    <string name="contacts_query">استعلام جهات الاتصال</string><string name="images_query">استعلام الصور</string><string name="videos_query">استعلام الفيديو</string><string name="audio_query">استعلام الصوت</string>
+    <string name="null_cursor">مؤشر null</string><string name="cursor_count">عدد المؤشر = %1$d</string><string name="secure_enabled">FLAG_SECURE = مفعّل</string><string name="secure_disabled">FLAG_SECURE = معطّل</string>
+    <string name="screenshot_explanation">يفترض أن يفعّل «منع لقطات الشاشة» العلامة بعد التشغيل، وأن يمنعها أو يمحوها «السماح بلقطات الشاشة». جرّب أيضاً التقاط لقطة شاشة فعلية.</string><string name="add_secure">إضافة العلامة</string><string name="clear_secure">مسح العلامة</string>
+    <string name="live_location">رد الموقع المباشر</string><string name="not_requested">لم يُطلب</string><string name="request_location">طلب تحديث GPS واحد</string>
+</resources>
