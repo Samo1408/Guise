@@ -12,7 +12,7 @@ private const val TAG = "AndroidKtx"
  * Check if the package is a system app
  * @return true if the package is a system app
  */
-val PackageInfo.isSystemApp: Boolean get() = applicationInfo.isSystemApp
+val PackageInfo.isSystemApp: Boolean get() = applicationInfo?.isSystemApp ?: false
 
 /**
  * Check if the application is a system app

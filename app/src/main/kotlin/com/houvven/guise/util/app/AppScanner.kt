@@ -117,7 +117,9 @@ class AppScanner(
      * Creates an [App] from the specified [PackageInfo].
      */
     private fun createApp(pi: PackageInfo) = pi.run {
-        val applicationInfo = applicationInfo
+        val applicationInfo = requireNotNull(applicationInfo) {
+            "ApplicationInfo is missing for $packageName"
+        }
         App(
             name = applicationInfo.loadLabel(packageManager).toString(),
             packageName = packageName,
