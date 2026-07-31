@@ -54,6 +54,7 @@
 
     <string name="stop_app">アプリを停止</string>
     <string name="restart_app">アプリを再起動</string>
+    <string name="restart_app_to_apply_configuration">設定を反映するには「%1$s」を再起動してください</string>
     <string name="save_as_template">テンプレートとして保存する</string>
     <string name="confirm">確認</string>
     <string name="cancel">キャンセル</string>

@@ -53,6 +53,7 @@
 
     <string name="stop_app">إيقاف التطبيق</string>
     <string name="restart_app">إعادة تشغيل التطبيق</string>
+    <string name="restart_app_to_apply_configuration">يرجى إعادة تشغيل «%1$s» لتطبيق الإعدادات</string>
     <string name="save_as_template">حفظ كقالب</string>
     <string name="confirm">تأكيد</string>
     <string name="cancel">إلغاء</string>

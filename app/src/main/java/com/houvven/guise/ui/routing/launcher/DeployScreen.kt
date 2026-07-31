@@ -154,15 +154,15 @@ private fun AppCard(
         .background(containerColor)
         .fillMaxWidth()
         .clickable(onClick = { clickable() })
-        .padding(horizontal = 10.dp, vertical = 15.dp)
+        .padding(horizontal = 8.dp, vertical = 10.dp)
 
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         val iconModifier = Modifier
-            .padding(horizontal = 10.dp)
-            .size(38.dp)
+            .padding(horizontal = 8.dp)
+            .size(36.dp)
         SimplifyImage(appInfo.icon.asImageBitmap(), iconModifier)
         val typography = MaterialTheme.typography
         Column(Modifier.weight(1f)) {
@@ -347,6 +347,10 @@ fun DeployScreen() {
                     items = generateApps(prioritizedPackages),
                     key = { _, appInfo -> appInfo.packageName },
                 ) { index, appInfo ->
+                    val restartToApplyMessage = stringResource(
+                        R.string.restart_app_to_apply_configuration,
+                        appInfo.label,
+                    )
                     AppCard(
                         appInfo = appInfo,
                         showSelection = index != clippedBottomItemIndex,
@@ -354,14 +358,25 @@ fun DeployScreen() {
                         val manager = ModuleConfigManager.of(ModuleConfig.get(appInfo.packageName))
                         if (enabled) {
                             manager.setEnabled(true)
+                            com.houvven.guise.ui.GlobalSnackbarHost.showByDismissPrevious(
+                                restartToApplyMessage
+                            )
                         } else {
                             coroutineScope.launch {
                                 val stopResult = manager.stopIfHooked()
                                 manager.setEnabled(false)
-                                stopResult.onFailure {
-                                    com.houvven.guise.ui.GlobalSnackbarHost
-                                        .showOnErrorByDismissPrevious(it.message ?: it.toString())
-                                }
+                                stopResult.fold(
+                                    onSuccess = {
+                                        com.houvven.guise.ui.GlobalSnackbarHost
+                                            .showByDismissPrevious(restartToApplyMessage)
+                                    },
+                                    onFailure = {
+                                        com.houvven.guise.ui.GlobalSnackbarHost
+                                            .showOnErrorByDismissPrevious(
+                                                "$restartToApplyMessage\n${it.message ?: it}"
+                                            )
+                                    },
+                                )
                             }
                         }
                     }

@@ -70,6 +70,7 @@
 
     <string name="stop_app">Stop App</string>
     <string name="restart_app">Restart App</string>
+    <string name="restart_app_to_apply_configuration">Please restart “%1$s” for the configuration to take effect</string>
     <string name="save_as_template">Save as template</string>
     <string name="one_click_random">One click random</string>
     <string name="confirm">Confirm</string>

@@ -53,6 +53,7 @@
     <string name="template_type_common">通用</string>
     <string name="stop_app">停止应用</string>
     <string name="restart_app">重启应用</string>
+    <string name="restart_app_to_apply_configuration">请重启“%1$s”以使配置生效</string>
     <string name="save_as_template">存为模板</string>
     <string name="add_template">新建模板</string>
     <string name="one_click_random">一键随机</string>
