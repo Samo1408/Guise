@@ -130,7 +130,10 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         preset = presetCatalog.densityDpi.reversed(),
         validate = { value -> value.length <= 4 && value.all(Char::isDigit) },
     )
-    InputBox(state.fingerPrint, stringResource(R.string.device_system_finger_print))
+    RandomInputBox(
+        state.fingerPrint,
+        stringResource(R.string.device_system_finger_print),
+    ) { Randoms.randomFingerPrint() }
 
 
     Title(text = stringResource(R.string.title_net_info))
