@@ -25,6 +25,7 @@
     <string name="title_unique_id">معرف فريد</string>
     <string name="id_imei_summary">تُعاد هذه القيمة عند قراءة أي فتحة في الجهاز؛ وسيكون IMEI 1 وIMEI 2 متطابقين في الأجهزة ثنائية الشريحة</string>
     <string name="title_location_info">معلومات الموقع</string>
+    <string name="location_info_summary">يغيّر خط العرض والطول قيم GPS فقط، ولا يزال بإمكان معظم التطبيقات تحديد الموقع عبر Wi-Fi وأبراج الاتصالات. فعّل أيضًا خياري تعطيل معلومات الموقع أدناه</string>
     <string name="title_other">أخرى</string>
     <string name="title_blank_pass">تمرير بيانات فارغة</string>
     <string name="device_brand">العلامة التجارية</string>

@@ -37,13 +37,19 @@ import com.houvven.guise.R
 import com.houvven.guise.ui.components.ElevatedTextField
 
 @Composable
-internal fun Title(text: String, topPadding: Dp = 22.dp) {
-    Text(
-        text = text,
-        modifier = Modifier.padding(top = topPadding, start = 25.dp, bottom = 5.dp),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary
-    )
+internal fun Title(
+    text: String,
+    topPadding: Dp = 22.dp,
+    supportingText: String? = null,
+) {
+    ConfigItem(supportingText) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(top = topPadding, start = 25.dp, bottom = 5.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
 }
 /**
  * 自定义容器 默认为水平排列

@@ -202,7 +202,10 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     InputBox(state.cid, stringResource(R.string.gsm_cid))
 
 
-    Title(text = stringResource(R.string.title_location_info))
+    Title(
+        text = stringResource(R.string.title_location_info),
+        supportingText = stringResource(R.string.location_info_summary),
+    )
     InputBox(state.longitude, stringResource(R.string.location_lng))
     InputBox(state.latitude, stringResource(R.string.location_lat))
     ContainerSwitch(state.randomOffset, stringResource(R.string.location_offset))

@@ -22,6 +22,7 @@
     <string name="id_imei_summary">应用读取任一卡槽时均返回此值；双卡设备的 IMEI 1/2 将相同</string>
     <string name="title_cell_location">基站信息</string>
     <string name="title_location_info">位置信息</string>
+    <string name="location_info_summary">经纬度仅修改 GPS 数值，但大多数应用仍可通过 Wi-Fi 定位和基站定位获取位置信息。建议同时开启下方两个“位置信息失效”选项</string>
     <string name="title_other">其他</string>
     <string name="title_blank_pass">空白通行证</string>
     <string name="device_brand">品牌</string>

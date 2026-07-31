@@ -28,6 +28,7 @@
     <string name="title_unique_id">Unique ID</string>
     <string name="title_cell_location">Cell Location</string>
     <string name="title_location_info">Location Info</string>
+    <string name="location_info_summary">Latitude and longitude change GPS values only. Most apps can still locate you through Wi-Fi and cell towers. Enable both location-failure options below as well</string>
     <string name="title_build_config" translatable="false">Build Config</string>
     <string name="title_other">Other</string>
     <string name="title_blank_pass">Blank Pass</string>

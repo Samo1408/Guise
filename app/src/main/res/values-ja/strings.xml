@@ -25,6 +25,7 @@
     <string name="title_unique_id">一意のID</string>
     <string name="id_imei_summary">どの端末スロットから読み取ってもこの値を返します。デュアル SIM 端末では IMEI 1/2 が同じ値になります</string>
     <string name="title_location_info">位置情報</string>
+    <string name="location_info_summary">緯度と経度で変更されるのは GPS の値のみです。多くのアプリは Wi-Fi や基地局からも位置を取得できます。下の 2 つの「位置情報を無効化」も有効にしてください</string>
     <string name="title_other">他の</string>
     <string name="title_blank_pass">ブランクパス</string>
     <string name="device_brand">ブランド</string>
