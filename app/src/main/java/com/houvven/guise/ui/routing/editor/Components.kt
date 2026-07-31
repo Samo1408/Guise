@@ -101,8 +101,9 @@ private fun BasicInputBox(
     validate: (String) -> Boolean = { true },
     trailingIcon: @Composable () -> Unit = {},
 ) {
+    val bottomPadding = if (supportingText == null) 3.dp else 9.dp
     val modifier = Modifier
-        .padding(horizontal = 15.dp, vertical = 3.dp)
+        .padding(start = 15.dp, top = 3.dp, end = 15.dp, bottom = bottomPadding)
         .fillMaxWidth()
     ElevatedTextField(
         value = state.value,
