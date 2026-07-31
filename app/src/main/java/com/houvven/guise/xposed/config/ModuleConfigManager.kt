@@ -31,20 +31,22 @@ private constructor(
         state.clear()
     }
 
-    fun save(notifyOnScopeError: Boolean = true) {
+    /** Saves spoofing parameters without changing the LSPosed scope. */
+    fun save() {
         this.updateConfigFromState()
-        persist(notifyOnScopeError)
+        persist()
     }
 
+    /** The single entry point for changing both selection state and LSPosed scope. */
     fun setEnabled(enabled: Boolean, notifyOnScopeError: Boolean = true) {
         config.enabled = enabled
-        persist(notifyOnScopeError)
+        persist()
+        syncLsposedScope(enabled, notifyOnScopeError)
     }
 
-    private fun persist(notifyOnScopeError: Boolean) {
+    private fun persist() {
         safePrefs.edit(commit = true) { putString(config.packageName, config.toJson()) }
         LauncherState.setAppEnabled(config.packageName, config.enabled)
-        syncLsposedScope(config.enabled, notifyOnScopeError)
     }
 
     private fun syncLsposedScope(enable: Boolean, notifyOnError: Boolean) {
@@ -79,7 +81,7 @@ private constructor(
     }
 
     suspend fun stopApp(): Result<Unit> {
-        this.save(notifyOnScopeError = false)
+        this.save()
         return requestProcessExit().fold(
             onSuccess = { Result.success(Unit) },
             onFailure = { Result.failure(it) },
@@ -87,7 +89,7 @@ private constructor(
     }
 
     suspend fun restartApp(): Result<Unit> {
-        this.save(notifyOnScopeError = false)
+        this.save()
         return runCatching {
             requestProcessExit().getOrThrow()
             val intent = context.packageManager.getLaunchIntentForPackage(config.packageName)
