@@ -98,15 +98,12 @@
     <string name="color_red">أحمر</string>
     <string name="color_green">أخضر</string>
     <string name="color_blue">أزرق</string>
-    <string name="settings_configuration">التهيئة</string>
-    <string name="settings_hide_launcher_icon">إخفاء أيقونة المشغل</string>
     <string name="settings_about">حول التطبيق</string>
     <string name="settings_version">الإصدار:</string>
     <string name="settings_maintainer">المشرف:</string>
     <string name="maintainer_description">يتولى صيانة الإصدار 1.2.0 وما بعده</string>
     <string name="settings_original_author">المؤلف الأصلي:</string>
     <string name="original_author_entry_description">المؤلف الأصلي لـ Guise · اضغط للتبرع له</string>
-    <string name="settings_update_address">التحديثات</string>
     <string name="update_checking">جارٍ التحقق من التحديثات…</string>
     <string name="update_check_action">تحقق</string>
     <string name="update_already_latest">لديك أحدث إصدار (%1$s)</string>
@@ -116,7 +113,6 @@
     <string name="update_go_to_download">عرض التحديث</string>
     <string name="update_ignore_version">تجاهل هذا الإصدار</string>
     <string name="update_later">لاحقًا</string>
-    <string name="settings_feedback_address">الملاحظات والمشكلات</string>
     <string name="settings_donation_channels">التبرع</string>
     <string name="maintainer_donation_notice">لا يقبل 大侠阿木 التبرعات. إذا كان هذا التطبيق مفيدًا لك، فيُرجى التفكير في التبرع للمؤلف الأصلي أدناه.</string>
     <string name="original_author_with_name">المؤلف الأصلي: Houvven</string>
@@ -155,4 +151,15 @@
     <string name="root_force_stop_timeout">انتهت مهلة انتظار إذن ROOT</string>
     <string name="invalid_package_name">اسم حزمة التطبيق غير صالح</string>
     <string name="xposed_scope_sync_failed">فشلت مزامنة نطاق Xposed: %1$s</string>
+    <string name="settings_view_source_code">عرض الشفرة المصدرية</string>
+    <string name="settings_view_source_code_summary">عرض الشفرة المصدرية على GitHub وإرسال issues</string>
+    <string name="settings_open_source_licenses">تراخيص المصادر المفتوحة</string>
+    <string name="settings_open_source_licenses_summary">عرض المشاريع ومصادر البيانات والتراخيص المستخدمة في هذا التطبيق</string>
+    <string name="open_source_role_app">هذا التطبيق</string>
+    <string name="open_source_role_dependency">اعتماد برمجي</string>
+    <string name="open_source_role_data">مصدر بيانات</string>
+    <string name="open_source_license_label">الترخيص: %1$s</string>
+    <string name="open_source_project_homepage">المشروع</string>
+    <string name="open_source_view_license">الترخيص</string>
+    <string name="close">إغلاق</string>
 </resources>

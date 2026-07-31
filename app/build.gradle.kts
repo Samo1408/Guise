@@ -17,8 +17,10 @@ android {
         minSdk = 29
         targetSdk = 37
         val versionConfig = getVersionConfig()
-        versionCode = versionConfig["versionCode"].toString().toInt()
-        versionName = versionConfig["versionName"].toString()
+        versionCode = providers.gradleProperty("versionCodeOverride").orNull?.toInt()
+            ?: versionConfig["versionCode"].toString().toInt()
+        versionName = providers.gradleProperty("versionNameOverride").orNull
+            ?: versionConfig["versionName"].toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

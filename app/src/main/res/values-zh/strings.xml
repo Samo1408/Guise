@@ -97,15 +97,12 @@
     <string name="color_red">红</string>
     <string name="color_green">绿</string>
     <string name="color_blue">蓝</string>
-    <string name="settings_configuration">配置项</string>
-    <string name="settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="settings_about">关于</string>
     <string name="settings_version">版本：</string>
     <string name="settings_maintainer">维护者：</string>
     <string name="maintainer_description">接手维护1.2.0及之后版本</string>
     <string name="settings_original_author">原作者：</string>
     <string name="original_author_entry_description">Guise原作者，点击给他捐赠</string>
-    <string name="settings_update_address">更新地址</string>
     <string name="update_checking">正在检查更新…</string>
     <string name="update_check_action">检查更新</string>
     <string name="update_already_latest">已是最新版本（%1$s）</string>
@@ -115,7 +112,6 @@
     <string name="update_go_to_download">前往更新</string>
     <string name="update_ignore_version">忽略此版本</string>
     <string name="update_later">稍后</string>
-    <string name="settings_feedback_address">反馈地址</string>
     <string name="settings_donation_channels">捐赠通道</string>
     <string name="maintainer_donation_notice">大侠阿木不接受捐赠，但如果本 APP 对您有用，恳请您给下面原作者捐赠</string>
     <string name="original_author_with_name">原作者：Houvven</string>
@@ -154,4 +150,15 @@
     <string name="root_force_stop_timeout">等待 ROOT 授权超时</string>
     <string name="invalid_package_name">应用包名无效</string>
     <string name="xposed_scope_sync_failed">Xposed 作用域自动同步失败：%1$s</string>
+    <string name="settings_view_source_code">查看源代码</string>
+    <string name="settings_view_source_code_summary">在Github查看源代码，提交issues</string>
+    <string name="settings_open_source_licenses">开放源代码许可</string>
+    <string name="settings_open_source_licenses_summary">查看本应用引用的项目、数据来源及其许可证</string>
+    <string name="open_source_role_app">本应用</string>
+    <string name="open_source_role_dependency">软件依赖</string>
+    <string name="open_source_role_data">数据来源</string>
+    <string name="open_source_license_label">许可证：%1$s</string>
+    <string name="open_source_project_homepage">项目主页</string>
+    <string name="open_source_view_license">查看许可证</string>
+    <string name="close">关闭</string>
 </resources>

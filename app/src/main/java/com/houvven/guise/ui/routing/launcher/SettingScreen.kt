@@ -24,8 +24,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
@@ -33,8 +34,6 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,8 +84,6 @@ import com.houvven.guise.ui.theme.setDynamicColor
 import com.houvven.guise.ui.theme.setPredictiveBack
 import com.houvven.guise.ui.theme.setThemeMode
 import com.houvven.guise.ui.theme.themeMode
-import com.houvven.guise.ui.utils.hideLauncherIcon
-import com.houvven.guise.ui.utils.isHideLauncherIcon
 import com.houvven.guise.update.AppUpdateManager
 import com.houvven.guise.util.android.IntentUtils
 import kotlin.math.roundToInt
@@ -102,11 +99,11 @@ private fun Title(text: String, topPadding: Dp = 30.dp) {
 }
 
 @Composable
-private fun LinkSettingItem(icon: ImageVector, title: String, url: String) {
+private fun LinkSettingItem(icon: ImageVector, title: String, summary: String, url: String) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = {
-            Text(url, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(summary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         leadingContent = { Icon(icon, contentDescription = null) },
         trailingContent = {
@@ -175,6 +172,7 @@ internal fun SettingScreen() {
     val receiptCode = remember { mutableStateOf<Bitmap?>(null) }
     val showColorDialog = remember { mutableStateOf(false) }
     val showDonationDialog = remember { mutableStateOf(false) }
+    val showOpenSourceLicenses = remember { mutableStateOf(false) }
 
     @Composable
     fun content() {
@@ -235,27 +233,6 @@ internal fun SettingScreen() {
         )
 
         HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-        Title(text = stringResource(R.string.settings_configuration))
-        val hideLauncher = remember { mutableStateOf(isHideLauncherIcon()) }
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.settings_hide_launcher_icon)) },
-            leadingContent = { Icon(Icons.Default.VisibilityOff, contentDescription = null) },
-            trailingContent = {
-                Switch(
-                    checked = hideLauncher.value,
-                    onCheckedChange = {
-                        hideLauncher.value = it
-                        hideLauncherIcon(it)
-                    },
-                )
-            },
-            modifier = Modifier.clickable {
-                hideLauncher.value = !hideLauncher.value
-                hideLauncherIcon(hideLauncher.value)
-            },
-        )
-
-        HorizontalDivider(Modifier.padding(horizontal = 16.dp))
         Title(text = stringResource(R.string.settings_about))
         ListItem(
             headlineContent = { Text(stringResource(R.string.settings_version)) },
@@ -299,14 +276,21 @@ internal fun SettingScreen() {
             modifier = Modifier.clickable { showDonationDialog.value = true },
         )
         LinkSettingItem(
-            icon = Icons.Default.SystemUpdate,
-            title = stringResource(R.string.settings_update_address),
-            url = "https://github.com/daxiaamu/Guise_Reborn/releases",
+            icon = Icons.Default.Code,
+            title = stringResource(R.string.settings_view_source_code),
+            summary = stringResource(R.string.settings_view_source_code_summary),
+            url = "https://github.com/daxiaamu/Guise_Reborn",
         )
-        LinkSettingItem(
-            icon = Icons.Default.BugReport,
-            title = stringResource(R.string.settings_feedback_address),
-            url = "https://github.com/daxiaamu/Guise_Reborn/issues",
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.settings_open_source_licenses)) },
+            supportingContent = {
+                Text(stringResource(R.string.settings_open_source_licenses_summary))
+            },
+            leadingContent = { Icon(Icons.Default.Gavel, contentDescription = null) },
+            trailingContent = {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+            },
+            modifier = Modifier.clickable { showOpenSourceLicenses.value = true },
         )
     }
 
@@ -376,6 +360,11 @@ internal fun SettingScreen() {
                 }
             },
         )
+    }
+    if (showOpenSourceLicenses.value) {
+        OpenSourceLicensesSheet {
+            showOpenSourceLicenses.value = false
+        }
     }
     if (showColorDialog.value) {
         ThemeColorDialog(

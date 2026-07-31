@@ -35,6 +35,19 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 Android 版本、API、DPI、网络和语言等内置预设集中维护在 `app/src/main/res/raw/presets.json`，避免把数据散落在 UI 代码中。
 
+## 开放源代码许可
+
+应用内可在“设置 → 开放源代码许可”查看以下项目、数据来源和许可证，并直接打开项目主页或许可证原文：
+
+- [Guise Reborn](https://github.com/daxiaamu/Guise_Reborn)：本应用代码采用 [GNU GPL v3.0 or later](LICENSE)，并保留原始 Guise 的 Git 历史和作者署名。
+- [AndroidX / Jetpack Compose / Material 3](https://github.com/androidx/androidx)：[Apache License 2.0](https://source.android.com/docs/setup/about/licenses)。
+- [Kotlin / kotlinx.coroutines / kotlinx.serialization](https://github.com/JetBrains/kotlin)：[Apache License 2.0](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt)。
+- [libxposed API / service](https://github.com/libxposed)：[Apache License 2.0](https://github.com/libxposed/api/blob/master/LICENSE)。
+- [MaterialKolor](https://github.com/jordond/MaterialKolor)：主体采用 [MIT License](https://github.com/jordond/MaterialKolor/blob/main/LICENSE)，其 Material Color Utilities 模块采用 [Apache License 2.0](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE)。
+- [MMKV](https://github.com/Tencent/MMKV)：[BSD 3-Clause License](https://github.com/Tencent/MMKV/blob/master/LICENSE.TXT)。
+- [MobileModels / MobileModels-csv](https://github.com/KHwang9883/MobileModels)：[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。
+- [mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)：[MIT License](https://github.com/pbakondy/mcc-mnc-list/blob/master/LICENSE)。
+
 目前主要模块：
 
 - `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。
@@ -94,7 +107,9 @@ Android 17 对面向 API 37 的应用收紧了 `static final` 字段修改。设
 
 ## 许可证
 
-上游仓库当前没有提供明确的许可证文件。本仓库暂不擅自为历史代码指定许可证；在许可证和历史代码授权范围得到进一步确认前，请谨慎分发衍生 APK 或复用代码。
+Guise Reborn 的应用代码采用 [GNU General Public License v3.0 or later](LICENSE) 发布。Copyright © 2026 大侠阿木及 Guise Reborn 贡献者。您可以在遵守该许可证、保留版权与许可证声明并公开相应源代码的前提下使用、修改和分发。
+
+原始 Guise 的作者署名及 Git 历史继续保留。独立数据资产维持各自的上游许可证：设备数据库为 `CC BY-NC-SA 4.0`，运营商预设为 `MIT License`；详见应用内“开放源代码许可”和对应的 `NOTICE` 文件。
 
 ---
 

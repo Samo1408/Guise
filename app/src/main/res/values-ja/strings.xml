@@ -98,15 +98,12 @@
     <string name="color_red">赤</string>
     <string name="color_green">緑</string>
     <string name="color_blue">青</string>
-    <string name="settings_configuration">設定項目</string>
-    <string name="settings_hide_launcher_icon">ランチャーアイコンを非表示</string>
     <string name="settings_about">このアプリについて</string>
     <string name="settings_version">バージョン：</string>
     <string name="settings_maintainer">管理者：</string>
     <string name="maintainer_description">バージョン 1.2.0 以降のメンテナンスを担当</string>
     <string name="settings_original_author">原作者：</string>
     <string name="original_author_entry_description">Guise の原作者・タップして寄付</string>
-    <string name="settings_update_address">更新先</string>
     <string name="update_checking">アップデートを確認中…</string>
     <string name="update_check_action">確認</string>
     <string name="update_already_latest">最新バージョンです（%1$s）</string>
@@ -116,7 +113,6 @@
     <string name="update_go_to_download">更新を表示</string>
     <string name="update_ignore_version">このバージョンを無視</string>
     <string name="update_later">後で</string>
-    <string name="settings_feedback_address">フィードバック</string>
     <string name="settings_donation_channels">寄付</string>
     <string name="maintainer_donation_notice">大侠阿木は寄付を受け付けていません。このアプリが役に立った場合は、以下の原作者への寄付をご検討ください。</string>
     <string name="original_author_with_name">原作者：Houvven</string>
@@ -155,4 +151,15 @@
     <string name="root_force_stop_timeout">ROOT 権限の承認待ちがタイムアウトしました</string>
     <string name="invalid_package_name">パッケージ名が無効です</string>
     <string name="xposed_scope_sync_failed">Xposed スコープの同期に失敗しました：%1$s</string>
+    <string name="settings_view_source_code">ソースコードを表示</string>
+    <string name="settings_view_source_code_summary">GitHub でソースコードを確認し、issues を送信します</string>
+    <string name="settings_open_source_licenses">オープンソース ライセンス</string>
+    <string name="settings_open_source_licenses_summary">このアプリが利用するプロジェクト、データソース、ライセンスを表示します</string>
+    <string name="open_source_role_app">このアプリ</string>
+    <string name="open_source_role_dependency">ソフトウェア依存関係</string>
+    <string name="open_source_role_data">データソース</string>
+    <string name="open_source_license_label">ライセンス：%1$s</string>
+    <string name="open_source_project_homepage">プロジェクト</string>
+    <string name="open_source_view_license">ライセンス</string>
+    <string name="close">閉じる</string>
 </resources>
