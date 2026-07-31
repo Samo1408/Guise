@@ -2,6 +2,7 @@ package com.houvven.guise.ui.routing.editor
 
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,10 +69,34 @@ internal fun Container(content: @Composable () -> Unit) {
 }
 
 @Composable
-internal fun ContainerSwitch(state: MutableState<Boolean>, label: String) {
-    Container {
-        Text(text = label, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Switch(checked = state.value, onCheckedChange = { state.value = it })
+internal fun ContainerSwitch(
+    state: MutableState<Boolean>,
+    label: String,
+    supportingText: String? = null,
+) {
+    ConfigItem(supportingText) {
+        Container {
+            Text(text = label, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Switch(checked = state.value, onCheckedChange = { state.value = it })
+        }
+    }
+}
+
+@Composable
+private fun ConfigItem(
+    supportingText: String?,
+    content: @Composable () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        content()
+        supportingText?.let { text ->
+            Text(
+                text = text,
+                modifier = Modifier.padding(start = 31.dp, top = 1.dp, end = 31.dp, bottom = 9.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -101,21 +126,19 @@ private fun BasicInputBox(
     validate: (String) -> Boolean = { true },
     trailingIcon: @Composable () -> Unit = {},
 ) {
-    val bottomPadding = if (supportingText == null) 3.dp else 9.dp
     val modifier = Modifier
-        .padding(start = 15.dp, top = 3.dp, end = 15.dp, bottom = bottomPadding)
+        .padding(horizontal = 15.dp, vertical = 3.dp)
         .fillMaxWidth()
-    ElevatedTextField(
-        value = state.value,
-        onValueChange = { state.value = if (validate(it)) it else state.value },
-        modifier = modifier,
-        singleLine = true,
-        label = { Text(text = label) },
-        supportingText = supportingText?.let { text ->
-            { Text(text = text) }
-        },
-        trailingIcon = trailingIcon,
-    )
+    ConfigItem(supportingText) {
+        ElevatedTextField(
+            value = state.value,
+            onValueChange = { state.value = if (validate(it)) it else state.value },
+            modifier = modifier,
+            singleLine = true,
+            label = { Text(text = label) },
+            trailingIcon = trailingIcon,
+        )
+    }
 }
 
 
@@ -123,9 +146,15 @@ private fun BasicInputBox(
 internal fun InputBox(
     state: MutableState<String>,
     label: String,
+    supportingText: String? = null,
     validate: (String) -> Boolean = { true },
 ) {
-    BasicInputBox(state = state, label = label, validate = validate) {
+    BasicInputBox(
+        state = state,
+        label = label,
+        supportingText = supportingText,
+        validate = validate,
+    ) {
         state.value.isNotBlank().let {
             if (it) FieldIconButton(
                 Icons.TwoTone.Delete,
@@ -194,12 +223,14 @@ internal fun OperateInputBox(
 internal fun RandomInputBox(
     state: MutableState<String>,
     label: String,
+    supportingText: String? = null,
     validate: (String) -> Boolean = { true },
     randomGenerator: () -> String,
 ) {
     OperateInputBox(
         state = state,
         label = label,
+        supportingText = supportingText,
         validate = validate,
         operateIcon = Icons.TwoTone.Casino,
         operateContentDescription = stringResource(R.string.one_click_random),

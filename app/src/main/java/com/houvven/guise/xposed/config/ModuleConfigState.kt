@@ -42,6 +42,7 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
 
     val batteryLevel = mutableStateOf(moduleConfig.batteryLevel.display(-1))
     val language = mutableStateOf(moduleConfig.language)
+    val timeZone = mutableStateOf(moduleConfig.timeZone)
     val allowForceScreenshots = mutableStateOf(
         moduleConfig.screenshotsFlag == HooksValue.SCREENSHOTS_ENABLE
     )
@@ -62,7 +63,7 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
             fingerPrint,
             networkType, wifiSSID, wifiBSSID, wifiMacAddress, simOperator, simOperatorName,
             simCountry, imei, phoneNum, androidId, lac, cid, longitude, latitude, versionCode,
-            versionName, batteryLevel, language,
+            versionName, batteryLevel, language, timeZone,
         )
 
     private val booleanStates: List<MutableState<Boolean>>

@@ -51,6 +51,7 @@
     <string name="net_sim_name">SIM Name</string>
     <string name="net_sim_iso">SIM ISO</string>
     <string name="id_imei" translatable="false">IMEI</string>
+    <string name="id_imei_summary">Returned for every device slot; IMEI 1 and 2 are identical on dual-SIM devices</string>
     <string name="id_phone_num">Phone Number</string>
     <string name="id_ssaid" translatable="false">SSAID</string>
     <string name="gsm_lac" translatable="false">Lac</string>
@@ -65,6 +66,8 @@
 
     <string name="other_battery_level">Battery level</string>
     <string name="other_language">Language</string>
+    <string name="other_time_zone">Time zone</string>
+    <string name="other_time_zone_summary">Changes the target app’s local time and formatting only; the system clock is not changed</string>
     <string name="other_allow_force_screenshots">Allow forced screenshots</string>
     <string name="config_reset_pending_save">Parameters reset. Save to apply.</string>
     <string name="unsaved_config_title">Save changes?</string>

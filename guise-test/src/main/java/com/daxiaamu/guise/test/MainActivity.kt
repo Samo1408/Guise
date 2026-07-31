@@ -99,7 +99,8 @@ private enum class TestKey(@StringRes val label: Int) {
     HARDWARE(R.string.hardware), FINGERPRINT(R.string.fingerprint), SDK(R.string.sdk),
     RELEASE(R.string.release), BASE_OS(R.string.base_os), DISPLAY_DENSITY(R.string.display_density),
     ANDROID_ID_SECURE(R.string.android_id_secure),
-    ANDROID_ID_SYSTEM(R.string.android_id_system), IMEI(R.string.imei), PHONE_NUMBER(R.string.phone_number),
+    ANDROID_ID_SYSTEM(R.string.android_id_system), IMEI(R.string.imei),
+    IMEI_SLOT_1(R.string.imei_slot_1), PHONE_NUMBER(R.string.phone_number),
     NETWORK_LEGACY(R.string.network_legacy), NETWORK_MODERN(R.string.network_modern),
     WIFI_STATE(R.string.wifi_state), WIFI_SSID(R.string.wifi_ssid), WIFI_BSSID(R.string.wifi_bssid),
     WIFI_MAC(R.string.wifi_mac), SIM_OPERATOR(R.string.sim_operator), NETWORK_OPERATOR(R.string.network_operator),
@@ -109,6 +110,8 @@ private enum class TestKey(@StringRes val label: Int) {
     PROVIDERS(R.string.location_providers), BATTERY_PROPERTY(R.string.battery_property),
     BATTERY_INTENT(R.string.battery_intent), LOCALE_LANGUAGE(R.string.locale_language),
     LOCALE_COUNTRY(R.string.locale_country), LOCALE_TAG(R.string.locale_tag), LOCALE_TEXT(R.string.locale_text),
+    TIME_ZONE_JAVA(R.string.time_zone_java), TIME_ZONE_JAVA_TIME(R.string.time_zone_java_time),
+    TIME_ZONE_ICU(R.string.time_zone_icu),
     CONTACTS(R.string.contacts_query), IMAGES(R.string.images_query), VIDEOS(R.string.videos_query),
     AUDIO(R.string.audio_query)
 }
@@ -119,12 +122,32 @@ private data class TestSection(@StringRes val title: Int, val keys: List<TestKey
 private val sections = listOf(
     TestSection(R.string.section_version, listOf(TestKey.PACKAGE_NAME, TestKey.COMPILED_VERSION, TestKey.PACKAGE_VERSION)),
     TestSection(R.string.section_device, listOf(TestKey.BRAND, TestKey.MANUFACTURER, TestKey.MODEL, TestKey.PRODUCT, TestKey.DEVICE, TestKey.BOARD, TestKey.HARDWARE, TestKey.FINGERPRINT, TestKey.SDK, TestKey.RELEASE, TestKey.BASE_OS, TestKey.DISPLAY_DENSITY)),
-    TestSection(R.string.section_identifiers, listOf(TestKey.ANDROID_ID_SECURE, TestKey.ANDROID_ID_SYSTEM, TestKey.IMEI, TestKey.PHONE_NUMBER)),
+    TestSection(
+        R.string.section_identifiers,
+        listOf(
+            TestKey.ANDROID_ID_SECURE,
+            TestKey.ANDROID_ID_SYSTEM,
+            TestKey.IMEI,
+            TestKey.IMEI_SLOT_1,
+            TestKey.PHONE_NUMBER,
+        ),
+    ),
     TestSection(R.string.section_network, listOf(TestKey.NETWORK_LEGACY, TestKey.NETWORK_MODERN, TestKey.WIFI_STATE, TestKey.WIFI_SSID, TestKey.WIFI_BSSID, TestKey.WIFI_MAC)),
     TestSection(R.string.section_sim, listOf(TestKey.SIM_OPERATOR, TestKey.NETWORK_OPERATOR, TestKey.SIM_NAME, TestKey.NETWORK_NAME, TestKey.SIM_COUNTRY, TestKey.NETWORK_COUNTRY, TestKey.NETWORK_TYPE, TestKey.SUBSCRIPTIONS, TestKey.CELL_INFO)),
     TestSection(R.string.section_location, listOf(TestKey.PROVIDERS, TestKey.LAST_LOCATION)),
     TestSection(R.string.section_battery, listOf(TestKey.BATTERY_PROPERTY, TestKey.BATTERY_INTENT)),
-    TestSection(R.string.section_locale, listOf(TestKey.LOCALE_LANGUAGE, TestKey.LOCALE_COUNTRY, TestKey.LOCALE_TAG, TestKey.LOCALE_TEXT)),
+    TestSection(
+        R.string.section_locale,
+        listOf(
+            TestKey.LOCALE_LANGUAGE,
+            TestKey.LOCALE_COUNTRY,
+            TestKey.LOCALE_TAG,
+            TestKey.LOCALE_TEXT,
+            TestKey.TIME_ZONE_JAVA,
+            TestKey.TIME_ZONE_JAVA_TIME,
+            TestKey.TIME_ZONE_ICU,
+        ),
+    ),
     TestSection(R.string.section_blank_pass, listOf(TestKey.CONTACTS, TestKey.IMAGES, TestKey.VIDEOS, TestKey.AUDIO))
 )
 
@@ -330,6 +353,7 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
 
     val telephony = context.getSystemService(TelephonyManager::class.java)
     putSafe(TestKey.IMEI) { telephony.getImei(0) }
+    putSafe(TestKey.IMEI_SLOT_1) { telephony.getImei(1) }
     putSafe(TestKey.PHONE_NUMBER) { telephony.line1Number }
 
     val connectivity = context.getSystemService(ConnectivityManager::class.java)
@@ -379,6 +403,9 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putSafe(TestKey.LOCALE_COUNTRY) { locale.country }
     putSafe(TestKey.LOCALE_TAG) { locale.toLanguageTag() }
     putSafe(TestKey.LOCALE_TEXT) { locale.toString() }
+    putSafe(TestKey.TIME_ZONE_JAVA) { java.util.TimeZone.getDefault().id }
+    putSafe(TestKey.TIME_ZONE_JAVA_TIME) { java.time.ZoneId.systemDefault().id }
+    putSafe(TestKey.TIME_ZONE_ICU) { android.icu.util.TimeZone.getDefault().id }
 
     putQuery(context, TestKey.CONTACTS, ContactsContract.Contacts.CONTENT_URI)
     putQuery(context, TestKey.IMAGES, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)

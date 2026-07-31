@@ -23,6 +23,7 @@
     <string name="title_device_parameter">معلمات الجهاز</string>
     <string name="title_net_info">معلومات الشبكة</string>
     <string name="title_unique_id">معرف فريد</string>
+    <string name="id_imei_summary">تُعاد هذه القيمة عند قراءة أي فتحة في الجهاز؛ وسيكون IMEI 1 وIMEI 2 متطابقين في الأجهزة ثنائية الشريحة</string>
     <string name="title_location_info">معلومات الموقع</string>
     <string name="title_other">أخرى</string>
     <string name="title_blank_pass">تمرير بيانات فارغة</string>
@@ -48,6 +49,8 @@
     <string name="location_wifi_fail">موقع WiFi غير صالح</string>
     <string name="other_battery_level">مستوى البطارية</string>
     <string name="other_language">اللغة</string>
+    <string name="other_time_zone">المنطقة الزمنية</string>
+    <string name="other_time_zone_summary">يغيّر المنطقة الزمنية التي يستخدمها التطبيق المستهدف لقراءة الوقت المحلي وتنسيقه فقط، ولا يغيّر ساعة النظام</string>
     <string name="other_allow_force_screenshots">السماح بلقطات الشاشة إجبارياً</string>
     <string name="config_reset_pending_save">تمت إعادة تعيين المعلمات. احفظ لتطبيق التغييرات</string>
     <string name="unsaved_config_title">هل تريد حفظ التغييرات؟</string>

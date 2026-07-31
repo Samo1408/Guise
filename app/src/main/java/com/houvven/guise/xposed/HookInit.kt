@@ -12,6 +12,7 @@ import com.houvven.guise.xposed.hook.DisplayDensityHook
 import com.houvven.guise.xposed.hook.LocalHook
 import com.houvven.guise.xposed.hook.OsBuildHook
 import com.houvven.guise.xposed.hook.ScreenshotsHook
+import com.houvven.guise.xposed.hook.TimeZoneHook
 import com.houvven.guise.xposed.hook.UniquelyIdHook
 import com.houvven.guise.xposed.hook.location.CellLocationHook
 import com.houvven.guise.xposed.hook.location.LocationHook
@@ -67,6 +68,7 @@ class HookInit : XposedModule() {
         listOf(
             BatteryHook(),
             LocalHook(),
+            TimeZoneHook(),
             LocationHook(),
             CellLocationHook(),
             NetworkHook(),

@@ -42,9 +42,11 @@ import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.PresetAdapter
 import com.houvven.guise.module.preset.CarrierPresetRepository
 import com.houvven.guise.module.preset.PresetRepository
+import com.houvven.guise.module.preset.ResourcePreset
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 
@@ -75,6 +77,11 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     val localConfiguration = LocalConfiguration.current
     val carrierPresets = remember(context) { CarrierPresetRepository.get(context) }
     val presetCatalog = remember(context) { PresetRepository.get(context) }
+    val timeZonePresets = remember {
+        ZoneId.getAvailableZoneIds()
+            .sorted()
+            .map { id -> ResourcePreset(label = id, value = id) }
+    }
     val equivalentSmallestWidthDp = state.densityDpi.value.toIntOrNull()
         ?.takeIf { it in 72..1000 && localConfiguration.smallestScreenWidthDp > 0 }
         ?.let { targetDensityDpi ->
@@ -178,7 +185,11 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 
 
     Title(text = stringResource(R.string.title_unique_id))
-    RandomInputBox(state.imei, stringResource(R.string.id_imei)) { Randoms.randomIMEI() }
+    RandomInputBox(
+        state = state.imei,
+        label = stringResource(R.string.id_imei),
+        supportingText = stringResource(R.string.id_imei_summary),
+    ) { Randoms.randomIMEI() }
     RandomInputBox(
         state.phoneNum,
         stringResource(R.string.id_phone_num)
@@ -220,6 +231,12 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         state.language,
         stringResource(R.string.other_language),
         presetCatalog.languages,
+    )
+    PresetInputBox(
+        state = state.timeZone,
+        label = stringResource(R.string.other_time_zone),
+        preset = timeZonePresets,
+        supportingText = stringResource(R.string.other_time_zone_summary),
     )
     ContainerSwitch(
         state.allowForceScreenshots,

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="imei_slot_1">IMEI، الفتحة 1</string>
+    <string name="time_zone_java">المنطقة الزمنية (java.util)</string>
+    <string name="time_zone_java_time">المنطقة الزمنية (java.time)</string>
+    <string name="time_zone_icu">المنطقة الزمنية (Android ICU)</string>
     <string name="app_name">اختبار Guise</string><string name="refresh">تحديث</string>
     <string name="test_instructions_title">طريقة الاختبار</string>
     <string name="test_instructions">أضف هذا التطبيق (com.daxiaamu.guise.test) إلى Guise، واضبط قيماً مزيّفة يسهل تمييزها، ثم زامن النطاق وأوقف التطبيق بالقوة وافتحه مجدداً. قارن القيم أدناه بإعدادات Guise.</string>

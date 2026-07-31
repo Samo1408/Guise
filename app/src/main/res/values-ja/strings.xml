@@ -23,6 +23,7 @@
     <string name="title_device_parameter">デバイス パラメータ</string>
     <string name="title_net_info">ネットワーク情報</string>
     <string name="title_unique_id">一意のID</string>
+    <string name="id_imei_summary">どの端末スロットから読み取ってもこの値を返します。デュアル SIM 端末では IMEI 1/2 が同じ値になります</string>
     <string name="title_location_info">位置情報</string>
     <string name="title_other">他の</string>
     <string name="title_blank_pass">ブランクパス</string>
@@ -49,6 +50,8 @@
     <string name="location_wifi_fail">WiFi ロケーションを無効にする</string>
     <string name="other_battery_level">バッテリー残量</string>
     <string name="other_language">言語</string>
+    <string name="other_time_zone">タイムゾーン</string>
+    <string name="other_time_zone_summary">対象アプリがローカル時刻の取得と表示に使うタイムゾーンのみを変更し、システム時計は変更しません</string>
     <string name="other_allow_force_screenshots">スクリーンショットを強制的に許可</string>
     <string name="config_reset_pending_save">パラメータをリセットしました。保存すると反映されます</string>
     <string name="unsaved_config_title">変更を保存しますか？</string>

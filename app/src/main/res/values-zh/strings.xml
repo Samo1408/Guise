@@ -19,6 +19,7 @@
     <string name="title_device_parameter">设备参数</string>
     <string name="title_net_info">网络信息</string>
     <string name="title_unique_id">唯一标识</string>
+    <string name="id_imei_summary">应用读取任一卡槽时均返回此值；双卡设备的 IMEI 1/2 将相同</string>
     <string name="title_cell_location">基站信息</string>
     <string name="title_location_info">位置信息</string>
     <string name="title_other">其他</string>
@@ -46,6 +47,8 @@
     <string name="location_wifi_fail">使WiFi位置信息失效</string>
     <string name="other_battery_level">电量</string>
     <string name="other_language">语言</string>
+    <string name="other_time_zone">时区</string>
+    <string name="other_time_zone_summary">仅改变目标应用读取和格式化本地时间所用的时区，不修改系统时钟</string>
     <string name="other_allow_force_screenshots">允许强制截图</string>
     <string name="config_reset_pending_save">参数已重置，保存后生效</string>
     <string name="unsaved_config_title">是否保存更改？</string>

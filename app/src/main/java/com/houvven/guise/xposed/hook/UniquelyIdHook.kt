@@ -16,7 +16,6 @@ import com.houvven.ktx_xposed.hook.findClass
 import com.houvven.ktx_xposed.hook.findClassIfExists
 import com.houvven.ktx_xposed.hook.lppram
 import com.houvven.ktx_xposed.hook.setAllMethodResult
-import com.houvven.ktx_xposed.hook.setMethodResult
 import com.houvven.ktx_xposed.hook.setSomeSameNameMethodResult
 import com.houvven.ktx_xposed.logger.XposedLogger
 
@@ -73,9 +72,13 @@ class UniquelyIdHook : LoadPackageHandler {
     }
 
     private fun hookImei() {
-        TelephonyManager::class.java.setMethodResult(
-            "getImei", config.imei, parameterTypes = arrayOf(Int::class.java)
-        )
+        TelephonyManager::class.java.run {
+            // Use one configured identity consistently for default, primary, and indexed slots.
+            setAllMethodResult("getImei", config.imei)
+            setAllMethodResult("getPrimaryImei", config.imei)
+            setAllMethodResult("getDeviceId", config.imei)
+            setAllMethodResult("getTypeAllocationCode", config.imei.take(8))
+        }
     }
 
     private fun hookPhoneNum() {

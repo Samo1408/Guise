@@ -32,6 +32,7 @@ data class ModuleConfig(
     var lac: Int = -1,
     var cid: Int = -1,
     var language: String = "",
+    var timeZone: String = "",
     var longitude: Double = -1.0,
     var latitude: Double = -1.0,
     var randomOffset: Boolean = false,
