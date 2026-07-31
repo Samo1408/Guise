@@ -82,7 +82,7 @@ object LsposedHelper {
     fun addScope(modulePackageName: String, appPkgName: String) {
         sqlite3Shell.insert(
             DB_PATH,
-            "insert into scope (mid, app_pkg_name, user_id) values ((select mid from modules where module_pkg_name = ?), ?, 0)",
+            "insert or ignore into scope (mid, app_pkg_name, user_id) values ((select mid from modules where module_pkg_name = ?), ?, 0)",
             modulePackageName,
             appPkgName
         )

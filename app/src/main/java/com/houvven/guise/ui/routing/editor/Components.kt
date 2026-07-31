@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.houvven.guise.ui.components.ElevatedTextField
-import com.houvven.guise.ui.isHooked
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -71,11 +70,8 @@ internal fun Container(content: @Composable () -> Unit) {
 @Composable
 internal fun ContainerSwitch(state: MutableState<Boolean>, label: String) {
     Container {
-        val color =
-            if (isHooked) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        Text(text = label, fontSize = 16.sp, color = color)
-        Switch(checked = state.value, onCheckedChange = { state.value = it }, enabled = isHooked)
+        Text(text = label, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Switch(checked = state.value, onCheckedChange = { state.value = it })
     }
 }
 
@@ -104,8 +100,7 @@ private fun BasicInputBox(
         modifier = modifier,
         singleLine = true,
         label = { Text(text = label) },
-        trailingIcon = { if (isHooked) trailingIcon() },
-        enabled = isHooked
+        trailingIcon = trailingIcon,
     )
 }
 

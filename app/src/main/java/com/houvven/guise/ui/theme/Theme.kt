@@ -1,8 +1,8 @@
 package com.houvven.guise.ui.theme
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -11,14 +11,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.houvven.guise.constant.AppConfigKey
-import com.houvven.guise.ui.alwaysDarkMode
-import com.houvven.guise.xposed.PackageConfig
-
-
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
@@ -44,25 +40,20 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun GuiseTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    var darkMode = darkTheme
+    val systemDark =
+        (LocalConfiguration.current.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+    val darkMode = themeMode.value == ThemeMode.DARK ||
+        (themeMode.value == ThemeMode.SYSTEM && systemDark)
     val colorScheme = when {
-        alwaysDarkMode.value -> {
-            darkMode = true
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicDarkColorScheme(LocalContext.current)
-            else DarkColorScheme
-        }
-
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor.value && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkMode) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
+        darkMode -> DarkColorScheme
         else -> LightColorScheme
     }
     val view = LocalView.current
@@ -71,6 +62,7 @@ fun GuiseTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkMode
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkMode
         }
     }
 

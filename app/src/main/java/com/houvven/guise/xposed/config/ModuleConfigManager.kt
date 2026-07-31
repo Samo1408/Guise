@@ -9,9 +9,9 @@ import androidx.core.content.edit
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
-import com.houvven.guise.constant.AppConfigKey
 import com.houvven.guise.lsposed.LsposedHelper
 import com.houvven.guise.module.ktx.runThread
+import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.PackageConfig
 import com.houvven.ktx_xposed.SafeSharePrefs
@@ -22,9 +22,6 @@ private constructor(
     val config: ModuleConfig,
     val state: ModuleConfigState,
 ) {
-
-    private val superLsposed get() = AppConfigKey.run { mmkv.decodeBool(SUPER_LSPOSED, false) }
-
 
     private val modulePkgName = BuildConfig.APPLICATION_ID
 
@@ -47,15 +44,23 @@ private constructor(
         LauncherState.apps.value.find { it.packageName == config.packageName }?.isEnable = enable
         if (enable) {
             safePrefs.edit { putString(config.packageName, json) }
-            if (superLsposed) runThread {
-                LsposedHelper.addScope(modulePkgName, config.packageName)
-            }
         } else {
             safePrefs.edit(commit = true) { remove(config.packageName) }
-            if (superLsposed) runThread {
-                LsposedHelper.removeScope(modulePkgName, config.packageName)
-            }
         }
+        syncLsposedScope(enable)
+    }
+
+    private fun syncLsposedScope(enable: Boolean) = runThread {
+        LsposedHelper.download()
+            .onSuccess {
+                if (enable) LsposedHelper.addScope(modulePkgName, config.packageName)
+                else LsposedHelper.removeScope(modulePkgName, config.packageName)
+            }
+            .onFailure {
+                GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                    "LSPosed 作用域自动同步失败：${it.message ?: it}",
+                )
+            }
     }
 
     fun stopApp(): Boolean {

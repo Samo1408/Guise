@@ -28,16 +28,6 @@ object IntentUtils {
         context.startActivity(intent)
     }
 
-
-    fun openEmail(email: String) {
-        val uri = Uri.parse("mailto:$email")
-        val intent = Intent()
-        intent.action = "android.intent.action.VIEW"
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.data = uri
-        context.startActivity(intent)
-    }
-
     fun openFileChooser(type: String) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK

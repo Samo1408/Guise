@@ -40,32 +40,3 @@ fun Hyperlink(
         IntentUtils.openBrowser(url)
     }
 }
-
-@Composable
-fun EmailHyperLink(
-    modifier: Modifier = Modifier,
-    label: String? = null,
-    address: String,
-    color: Color = LocalContentColor.current,
-    style: TextStyle = TextStyle.Default,
-    softWrap: Boolean = true,
-    overflow: TextOverflow = TextOverflow.Clip,
-    maxLines: Int = Int.MAX_VALUE,
-    onTextLayout: (TextLayoutResult) -> Unit = {}
-) {
-    val string = buildAnnotatedString {
-        append(label ?: address)
-        addStyle(SpanStyle(color = color), 0, length)
-    }
-    ClickableText(
-        text = string,
-        modifier = modifier,
-        style = style,
-        softWrap = softWrap,
-        overflow = overflow,
-        maxLines = maxLines,
-        onTextLayout = onTextLayout
-    ) {
-        IntentUtils.openEmail(address)
-    }
-}
