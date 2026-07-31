@@ -51,8 +51,10 @@ import com.houvven.guise.ui.utils.oneClickRandom
 import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.config.ModuleConfigManager
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 private enum class EditorExitDialog {
@@ -169,10 +171,15 @@ fun DeployConfigEditScreen(
                 leaveEditor()
             }
         } catch (cancelled: CancellationException) {
-            backOffsetX.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = 120),
-            )
+            // The gesture Flow is cancelled when the user abandons predictive back.
+            // Reset in a non-cancellable context; otherwise animateTo is cancelled
+            // immediately as well and the page can remain at its partial offset.
+            withContext(NonCancellable) {
+                backOffsetX.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 120),
+                )
+            }
             throw cancelled
         }
     }

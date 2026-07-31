@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.List
@@ -35,6 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.houvven.guise.R
 import com.houvven.guise.ui.components.ElevatedTextField
+
+private val FieldActionButtonSize = 32.dp
+private val FieldActionIconSize = 22.dp
+private val FieldActionsWidth = FieldActionButtonSize * 3
 
 @Composable
 internal fun Title(
@@ -113,11 +118,11 @@ private fun FieldIconButton(
     tint: Color = MaterialTheme.colorScheme.primary,
     clickable: () -> Unit,
 ) {
-    IconButton(onClick = clickable, modifier = Modifier.size(32.dp)) {
+    IconButton(onClick = clickable, modifier = Modifier.size(FieldActionButtonSize)) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(FieldActionIconSize),
             tint = tint,
         )
     }
@@ -126,6 +131,7 @@ private fun FieldIconButton(
 @Composable
 private fun FieldActions(content: @Composable () -> Unit) {
     Row(
+        modifier = Modifier.width(FieldActionsWidth),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End,
     ) {
@@ -174,7 +180,7 @@ internal fun InputBox(
             if (state.value.isNotBlank()) FieldIconButton(
                 Icons.TwoTone.Delete,
                 stringResource(R.string.delete),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.primary,
             ) {
                 state.value = ""
             }
@@ -234,7 +240,7 @@ internal fun OperateInputBox(
                 FieldIconButton(
                     Icons.TwoTone.Delete,
                     stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.primary,
                 ) {
                     state.value = ""
                 }
