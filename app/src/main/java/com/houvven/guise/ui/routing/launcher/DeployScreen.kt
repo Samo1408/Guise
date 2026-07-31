@@ -167,7 +167,15 @@ private fun AppCard(
         val typography = MaterialTheme.typography
         Column(Modifier.weight(1f)) {
             Text(appInfo.label, style = typography.titleMedium, softWrap = false)
-            Text(appInfo.packageName, style = typography.bodyMedium, softWrap = false)
+            val appType = stringResource(
+                if (appInfo.isSystemApp) R.string.app_type_system else R.string.app_type_user
+            )
+            Text(
+                text = "$appType · ${appInfo.packageName}",
+                style = typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f),
+                softWrap = false,
+            )
         }
         if (showSelection) {
             Checkbox(

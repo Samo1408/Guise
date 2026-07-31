@@ -25,9 +25,13 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 现有功能包括：
 
 - 已安装应用管理、搜索、过滤、排序及 LSPosed 作用域同步。
-- 按应用配置设备型号、系统版本、网络、SIM、Wi-Fi、唯一标识、定位和基站信息。
+- 按应用配置设备型号、显示大小（DPI）、系统版本、网络、SIM、Wi-Fi、唯一标识、定位和基站信息。
 - 电池电量、截图限制、窗口隐私及联系人/图片/视频/音频访问控制。
 - 内置设备数据库、配置模板、预设、导入导出、运行日志和应用设置。
+
+内置品牌与型号数据库来自 [KHwang9883/MobileModels](https://github.com/KHwang9883/MobileModels) 的[官方 CSV 导出](https://github.com/KHwang9883/MobileModels-csv)，数据库部分遵循 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)；具体来源版本与转换说明见 `app/src/main/assets/devices.NOTICE.txt`。
+
+全球运营商预设来自 MIT 许可的 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，编码依据 [ITU-T E.212](https://www.itu.int/rec/T-REC-E.212/en)；具体筛选规则与来源版本见 `app/src/main/assets/carriers.NOTICE.txt`。
 
 目前主要模块：
 

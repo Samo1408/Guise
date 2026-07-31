@@ -17,6 +17,7 @@ data class ModuleConfig(
     var hardware: String = "",
     var androidVersion: String = "",
     var sdkInt: Int = -1,
+    var densityDpi: Int = -1,
     var networkType: Int = HooksValue.NET_UNHOOK,
     var fingerPrint: String = "",
     var wifiSSID: String = "",

@@ -97,7 +97,8 @@ private enum class TestKey(@StringRes val label: Int) {
     BRAND(R.string.brand), MANUFACTURER(R.string.manufacturer), MODEL(R.string.model),
     PRODUCT(R.string.product), DEVICE(R.string.device), BOARD(R.string.board),
     HARDWARE(R.string.hardware), FINGERPRINT(R.string.fingerprint), SDK(R.string.sdk),
-    RELEASE(R.string.release), BASE_OS(R.string.base_os), ANDROID_ID_SECURE(R.string.android_id_secure),
+    RELEASE(R.string.release), BASE_OS(R.string.base_os), DISPLAY_DENSITY(R.string.display_density),
+    ANDROID_ID_SECURE(R.string.android_id_secure),
     ANDROID_ID_SYSTEM(R.string.android_id_system), IMEI(R.string.imei), PHONE_NUMBER(R.string.phone_number),
     NETWORK_LEGACY(R.string.network_legacy), NETWORK_MODERN(R.string.network_modern),
     WIFI_STATE(R.string.wifi_state), WIFI_SSID(R.string.wifi_ssid), WIFI_BSSID(R.string.wifi_bssid),
@@ -117,7 +118,7 @@ private data class TestSection(@StringRes val title: Int, val keys: List<TestKey
 
 private val sections = listOf(
     TestSection(R.string.section_version, listOf(TestKey.PACKAGE_NAME, TestKey.COMPILED_VERSION, TestKey.PACKAGE_VERSION)),
-    TestSection(R.string.section_device, listOf(TestKey.BRAND, TestKey.MANUFACTURER, TestKey.MODEL, TestKey.PRODUCT, TestKey.DEVICE, TestKey.BOARD, TestKey.HARDWARE, TestKey.FINGERPRINT, TestKey.SDK, TestKey.RELEASE, TestKey.BASE_OS)),
+    TestSection(R.string.section_device, listOf(TestKey.BRAND, TestKey.MANUFACTURER, TestKey.MODEL, TestKey.PRODUCT, TestKey.DEVICE, TestKey.BOARD, TestKey.HARDWARE, TestKey.FINGERPRINT, TestKey.SDK, TestKey.RELEASE, TestKey.BASE_OS, TestKey.DISPLAY_DENSITY)),
     TestSection(R.string.section_identifiers, listOf(TestKey.ANDROID_ID_SECURE, TestKey.ANDROID_ID_SYSTEM, TestKey.IMEI, TestKey.PHONE_NUMBER)),
     TestSection(R.string.section_network, listOf(TestKey.NETWORK_LEGACY, TestKey.NETWORK_MODERN, TestKey.WIFI_STATE, TestKey.WIFI_SSID, TestKey.WIFI_BSSID, TestKey.WIFI_MAC)),
     TestSection(R.string.section_sim, listOf(TestKey.SIM_OPERATOR, TestKey.NETWORK_OPERATOR, TestKey.SIM_NAME, TestKey.NETWORK_NAME, TestKey.SIM_COUNTRY, TestKey.NETWORK_COUNTRY, TestKey.NETWORK_TYPE, TestKey.SUBSCRIPTIONS, TestKey.CELL_INFO)),
@@ -316,6 +317,14 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putSafe(TestKey.HARDWARE) { Build.HARDWARE }; putSafe(TestKey.FINGERPRINT) { Build.FINGERPRINT }
     putSafe(TestKey.SDK) { Build.VERSION.SDK_INT }; putSafe(TestKey.RELEASE) { Build.VERSION.RELEASE }
     putSafe(TestKey.BASE_OS) { Build.VERSION.BASE_OS }
+    putSafe(TestKey.DISPLAY_DENSITY) {
+        val metrics = context.resources.displayMetrics
+        val configuration = context.resources.configuration
+        "metrics=${metrics.densityDpi} dpi, configuration=${configuration.densityDpi} dpi, " +
+            "density=${metrics.density}, scaledDensity=${metrics.scaledDensity}, " +
+            "size=${configuration.screenWidthDp}×${configuration.screenHeightDp} dp, " +
+            "smallest=${configuration.smallestScreenWidthDp} dp"
+    }
     putSafe(TestKey.ANDROID_ID_SECURE) { Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) }
     putSafe(TestKey.ANDROID_ID_SYSTEM) { Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID) }
 

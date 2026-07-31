@@ -8,6 +8,7 @@ import android.util.Log
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.xposed.hook.BatteryHook
 import com.houvven.guise.xposed.hook.BuildConfigHook
+import com.houvven.guise.xposed.hook.DisplayDensityHook
 import com.houvven.guise.xposed.hook.LocalHook
 import com.houvven.guise.xposed.hook.OsBuildHook
 import com.houvven.guise.xposed.hook.ScreenshotsHook
@@ -70,6 +71,7 @@ class HookInit : XposedModule() {
             CellLocationHook(),
             NetworkHook(),
             OsBuildHook(),
+            DisplayDensityHook(),
             ScreenshotsHook(),
             UniquelyIdHook(),
             BlankPass(),

@@ -18,6 +18,8 @@
     <string name="apps_reverse_order">ترتيب عكسي</string>
     <string name="also_search_for_package">ابحث أيضًا عن اسم الحزمة</string>
     <string name="display_system_apps">عرض تطبيقات النظام</string>
+    <string name="app_type_system">تطبيق نظام</string>
+    <string name="app_type_user">تطبيق مستخدم</string>
     <string name="title_device_parameter">معلمات الجهاز</string>
     <string name="title_net_info">معلومات الشبكة</string>
     <string name="title_unique_id">معرف فريد</string>
@@ -31,6 +33,7 @@
     <string name="device_board">رمز اللوحة</string>
     <string name="device_system_android_version">نسخة أندرويد</string>
     <string name="device_system_api_level">مستوى API</string>
+    <string name="device_display_density">حجم العرض (DPI)</string>
     <string name="device_cpu">كود وحدة المعالجة المركزية</string>
     <string name="net_type">نوع الإنترنت</string>
     <string name="net_wifi_ssid">شبكة WiFi-SSID</string>
@@ -43,7 +46,7 @@
     <string name="location_wifi_fail">موقع WiFi غير صالح</string>
     <string name="other_battery_level">مستوى البطارية</string>
     <string name="other_language">اللغة</string>
-    <string name="other_screenshot">لقطة الشاشة (0: منع، 1: سماح)</string>
+    <string name="other_allow_force_screenshots">السماح بلقطات الشاشة إجبارياً</string>
     <string name="config_reset_pending_save">تمت إعادة تعيين المعلمات. احفظ لتطبيق التغييرات</string>
     <string name="unsaved_config_title">هل تريد حفظ التغييرات؟</string>
     <string name="unsaved_config_message">توجد تغييرات غير محفوظة في إعدادات «%1$s».</string>

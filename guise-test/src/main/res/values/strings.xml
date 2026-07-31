@@ -36,6 +36,7 @@
     <string name="sdk">SDK level</string>
     <string name="release">Android release</string>
     <string name="base_os">Base OS</string>
+    <string name="display_density">Display size (DPI)</string>
     <string name="android_id_secure">Android ID (Secure)</string>
     <string name="android_id_system">Android ID (System)</string>
     <string name="imei">IMEI, slot 0</string>

@@ -4,7 +4,7 @@ import android.content.Context
 import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.ktx.runThread
 import com.houvven.guise.module.preset.NetworkPreset
-import com.houvven.guise.module.preset.SimPreset
+import com.houvven.guise.module.preset.CarrierPresetRepository
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
 
@@ -18,7 +18,7 @@ fun oneClickRandom(state: ModuleConfigState, context: Context) {
         state.run {
             brand.value = rBrand
             model.value = rDevice.model ?: ""
-            device.value = rDevice.code ?: ""
+            device.value = rDevice.codeAlias ?: ""
 
             fingerPrint.value = Randoms.randomFingerPrint()
 
@@ -33,10 +33,10 @@ fun oneClickRandom(state: ModuleConfigState, context: Context) {
                 longitude.value = it.y.toString()
             }
 
-            SimPreset.values().random().value.split(":").let {
-                simOperatorName.value = it[0]
-                simOperator.value = it[1]
-                simCountry.value = it[2]
+            CarrierPresetRepository.get(context).random().let {
+                simOperatorName.value = it.name
+                simOperator.value = it.plmn
+                simCountry.value = it.countryCode
             }
 
             androidId.value = Randoms.randomIMEI()

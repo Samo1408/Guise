@@ -18,6 +18,8 @@
     <string name="apps_reverse_order">逆順</string>
     <string name="also_search_for_package">パッケージ名も検索</string>
     <string name="display_system_apps">システムアプリを表示する</string>
+    <string name="app_type_system">システムアプリ</string>
+    <string name="app_type_user">ユーザーアプリ</string>
     <string name="title_device_parameter">デバイス パラメータ</string>
     <string name="title_net_info">ネットワーク情報</string>
     <string name="title_unique_id">一意のID</string>
@@ -32,6 +34,7 @@
     <string name="device_system_android_version">Android版本</string>
     <string name="description">説明</string>
     <string name="device_system_api_level">APIレベル</string>
+    <string name="device_display_density">表示サイズ（DPI）</string>
     <string name="device_cpu">CPUコード</string>
     <string name="net_type">インターネットの種類</string>
     <string name="net_wifi_ssid">WiFi-SSID</string>
@@ -44,7 +47,7 @@
     <string name="location_wifi_fail">WiFi ロケーションを無効にする</string>
     <string name="other_battery_level">バッテリー残量</string>
     <string name="other_language">言語</string>
-    <string name="other_screenshot">スクリーンショット(0:無効, 1:有効)</string>
+    <string name="other_allow_force_screenshots">スクリーンショットを強制的に許可</string>
     <string name="config_reset_pending_save">パラメータをリセットしました。保存すると反映されます</string>
     <string name="unsaved_config_title">変更を保存しますか？</string>
     <string name="unsaved_config_message">「%1$s」の設定には未保存の変更があります。</string>

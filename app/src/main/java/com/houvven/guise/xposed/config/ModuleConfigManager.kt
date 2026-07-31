@@ -248,6 +248,11 @@ private constructor(
                 else -> Unit
             }
         }
+        target.screenshotsFlag = if (state.allowForceScreenshots.value) {
+            HooksValue.SCREENSHOTS_ENABLE
+        } else {
+            HooksValue.SCREENSHOTS_UNHOOK
+        }
     }
 
     companion object {

@@ -21,6 +21,8 @@
     <string name="apps_reverse_order">Reverse order</string>
     <string name="also_search_for_package">Also search for the package name</string>
     <string name="display_system_apps">Display system apps</string>
+    <string name="app_type_system">System app</string>
+    <string name="app_type_user">User app</string>
     <string name="title_device_parameter">Device Parameters</string>
     <string name="title_net_info">Network Info</string>
     <string name="title_unique_id">Unique ID</string>
@@ -36,6 +38,7 @@
     <string name="device_board">Board Code</string>
     <string name="device_system_android_version">Android Version</string>
     <string name="device_system_api_level">API Level</string>
+    <string name="device_display_density">Display size (DPI)</string>
     <string name="device_system_finger_print" translatable="false">FingerPrint</string>
     <string name="device_cpu">CPU Code</string>
     <string name="net_type">Internet Type</string>
@@ -60,7 +63,7 @@
 
     <string name="other_battery_level">Battery level</string>
     <string name="other_language">Language</string>
-    <string name="other_screenshot">Screenshot(0: dis, 1: en)</string>
+    <string name="other_allow_force_screenshots">Allow forced screenshots</string>
     <string name="config_reset_pending_save">Parameters reset. Save to apply.</string>
     <string name="unsaved_config_title">Save changes?</string>
     <string name="unsaved_config_message">The configuration for “%1$s” has unsaved changes.</string>

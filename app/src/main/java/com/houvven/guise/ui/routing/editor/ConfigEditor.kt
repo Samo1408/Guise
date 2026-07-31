@@ -1,8 +1,6 @@
 package com.houvven.guise.ui.routing.editor
 
-import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Column
@@ -13,14 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -44,10 +39,12 @@ import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
 import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.PresetAdapter
+import com.houvven.guise.module.preset.CarrierPresetRepository
+import com.houvven.guise.module.preset.DensityPreset
 import com.houvven.guise.module.preset.LanguagePreset
 import com.houvven.guise.module.preset.NetworkPreset
 import com.houvven.guise.module.preset.ReleasePreset
-import com.houvven.guise.module.preset.SimPreset
+import com.houvven.guise.module.preset.SdkPreset
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
@@ -76,6 +73,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 
 
     val context = LocalContext.current
+    val carrierPresets = remember(context) { CarrierPresetRepository.get(context) }
 
 
     Title(text = stringResource(R.string.title_device_parameter), topPadding = 1.dp)
@@ -96,19 +94,18 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
             dbHelper.getDevicesByBrand(state.brand.value)
                 .filterNot { it.modelName.isNullOrBlank() || it.model.isNullOrBlank() }
                 .map {
-                    val label = if (it.verName == "#" || it.verName == null) it.modelName!!
+                    val name = if (it.verName == "#" || it.verName == null) it.modelName!!
                     else "${it.modelName!!} (${it.verName.removePrefix("#")})"
                     object : PresetAdapter {
-                        override val label: String = label
+                        override val label: String = "$name · ${it.model}"
                         override val value: String = "${it.model!!}:${it.codeAlias ?: ""}"
                     }
                 }
         },
-        showOperateIcon = allBrands.containsKey(state.brand.value),
+        showOperateIcon = allBrands.keys.any { it.equals(state.brand.value, ignoreCase = true) },
         setValue = { value ->
-            val (model, codeAlias) = value.split(":")
-            state.model.value = model
-            state.device.value = codeAlias
+            state.model.value = value.substringBefore(":")
+            state.device.value = value.substringAfter(":", missingDelimiterValue = "")
         }
     )
     InputBox(state.device, stringResource(R.string.device_device))
@@ -118,17 +115,23 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state.androidVersion,
         stringResource(R.string.device_system_android_version),
-        preset = ReleasePreset.values().toList().reversed()
-    )
+        preset = ReleasePreset.values().toList().reversed(),
+    ) { value ->
+        state.androidVersion.value = value.substringBefore('|')
+        value.substringAfter('|', missingDelimiterValue = "")
+            .takeIf(String::isNotBlank)
+            ?.let { state.sdkInt.value = it }
+    }
     PresetInputBox(
         state = state.sdkInt,
         label = stringResource(R.string.device_system_api_level),
-        preset = Build.VERSION_CODES::class.java.fields.map {
-            object : PresetAdapter {
-                override val label: String = it.name
-                override val value: String = it.getInt(null).toString()
-            }
-        }.sortedBy { it.label }.reversed()
+        preset = SdkPreset.values().toList().reversed(),
+    )
+    PresetInputBox(
+        state = state.densityDpi,
+        label = stringResource(R.string.device_display_density),
+        preset = DensityPreset.values().toList().reversed(),
+        validate = { value -> value.length <= 4 && value.all(Char::isDigit) },
     )
     InputBox(state.fingerPrint, stringResource(R.string.device_system_finger_print))
 
@@ -148,12 +151,13 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     PresetInputBox(
         state.simOperator,
         stringResource(R.string.net_sim_code),
-        SimPreset.values().toList()
-    ) {
-        val (name, code, country) = it.split(":")
-        state.simOperatorName.value = name
-        state.simOperator.value = code
-        state.simCountry.value = country
+        carrierPresets,
+    ) { plmn ->
+        carrierPresets.firstOrNull { it.plmn == plmn }?.let { carrier ->
+            state.simOperatorName.value = carrier.name
+            state.simOperator.value = carrier.plmn
+            state.simCountry.value = carrier.countryCode
+        }
     }
     InputBox(state.simOperatorName, stringResource(R.string.net_sim_name))
     InputBox(state.simCountry, stringResource(R.string.net_sim_iso))
@@ -193,7 +197,10 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         stringResource(R.string.other_language),
         LanguagePreset.values().toList()
     )
-    InputBox(state.screenshotsFlag, stringResource(R.string.other_screenshot))
+    ContainerSwitch(
+        state.allowForceScreenshots,
+        stringResource(R.string.other_allow_force_screenshots),
+    )
 
 
     Title(text = stringResource(R.string.title_blank_pass))
@@ -216,12 +223,9 @@ internal fun ConfigEditorView(
     topBar: @Composable () -> Unit,
 ) {
     var showPresets by remember { mutableStateOf(false) }
-    var search by remember { mutableStateOf(false) }
     var key by remember { mutableStateOf("") }
 
-
     if (!showPresets) {
-        search = false
         key = ""
     }
 
@@ -231,24 +235,14 @@ internal fun ConfigEditorView(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.primary,
-                    thickness = 5.dp,
-                    modifier = Modifier
-                        .width(50.dp)
-                        .padding(vertical = 20.dp)
-                        .clip(RoundedCornerShape(25.dp))
-                        .clickable { search = !search }
-                )
-
                 val presets =
-                    if (key.isNotBlank() && localPreset.value.any { it.label.contains(key, true) })
-                        localPreset.value
-                            .sortedBy { it.label.contains(key, true) }
-                            .reversed()
-                    else localPreset.value
+                    if (key.isBlank()) localPreset.value
+                    else localPreset.value.filter {
+                        it.label.contains(key, ignoreCase = true) ||
+                            it.value.contains(key, ignoreCase = true)
+                    }
 
-                if (search) SearchBox(value = key, onValueChange = { key = it })
+                SearchBox(value = key, onValueChange = { key = it })
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
                     contentPadding = PaddingValues(horizontal = 15.dp),

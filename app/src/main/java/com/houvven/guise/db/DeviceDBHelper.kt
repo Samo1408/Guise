@@ -8,7 +8,7 @@ import java.io.Closeable
 
 class DeviceDBHelper(context: Context) : Closeable {
 
-    private val version = 2
+    private val version = 3
     private val deviceDBFileName = "devices.db"
     private val deviceDBFile = context.getDatabasePath(deviceDBFileName)
 
@@ -31,7 +31,7 @@ class DeviceDBHelper(context: Context) : Closeable {
 
     fun getAllBrand(): Map<String, String> {
         val cursor = db.rawQuery(
-            "select brand, brand_title from (select * from models group by brand)",
+            "select brand, brand_title from models group by brand order by brand_title",
             null
         )
         val map = mutableMapOf<String, String>()
@@ -46,7 +46,13 @@ class DeviceDBHelper(context: Context) : Closeable {
 
     fun getDevicesByBrand(brand: String): List<Device> {
         val cursor = db.rawQuery(
-            "select * from (select * from models group by model) where brand = ?",
+            """
+            select * from models
+            where brand = ? collate nocase and model_name is not null and model_name != ''
+              and dtype in ('mob', 'pad', 'tv', 'tv_hub', 'watch')
+            group by model
+            order by model_name, model
+            """.trimIndent(),
             arrayOf(brand)
         )
         val list = mutableListOf<Device>()
