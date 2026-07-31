@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -129,7 +131,11 @@ private fun generateApps(prioritizedPackages: Set<String>): List<AppInfo> {
 
 
 @Composable
-private fun AppCard(appInfo: AppInfo, onEnabledChange: (Boolean) -> Unit) {
+private fun AppCard(
+    appInfo: AppInfo,
+    showSelection: Boolean,
+    onEnabledChange: (Boolean) -> Unit,
+) {
     val clickable = {
         val name = appInfo.label
         val packageName = appInfo.packageName
@@ -163,10 +169,14 @@ private fun AppCard(appInfo: AppInfo, onEnabledChange: (Boolean) -> Unit) {
             Text(appInfo.label, style = typography.titleMedium, softWrap = false)
             Text(appInfo.packageName, style = typography.bodyMedium, softWrap = false)
         }
-        Checkbox(
-            checked = appInfo.isEnable,
-            onCheckedChange = onEnabledChange,
-        )
+        if (showSelection) {
+            Checkbox(
+                checked = appInfo.isEnable,
+                onCheckedChange = onEnabledChange,
+            )
+        } else {
+            Box(Modifier.size(48.dp))
+        }
     }
 }
 
@@ -184,6 +194,15 @@ fun DeployScreen() {
         mutableStateOf(
             LauncherState.apps.value.filter { it.isEnable }.mapTo(mutableSetOf()) { it.packageName }
         )
+    }
+    val listState = rememberLazyListState()
+    val clippedBottomItemIndex by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            layoutInfo.visibleItemsInfo.lastOrNull()
+                ?.takeIf { it.offset + it.size > layoutInfo.viewportEndOffset }
+                ?.index
+        }
     }
     val coroutineScope = rememberCoroutineScope()
 
@@ -310,6 +329,7 @@ fun DeployScreen() {
 
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = { Bar() }
     ) { pd ->
         PullToRefreshBox(
@@ -319,9 +339,15 @@ fun DeployScreen() {
                 .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
                 .fillMaxSize(),
         ) {
-            LazyColumn {
-                items(generateApps(prioritizedPackages), key = { it.packageName }) { appInfo ->
-                    AppCard(appInfo) { enabled ->
+            LazyColumn(state = listState) {
+                itemsIndexed(
+                    items = generateApps(prioritizedPackages),
+                    key = { _, appInfo -> appInfo.packageName },
+                ) { index, appInfo ->
+                    AppCard(
+                        appInfo = appInfo,
+                        showSelection = index != clippedBottomItemIndex,
+                    ) { enabled ->
                         val manager = ModuleConfigManager.of(ModuleConfig.get(appInfo.packageName))
                         if (enabled) {
                             manager.setEnabled(true)
