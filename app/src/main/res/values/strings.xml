@@ -61,7 +61,7 @@
     <string name="other_battery_level">Battery level</string>
     <string name="other_language">Language</string>
     <string name="other_screenshot">Screenshot(0: dis, 1: en)</string>
-    <string name="other_hook_hint">Hook succeed hint</string>
+    <string name="config_reset_pending_save">Parameters reset. Save to apply.</string>
     <string name="pass_contacts">Contacts</string>
     <string name="pass_photo">Photo</string>
     <string name="pass_video">Video</string>

@@ -20,6 +20,12 @@ object LauncherState {
         apps.value = AppInfoProvider.getList()
     }
 
+    fun setAppEnabled(packageName: String, enabled: Boolean) {
+        apps.value = apps.value.map { app ->
+            if (app.packageName == packageName) app.copy(isEnable = enabled) else app
+        }
+    }
+
     private fun refreshTemplates() {
         templates.value = templateDao.getAll()
     }

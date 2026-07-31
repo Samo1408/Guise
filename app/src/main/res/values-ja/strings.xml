@@ -45,7 +45,7 @@
     <string name="other_battery_level">バッテリー残量</string>
     <string name="other_language">言語</string>
     <string name="other_screenshot">スクリーンショット(0:無効, 1:有効)</string>
-    <string name="other_hook_hint">フック成功のヒント</string>
+    <string name="config_reset_pending_save">パラメータをリセットしました。保存すると反映されます</string>
     <string name="pass_contacts">連絡先</string>
     <string name="pass_photo">写真</string>
     <string name="pass_video">ビデオ</string>

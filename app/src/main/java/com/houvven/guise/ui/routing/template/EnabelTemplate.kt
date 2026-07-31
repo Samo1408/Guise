@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.houvven.guise.R
@@ -50,7 +49,8 @@ import com.houvven.guise.module.apps.AppInfo
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.routing.LocalNavController
-import com.houvven.guise.xposed.PackageConfig
+import com.houvven.guise.xposed.config.ModuleConfig
+import com.houvven.guise.xposed.config.ModuleConfigManager
 import java.text.Collator
 import java.util.Locale
 
@@ -60,7 +60,9 @@ import java.util.Locale
 @Composable
 fun EnableTemplateScreen(template: Template) {
 
-    val all = PackageConfig.safePrefs.all
+    val templateConfig = remember(template.configuration) {
+        ModuleConfig.fromJson(template.configuration)
+    }
 
     // 系统与用户APP过滤
     var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -69,7 +71,10 @@ fun EnableTemplateScreen(template: Template) {
     val selects = remember {
         mutableStateListOf(
             *apps
-                .filter { all.containsKey(it.packageName) && all[it.packageName] == template.configuration }
+                .filter {
+                    val config = ModuleConfig.get(it.packageName)
+                    config.enabled && config.hasSameParameters(templateConfig)
+                }
                 .map { it.packageName }.toTypedArray()
         )
     }
@@ -194,16 +199,13 @@ fun EnableTemplateScreen(template: Template) {
         LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_DESTROY) {
                 unselects.forEach {
-                    PackageConfig.safePrefs.edit { remove(it) }
-                    LauncherState.apps.value.find { app -> app.packageName == it }?.let {
-                        it.isEnable = false
-                    }
+                    ModuleConfigManager.of(ModuleConfig.get(it))
+                        .setEnabled(false, notifyOnScopeError = false)
                 }
                 selects.forEach {
-                    PackageConfig.safePrefs.edit { putString(it, template.configuration) }
-                    LauncherState.apps.value.find { app -> app.packageName == it }?.let {
-                        it.isEnable = true
-                    }
+                    ModuleConfigManager.of(
+                        templateConfig.copy(packageName = it, enabled = true)
+                    ).setEnabled(true, notifyOnScopeError = false)
                 }
             }
         }

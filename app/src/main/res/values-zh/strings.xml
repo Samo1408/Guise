@@ -42,7 +42,7 @@
     <string name="other_battery_level">电量</string>
     <string name="other_language">语言</string>
     <string name="other_screenshot">截屏(0:强制禁止 1:强制启用)</string>
-    <string name="other_hook_hint">Hook成功提示</string>
+    <string name="config_reset_pending_save">参数已重置，保存后生效</string>
     <string name="pass_contacts">通讯录</string>
     <string name="pass_photo">照片</string>
     <string name="pass_video">视频</string>

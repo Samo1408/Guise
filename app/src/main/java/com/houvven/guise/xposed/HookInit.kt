@@ -16,7 +16,6 @@ import com.houvven.guise.xposed.hook.location.CellLocationHook
 import com.houvven.guise.xposed.hook.location.LocationHook
 import com.houvven.guise.xposed.hook.netowork.NetworkHook
 import com.houvven.guise.xposed.other.BlankPass
-import com.houvven.guise.xposed.other.HookSuccessHint
 import com.houvven.ktx_xposed.LoadPackageHookAdapter
 import com.houvven.ktx_xposed.hook.LoadPackageContext
 import com.houvven.ktx_xposed.hook.ModernXposedRuntime
@@ -65,7 +64,6 @@ class HookInit : XposedModule() {
         }
 
         listOf(
-            HookSuccessHint(),
             BatteryHook(),
             LocalHook(),
             LocationHook(),

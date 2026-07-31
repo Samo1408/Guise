@@ -40,6 +40,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     val moduleConfigManager = ModuleConfigManager.of(ModuleConfig.get(packageName))
     val isSaveRequest = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val resetPendingMessage = stringResource(R.string.config_reset_pending_save)
 
     SaveTemplate(isSaveRequest, moduleConfigManager.config)
 
@@ -56,7 +57,9 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
             actions = {
                 IconButton({
                     moduleConfigManager.clear()
-                    GlobalSnackbarHost.showSuccess()
+                    GlobalSnackbarHost.showByDismissPrevious(
+                        resetPendingMessage
+                    )
                 }) { SimplifyIcon(Icons.Outlined.Delete) }
 
                 IconButton({

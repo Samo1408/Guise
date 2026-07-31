@@ -42,7 +42,6 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
     val batteryLevel = mutableStateOf(moduleConfig.batteryLevel.display(-1))
     val language = mutableStateOf(moduleConfig.language)
     val screenshotsFlag = mutableStateOf(moduleConfig.screenshotsFlag.display(HooksValue.SCREENSHOTS_UNHOOK))
-    val hookSuccessHint = mutableStateOf(moduleConfig.hookSuccessHint)
 
     val passContacts = mutableStateOf(moduleConfig.passContacts)
     val passPhoto = mutableStateOf(moduleConfig.passPhoto)
@@ -64,7 +63,7 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
 
     private val booleanStates: List<MutableState<Boolean>>
         get() = listOf(
-            randomOffset, makeWifiLocationFail, makeCellLocationFail, hookSuccessHint,
+            randomOffset, makeWifiLocationFail, makeCellLocationFail,
             passContacts, passPhoto, passVideo, passAudio,
         )
 

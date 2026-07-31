@@ -61,6 +61,8 @@ import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.routing.LocalNavController
 import com.houvven.guise.ui.routing.NavRoutingTypes
+import com.houvven.guise.xposed.config.ModuleConfig
+import com.houvven.guise.xposed.config.ModuleConfigManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -123,7 +125,7 @@ private fun generateApps(): List<AppInfo> {
 
 
 @Composable
-private fun AppCard(appInfo: AppInfo) {
+private fun AppCard(appInfo: AppInfo, onEnabledChange: (Boolean) -> Unit) {
     val clickable = {
         val name = appInfo.label
         val packageName = appInfo.packageName
@@ -136,7 +138,6 @@ private fun AppCard(appInfo: AppInfo) {
     val enable = Modifier
         .padding(horizontal = 5.dp)
         .clip(RoundedCornerShape(15.dp))
-        .padding(vertical = 2.dp)
         .background(MaterialTheme.colorScheme.surfaceVariant)
 
     val modifier = (if (appInfo.isEnable) enable else disable)
@@ -154,10 +155,14 @@ private fun AppCard(appInfo: AppInfo) {
             .size(38.dp)
         SimplifyImage(appInfo.icon.asImageBitmap(), iconModifier)
         val typography = MaterialTheme.typography
-        Column {
+        Column(Modifier.weight(1f)) {
             Text(appInfo.label, style = typography.titleMedium, softWrap = false)
             Text(appInfo.packageName, style = typography.bodyMedium, softWrap = false)
         }
+        Checkbox(
+            checked = appInfo.isEnable,
+            onCheckedChange = onEnabledChange,
+        )
     }
 }
 
@@ -304,7 +309,25 @@ fun DeployScreen() {
                 .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
                 .fillMaxSize(),
         ) {
-            LazyColumn { items(generateApps()) { AppCard(it) } }
+            LazyColumn {
+                items(generateApps(), key = { it.packageName }) { appInfo ->
+                    AppCard(appInfo) { enabled ->
+                        val manager = ModuleConfigManager.of(ModuleConfig.get(appInfo.packageName))
+                        if (enabled) {
+                            manager.setEnabled(true)
+                        } else {
+                            coroutineScope.launch {
+                                val stopResult = manager.stopIfHooked()
+                                manager.setEnabled(false)
+                                stopResult.onFailure {
+                                    com.houvven.guise.ui.GlobalSnackbarHost
+                                        .showOnErrorByDismissPrevious(it.message ?: it.toString())
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         LaunchedEffect(Unit) {
             if (LauncherState.apps.value.isEmpty()) onRefresh()

@@ -7,14 +7,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.houvven.guise.ContextAmbient
-import com.houvven.guise.xposed.PackageConfig
+import com.houvven.guise.xposed.config.ModuleConfig
 
 @SuppressLint("StaticFieldLeak")
 object AppInfoProvider {
 
     private val context = ContextAmbient.current
     private val packageManager get() = context.packageManager
-    private val safeSharePrefs get() = PackageConfig.safePrefs
 
 
     fun getList(): ArrayList<AppInfo> {
@@ -45,7 +44,7 @@ object AppInfoProvider {
         }
         val packageName = applicationInfo.packageName
 
-        val isEnable = safeSharePrefs.contains(packageName)
+        val isEnable = ModuleConfig.get(packageName).enabled
         val label = applicationInfo.loadLabel(packageManager).toString()
         val icon = applicationInfo.loadIcon(packageManager).toBitmap()
         val installTime = packageInfo.firstInstallTime

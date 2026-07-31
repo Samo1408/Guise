@@ -6,12 +6,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.edit
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.ui.GlobalSnackbarHost
-import com.houvven.guise.ui.routing.LauncherState
-import com.houvven.guise.xposed.PackageConfig
+import com.houvven.guise.xposed.config.ModuleConfig
+import com.houvven.guise.xposed.config.ModuleConfigManager
 
 @Composable
 fun EnableTemplateDialog(state: MutableState<Boolean>, template: Template) {
@@ -22,12 +21,10 @@ fun EnableTemplateDialog(state: MutableState<Boolean>, template: Template) {
         onDismissRequest = { state.value = false },
         confirmButton = {
             TextButton(onClick = {
-                PackageConfig.safePrefs.edit {
-                    putString(template.packageName, template.configuration)
-                }
-                LauncherState.apps.value
-                    .find { it.packageName == template.packageName }
-                    ?.let { it.isEnable = true }
+                val packageName = requireNotNull(template.packageName)
+                val config = ModuleConfig.fromJson(template.configuration)
+                    .copy(packageName = packageName, enabled = true)
+                ModuleConfigManager.of(config).setEnabled(true)
                 state.value = false
                 GlobalSnackbarHost.showSuccess()
             }) {

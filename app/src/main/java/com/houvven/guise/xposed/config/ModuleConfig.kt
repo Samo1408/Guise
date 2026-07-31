@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class ModuleConfig(
     @Transient var packageName: String = "",
+    var enabled: Boolean = true,
     var brand: String = "",
     var model: String = "",
     var product: String = "",
@@ -40,25 +41,29 @@ data class ModuleConfig(
     var versionName: String = "",
     var batteryLevel: Int = -1,
     var screenshotsFlag: Int = HooksValue.SCREENSHOTS_UNHOOK,
-    var hookSuccessHint: Boolean = false,
     var passContacts: Boolean = false,
     var passPhoto: Boolean = false,
     var passVideo: Boolean = false,
     var passAudio: Boolean = false,
 ) {
-    val isEnable: Boolean get() = this != ModuleConfig(packageName)
+    val isEnable: Boolean get() = enabled
 
-    fun toJson() = Json.encodeToString(serializer(), this)
+    fun toJson() = json.encodeToString(serializer(), this)
+
+    fun hasSameParameters(other: ModuleConfig): Boolean =
+        copy(packageName = "", enabled = false) == other.copy(packageName = "", enabled = false)
 
     fun toModuleConfigState() = ModuleConfigState.of(this)
 
     companion object {
-        fun fromJson(json: String) = Json.decodeFromString(serializer(), json)
+        private val json = Json { ignoreUnknownKeys = true }
+
+        fun fromJson(value: String) = json.decodeFromString(serializer(), value)
 
         fun get(packageName: String): ModuleConfig {
             val config = PackageConfig.safePrefs.getString(packageName, null)?.let { fromJson(it) }
             config?.packageName = packageName
-            return config ?: ModuleConfig(packageName)
+            return config ?: ModuleConfig(packageName = packageName, enabled = false)
         }
     }
 }

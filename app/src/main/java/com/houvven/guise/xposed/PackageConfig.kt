@@ -39,7 +39,7 @@ object PackageConfig {
         val prefs = ModernXposedPreferences.current
         current = prefs.getString(packageName, null)
             ?.let(ModuleConfig::fromJson)
-            ?: ModuleConfig()
+            ?: ModuleConfig(enabled = false)
         current.packageName = packageName
     }
 }

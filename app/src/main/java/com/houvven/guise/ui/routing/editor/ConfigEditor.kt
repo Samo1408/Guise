@@ -194,7 +194,6 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         LanguagePreset.values().toList()
     )
     InputBox(state.screenshotsFlag, stringResource(R.string.other_screenshot))
-    ContainerSwitch(state.hookSuccessHint, stringResource(R.string.other_hook_hint))
 
 
     Title(text = stringResource(R.string.title_blank_pass))

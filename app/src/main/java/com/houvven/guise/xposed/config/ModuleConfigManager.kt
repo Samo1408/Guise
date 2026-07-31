@@ -33,15 +33,18 @@ private constructor(
 
     fun save(notifyOnScopeError: Boolean = true) {
         this.updateConfigFromState()
-        val json = config.toJson()
-        val enable = config.isEnable
-        LauncherState.apps.value.find { it.packageName == config.packageName }?.isEnable = enable
-        if (enable) {
-            safePrefs.edit { putString(config.packageName, json) }
-        } else {
-            safePrefs.edit(commit = true) { remove(config.packageName) }
-        }
-        syncLsposedScope(enable, notifyOnScopeError)
+        persist(notifyOnScopeError)
+    }
+
+    fun setEnabled(enabled: Boolean, notifyOnScopeError: Boolean = true) {
+        config.enabled = enabled
+        persist(notifyOnScopeError)
+    }
+
+    private fun persist(notifyOnScopeError: Boolean) {
+        safePrefs.edit(commit = true) { putString(config.packageName, config.toJson()) }
+        LauncherState.setAppEnabled(config.packageName, config.enabled)
+        syncLsposedScope(config.enabled, notifyOnScopeError)
     }
 
     private fun syncLsposedScope(enable: Boolean, notifyOnError: Boolean) {
@@ -94,15 +97,26 @@ private constructor(
         }
     }
 
-    private suspend fun requestProcessExit(): Result<Int> = runCatching {
+    suspend fun stopIfHooked(): Result<Unit> =
+        requestProcessExit(openDetailsWhenUnavailable = false).map { }
+
+    private suspend fun requestProcessExit(
+        openDetailsWhenUnavailable: Boolean = true,
+    ): Result<Int> = runCatching {
         val service = ContextAmbient.xposedService ?: run {
-            openApplicationDetails()
-            error(context.getString(R.string.manual_force_stop_required))
+            if (openDetailsWhenUnavailable) {
+                openApplicationDetails()
+                error(context.getString(R.string.manual_force_stop_required))
+            }
+            return@runCatching 0
         }
         val targets = service.getRunningTargets().filter(::isTargetProcess)
         if (targets.isEmpty()) {
-            openApplicationDetails()
-            error(context.getString(R.string.manual_force_stop_required))
+            if (openDetailsWhenUnavailable) {
+                openApplicationDetails()
+                error(context.getString(R.string.manual_force_stop_required))
+            }
+            return@runCatching 0
         }
         val targetPids = targets.mapTo(mutableSetOf()) { it.pid }
         val extras = Bundle().apply {
