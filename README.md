@@ -4,7 +4,7 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 本仓库保留了公开源码仓库的完整 Git 历史，并基于作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
 
-- 原项目：[Doraemonliu/com.houvven.guise](https://github.com/Doraemonliu/com.houvven.guise)
+- 原项目：[Houvven/Guise](https://github.com/Houvven/Guise)
 - 本仓库采用的源码上游：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
 - 上述源码仓库的 GitHub Fork 上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
 
@@ -69,7 +69,7 @@ sign.key.password=change-me
 
 ## 【以下为原作者说明】
 
-原项目：[Doraemonliu/com.houvven.guise](https://github.com/Doraemonliu/com.houvven.guise)
+原项目：[Houvven/Guise](https://github.com/Houvven/Guise)
 
 本说明所在的源码仓库：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
 
