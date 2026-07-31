@@ -108,6 +108,7 @@
     <string name="original_author_entry_description">المؤلف الأصلي لـ Guise · اضغط للتبرع له</string>
     <string name="settings_update_address">التحديثات</string>
     <string name="update_checking">جارٍ التحقق من التحديثات…</string>
+    <string name="update_check_action">تحقق</string>
     <string name="update_already_latest">لديك أحدث إصدار (%1$s)</string>
     <string name="update_check_failed">تعذر التحقق من التحديثات. حاول مرة أخرى لاحقًا.</string>
     <string name="update_available_title">إصدار جديد %1$s</string>

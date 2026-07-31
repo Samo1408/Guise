@@ -108,6 +108,7 @@
     <string name="original_author_entry_description">Guise の原作者・タップして寄付</string>
     <string name="settings_update_address">更新先</string>
     <string name="update_checking">アップデートを確認中…</string>
+    <string name="update_check_action">確認</string>
     <string name="update_already_latest">最新バージョンです（%1$s）</string>
     <string name="update_check_failed">アップデートを確認できません。しばらくしてからもう一度お試しください。</string>
     <string name="update_available_title">新しいバージョン %1$s</string>

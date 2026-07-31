@@ -109,7 +109,7 @@ fun AppUpdateHost() {
                         stringResource(R.string.update_notes),
                         style = MaterialTheme.typography.titleSmall,
                     )
-                    Text(info.notes)
+                    UpdateNotesText(info.notes)
                 }
             }
         },

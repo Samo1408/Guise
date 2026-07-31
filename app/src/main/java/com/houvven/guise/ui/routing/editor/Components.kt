@@ -113,14 +113,23 @@ private fun FieldIconButton(
     tint: Color = MaterialTheme.colorScheme.primary,
     clickable: () -> Unit,
 ) {
-    Row {
-        IconButton(onClick = clickable, modifier = Modifier.size(40.dp)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = tint
-            )
-        }
+    IconButton(onClick = clickable, modifier = Modifier.size(32.dp)) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(22.dp),
+            tint = tint,
+        )
+    }
+}
+
+@Composable
+private fun FieldActions(content: @Composable () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
+    ) {
+        content()
     }
 }
 
@@ -161,8 +170,8 @@ internal fun InputBox(
         supportingText = supportingText,
         validate = validate,
     ) {
-        state.value.isNotBlank().let {
-            if (it) FieldIconButton(
+        FieldActions {
+            if (state.value.isNotBlank()) FieldIconButton(
                 Icons.TwoTone.Delete,
                 stringResource(R.string.delete),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -204,7 +213,7 @@ internal fun OperateInputBox(
     }
 
     BasicInputBox(state, label, supportingText, validate) {
-        Row {
+        FieldActions {
             if (showOperateIcon) {
                 FieldIconButton(
                     operateIcon,

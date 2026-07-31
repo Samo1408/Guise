@@ -273,9 +273,10 @@ internal fun SettingScreen() {
                 if (AppUpdateManager.checking) {
                     CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 } else {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
+                    Text(
+                        text = stringResource(R.string.update_check_action),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             },

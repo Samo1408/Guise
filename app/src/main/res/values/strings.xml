@@ -122,6 +122,7 @@
     <string name="original_author_entry_description">Original author of Guise · Tap to donate</string>
     <string name="settings_update_address">Updates</string>
     <string name="update_checking">Checking for updates…</string>
+    <string name="update_check_action">Check</string>
     <string name="update_already_latest">You’re up to date (%1$s)</string>
     <string name="update_check_failed">Unable to check for updates. Please try again later.</string>
     <string name="update_available_title">New version %1$s</string>

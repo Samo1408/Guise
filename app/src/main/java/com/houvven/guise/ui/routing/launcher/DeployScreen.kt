@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -133,7 +132,6 @@ private fun generateApps(prioritizedPackages: Collection<String>): List<AppInfo>
 @Composable
 private fun AppCard(
     appInfo: AppInfo,
-    showSelection: Boolean,
     onOpenConfig: (AppInfo) -> Unit,
     onEnabledChange: (Boolean) -> Unit,
 ) {
@@ -187,14 +185,10 @@ private fun AppCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (showSelection) {
-            Checkbox(
-                checked = appInfo.isEnable,
-                onCheckedChange = onEnabledChange,
-            )
-        } else {
-            Box(Modifier.size(48.dp))
-        }
+        Checkbox(
+            checked = appInfo.isEnable,
+            onCheckedChange = onEnabledChange,
+        )
     }
 }
 
@@ -214,14 +208,6 @@ fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
         )
     }
     val listState = rememberLazyListState()
-    val clippedBottomItemIndex by remember {
-        derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            layoutInfo.visibleItemsInfo.lastOrNull()
-                ?.takeIf { it.offset + it.size > layoutInfo.viewportEndOffset }
-                ?.index
-        }
-    }
     val coroutineScope = rememberCoroutineScope()
 
     val onRefresh: () -> Unit = {
@@ -361,17 +347,16 @@ fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                itemsIndexed(
+                items(
                     items = generateApps(prioritizedPackages),
-                    key = { _, appInfo -> appInfo.packageName },
-                ) { index, appInfo ->
+                    key = { appInfo -> appInfo.packageName },
+                ) { appInfo ->
                     val restartToApplyMessage = stringResource(
                         R.string.restart_app_to_apply_configuration,
                         appInfo.label,
                     )
                     AppCard(
                         appInfo = appInfo,
-                        showSelection = index != clippedBottomItemIndex,
                         onOpenConfig = onOpenConfig,
                         onEnabledChange = { enabled ->
                             val manager = ModuleConfigManager.of(
