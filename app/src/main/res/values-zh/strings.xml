@@ -96,6 +96,7 @@
     <string name="system_apps">系统应用</string>
     <string name="edit">修改</string>
     <string name="delete">删除</string>
+    <string name="choose_preset">选择预设</string>
     <string name="import_data">导入</string>
     <string name="export_data">导出</string>
     <string name="import_success">导入成功</string>

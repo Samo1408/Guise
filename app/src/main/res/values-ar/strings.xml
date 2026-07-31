@@ -97,6 +97,7 @@
     <string name="system_apps">تطبيقات النظام</string>
     <string name="edit">تعديل</string>
     <string name="delete">حذف</string>
+    <string name="choose_preset">اختيار إعداد مسبق</string>
     <string name="import_data">استيراد</string>
     <string name="export_data">تصدير</string>
     <string name="import_success">تم الاستيراد بنجاح</string>

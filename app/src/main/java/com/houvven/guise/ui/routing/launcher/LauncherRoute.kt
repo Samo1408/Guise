@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Layers
@@ -95,17 +96,20 @@ fun LauncherRoute() {
         )
     }
 
-    Scaffold(bottomBar = {
-        Column {
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            NavigationBar(
-                modifier = Modifier.wrapContentHeight(),
-                tonalElevation = 0.dp
-            ) {
-                LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = {
+            Column {
+                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                NavigationBar(
+                    modifier = Modifier.wrapContentHeight(),
+                    tonalElevation = 0.dp
+                ) {
+                    LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
+                }
             }
         }
-    }) { pd ->
+    ) { pd ->
         Surface(
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier

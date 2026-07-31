@@ -97,6 +97,7 @@
     <string name="system_apps">システムアプリ</string>
     <string name="edit">編集</string>
     <string name="delete">削除</string>
+    <string name="choose_preset">プリセットを選択</string>
     <string name="import_data">インポート</string>
     <string name="export_data">エクスポート</string>
     <string name="import_success">インポートに成功しました</string>

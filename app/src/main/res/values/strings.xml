@@ -111,6 +111,7 @@
     <string name="system_apps">System apps</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="choose_preset">Choose preset</string>
     <string name="import_data">Import</string>
     <string name="export_data">Export</string>
     <string name="import_success">Import successful</string>

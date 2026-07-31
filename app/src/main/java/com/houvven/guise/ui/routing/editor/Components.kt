@@ -7,15 +7,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Circle
+import androidx.compose.material.icons.automirrored.twotone.List
+import androidx.compose.material.icons.twotone.Casino
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -27,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.houvven.guise.R
 import com.houvven.guise.ui.components.ElevatedTextField
 
 @Composable
@@ -73,10 +76,18 @@ internal fun ContainerSwitch(state: MutableState<Boolean>, label: String) {
 }
 
 @Composable
-private fun IconButton(icon: ImageVector, clickable: () -> Unit) {
+private fun FieldIconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    clickable: () -> Unit,
+) {
     Row {
-        FilledIconButton(onClick = clickable, modifier = Modifier.requiredSize(22.dp)) {
-            Icon(icon, contentDescription = null, Modifier.padding(2.dp))
+        IconButton(onClick = clickable, modifier = Modifier.size(40.dp)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -110,7 +121,9 @@ internal fun InputBox(
 ) {
     BasicInputBox(state, label, validate) {
         state.value.isNotBlank().let {
-            if (it) IconButton(Icons.TwoTone.Delete) { state.value = "" }
+            if (it) FieldIconButton(Icons.TwoTone.Delete, stringResource(R.string.delete)) {
+                state.value = ""
+            }
         }
     }
 }
@@ -123,6 +136,8 @@ internal fun OperateInputBox(
     label: String,
     showOperateIcon: Boolean = true,
     validate: (String) -> Boolean = { true },
+    operateIcon: ImageVector = Icons.AutoMirrored.TwoTone.List,
+    operateContentDescription: String = stringResource(R.string.choose_preset),
     clickable: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -136,10 +151,14 @@ internal fun OperateInputBox(
 
     BasicInputBox(state, label, validate) {
         Row {
-            if (showOperateIcon) IconButton(Icons.TwoTone.Circle, onClick)
+            if (showOperateIcon) {
+                FieldIconButton(operateIcon, operateContentDescription, onClick)
+            }
             if (state.value.isNotBlank()) {
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(Icons.TwoTone.Delete) { state.value = "" }
+                FieldIconButton(Icons.TwoTone.Delete, stringResource(R.string.delete)) {
+                    state.value = ""
+                }
                 Spacer(modifier = Modifier.width(13.dp))
             }
         }
@@ -157,6 +176,8 @@ internal fun RandomInputBox(
         state = state,
         label = label,
         validate = validate,
+        operateIcon = Icons.TwoTone.Casino,
+        operateContentDescription = stringResource(R.string.one_click_random),
         clickable = { state.value = randomGenerator() }
     )
 }
