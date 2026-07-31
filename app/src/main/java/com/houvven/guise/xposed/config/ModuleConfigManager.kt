@@ -40,6 +40,20 @@ private constructor(
         persist()
     }
 
+    fun hasUnsavedChanges(): Boolean =
+        !config.hasSameParameters(configFromState())
+
+    fun hasNoConfiguredParameters(): Boolean =
+        config.hasSameParameters(ModuleConfig())
+
+    /** Returns null when the Xposed service cannot reliably answer. */
+    fun hasRunningHookedTarget(): Boolean? {
+        val service = ContextAmbient.xposedService ?: return null
+        return runCatching {
+            service.getRunningTargets().any(::isTargetProcess)
+        }.getOrNull()
+    }
+
     /** The single entry point for changing both selection state and LSPosed scope. */
     fun setEnabled(enabled: Boolean, notifyOnScopeError: Boolean = true) {
         config.enabled = enabled
@@ -182,8 +196,15 @@ private constructor(
     }
 
     fun updateConfigFromState() {
+        updateConfigFromState(config)
+    }
+
+    private fun configFromState(): ModuleConfig =
+        config.copy().also(::updateConfigFromState)
+
+    private fun updateConfigFromState(target: ModuleConfig) {
         val empty = ModuleConfig()
-        val configFields = config.javaClass.declaredFields.toMutableList()
+        val configFields = target.javaClass.declaredFields.toMutableList()
         val stateFields =
             state.javaClass.declaredFields.filter { it.type == MutableState::class.java }
         for (stateFiled in stateFields) {
@@ -194,35 +215,35 @@ private constructor(
             // if (configField.get(empty) == value) continue
 
             if (configField.type == Boolean::class.java) {
-                configField.setBoolean(config, value as Boolean)
+                configField.setBoolean(target, value as Boolean)
                 continue
             } else if (configField.type == String::class.java) {
-                configField.set(config, value as String)
+                configField.set(target, value as String)
                 continue
             }
 
             value as String
             when (configField.type) {
                 Int::class.java -> (value.toIntOrNull() ?: configField.getInt(empty))
-                    .let { configField.setInt(config, it) }
+                    .let { configField.setInt(target, it) }
 
                 Long::class.java -> (value.toLongOrNull() ?: configField.getLong(empty))
-                    .let { configField.setLong(config, it) }
+                    .let { configField.setLong(target, it) }
 
                 Short::class.java -> (value.toShortOrNull() ?: configField.getShort(empty))
-                    .let { configField.setShort(config, it) }
+                    .let { configField.setShort(target, it) }
 
                 Byte::class.java -> (value.toByteOrNull() ?: configField.getByte(empty))
-                    .let { configField.setByte(config, it) }
+                    .let { configField.setByte(target, it) }
 
                 Double::class.java -> (value.toDoubleOrNull() ?: configField.getDouble(empty))
-                    .let { configField.setDouble(config, it) }
+                    .let { configField.setDouble(target, it) }
 
                 Float::class.java -> (value.toFloatOrNull() ?: configField.getFloat(empty))
-                    .let { configField.setFloat(config, it) }
+                    .let { configField.setFloat(target, it) }
 
                 Char::class.java -> (value.singleOrNull() ?: configField.getChar(empty))
-                    .let { configField.setChar(config, it) }
+                    .let { configField.setChar(target, it) }
 
                 else -> Unit
             }

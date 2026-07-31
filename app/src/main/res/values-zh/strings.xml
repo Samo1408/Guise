@@ -43,6 +43,13 @@
     <string name="other_language">语言</string>
     <string name="other_screenshot">截屏(0:强制禁止 1:强制启用)</string>
     <string name="config_reset_pending_save">参数已重置，保存后生效</string>
+    <string name="unsaved_config_title">是否保存更改？</string>
+    <string name="unsaved_config_message">“%1$s”的配置尚未保存。</string>
+    <string name="save_changes">保存</string>
+    <string name="discard_changes">不保存</string>
+    <string name="apply_config_title">使配置生效</string>
+    <string name="apply_config_message">“%1$s”的配置已保存。是否立即停止或重启应用以使配置生效？</string>
+    <string name="ignore">忽略</string>
     <string name="pass_contacts">通讯录</string>
     <string name="pass_photo">照片</string>
     <string name="pass_video">视频</string>

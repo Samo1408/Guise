@@ -45,6 +45,13 @@
     <string name="other_language">اللغة</string>
     <string name="other_screenshot">لقطة الشاشة (0: منع، 1: سماح)</string>
     <string name="config_reset_pending_save">تمت إعادة تعيين المعلمات. احفظ لتطبيق التغييرات</string>
+    <string name="unsaved_config_title">هل تريد حفظ التغييرات؟</string>
+    <string name="unsaved_config_message">توجد تغييرات غير محفوظة في إعدادات «%1$s».</string>
+    <string name="save_changes">حفظ</string>
+    <string name="discard_changes">عدم الحفظ</string>
+    <string name="apply_config_title">تطبيق الإعدادات</string>
+    <string name="apply_config_message">تم حفظ إعدادات «%1$s». هل تريد إيقاف التطبيق أو إعادة تشغيله الآن لتطبيقها؟</string>
+    <string name="ignore">تجاهل</string>
     <string name="pass_contacts">جهات الاتصال</string>
     <string name="pass_photo">الصور</string>
     <string name="pass_video">فيديو</string>

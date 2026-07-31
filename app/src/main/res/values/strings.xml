@@ -62,6 +62,13 @@
     <string name="other_language">Language</string>
     <string name="other_screenshot">Screenshot(0: dis, 1: en)</string>
     <string name="config_reset_pending_save">Parameters reset. Save to apply.</string>
+    <string name="unsaved_config_title">Save changes?</string>
+    <string name="unsaved_config_message">The configuration for “%1$s” has unsaved changes.</string>
+    <string name="save_changes">Save</string>
+    <string name="discard_changes">Don’t save</string>
+    <string name="apply_config_title">Apply configuration</string>
+    <string name="apply_config_message">The configuration for “%1$s” has been saved. Stop or restart the app now to apply it.</string>
+    <string name="ignore">Ignore</string>
     <string name="pass_contacts">Contacts</string>
     <string name="pass_photo">Photo</string>
     <string name="pass_video">Video</string>
