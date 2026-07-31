@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,21 +26,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GuiseTheme {
-                Scaffold(snackbarHost = {
-                    SnackbarHost(
-                        hostState = GlobalSnackbarHost.state,
-                        modifier = Modifier.padding(bottom = 80.dp),
-                    ) { data ->
-                        val containerStateColor =
-                            if (GlobalSnackbarHost.onError.value) MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.primary
-                        Snackbar(
-                            snackbarData = data,
-                            containerColor = containerStateColor,
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                Scaffold(
+                    contentWindowInsets = WindowInsets(0),
+                    snackbarHost = {
+                        SnackbarHost(
+                            hostState = GlobalSnackbarHost.state,
+                            modifier = Modifier.padding(bottom = 80.dp),
+                        ) { data ->
+                            val containerStateColor =
+                                if (GlobalSnackbarHost.onError.value) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary
+                            Snackbar(
+                                snackbarData = data,
+                                containerColor = containerStateColor,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                        }
                     }
-                }) {
+                ) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.padding(
