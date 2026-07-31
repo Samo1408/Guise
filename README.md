@@ -2,10 +2,11 @@
 
 Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模块，可针对指定应用配置机型、系统属性、Android ID、区域、网络、Wi-Fi、定位及基站等运行环境信息。
 
-本仓库保留了原项目的完整 Git 历史，并基于原作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
+本仓库保留了公开源码仓库的完整 Git 历史，并基于作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
 
-- 原维护仓库：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
-- 更早的上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
+- 原项目：[Doraemonliu/com.houvven.guise](https://github.com/Doraemonliu/com.houvven.guise)
+- 本仓库采用的源码上游：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
+- 上述源码仓库的 GitHub Fork 上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
 
 ## 当前状态
 
@@ -68,7 +69,9 @@ sign.key.password=change-me
 
 ## 【以下为原作者说明】
 
-原项目：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
+原项目：[Doraemonliu/com.houvven.guise](https://github.com/Doraemonliu/com.houvven.guise)
+
+本说明所在的源码仓库：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
 
 这个软件从第一个版本发布到现在应该有一年多了，具体哪天发布的我已经忘记了，也懒得去看。
 
