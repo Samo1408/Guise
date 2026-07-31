@@ -22,9 +22,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -79,6 +81,7 @@ internal fun ContainerSwitch(state: MutableState<Boolean>, label: String) {
 private fun FieldIconButton(
     icon: ImageVector,
     contentDescription: String,
+    tint: Color = MaterialTheme.colorScheme.primary,
     clickable: () -> Unit,
 ) {
     Row {
@@ -86,7 +89,7 @@ private fun FieldIconButton(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary
+                tint = tint
             )
         }
     }
@@ -121,7 +124,11 @@ internal fun InputBox(
 ) {
     BasicInputBox(state, label, validate) {
         state.value.isNotBlank().let {
-            if (it) FieldIconButton(Icons.TwoTone.Delete, stringResource(R.string.delete)) {
+            if (it) FieldIconButton(
+                Icons.TwoTone.Delete,
+                stringResource(R.string.delete),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            ) {
                 state.value = ""
             }
         }
@@ -142,6 +149,13 @@ internal fun OperateInputBox(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val initialValue = remember(state) { state.value }
+    val hasConfiguredValueOrChange = state.value.isNotBlank() || state.value != initialValue
+    val operateIconTint = if (hasConfiguredValueOrChange) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     val onClick = {
         focusManager.clearFocus()
@@ -152,11 +166,20 @@ internal fun OperateInputBox(
     BasicInputBox(state, label, validate) {
         Row {
             if (showOperateIcon) {
-                FieldIconButton(operateIcon, operateContentDescription, onClick)
+                FieldIconButton(
+                    operateIcon,
+                    operateContentDescription,
+                    tint = operateIconTint,
+                    clickable = onClick,
+                )
             }
             if (state.value.isNotBlank()) {
                 Spacer(modifier = Modifier.width(8.dp))
-                FieldIconButton(Icons.TwoTone.Delete, stringResource(R.string.delete)) {
+                FieldIconButton(
+                    Icons.TwoTone.Delete,
+                    stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
                     state.value = ""
                 }
             }
