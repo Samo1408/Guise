@@ -16,6 +16,7 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 - 使用 JDK 17、Gradle 9.6.1、Android Gradle Plugin 9.3.1、Kotlin 2.4.10、Android SDK 与 Build Tools 37。
 - UI 迁移到当前稳定版 Jetpack Compose BOM `2026.06.01` 和 Material 3，启用 edge-to-edge、系统/浅色/深色主题及 Monet 动态取色。
+- 英文、简体中文、日文和阿拉伯文资源完整对应；Android 13 及以上可通过系统的应用语言设置切换。
 - 模块入口、Hook 拦截器、Remote Preferences 和作用域管理迁移到 Modern Xposed API 102；不再使用旧版 XposedBridge/XposedHelpers、旧模块元数据和直接修改 LSPosed 数据库的实现。
 - 采用 MediaStore 与系统文件选择器导入导出，移除“所有文件访问”、旧外部存储权限和明文网络配置。
 - 升级 Room、MMKV 2、KSP、协程、序列化和 AndroidX；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及单独的通用 `lib` 模块。

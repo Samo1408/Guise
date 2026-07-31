@@ -43,7 +43,7 @@ private constructor(
 
     private fun syncLsposedScope(enable: Boolean) {
         val service = ContextAmbient.xposedService ?: run {
-            reportScopeError("尚未连接 Xposed 服务")
+            reportScopeError(context.getString(R.string.xposed_service_not_connected))
             return
         }
         if (!enable) {
@@ -61,7 +61,9 @@ private constructor(
     }
 
     private fun reportScopeError(message: String) {
-        GlobalSnackbarHost.showOnErrorByDismissPrevious("Xposed 作用域自动同步失败：$message")
+        GlobalSnackbarHost.showOnErrorByDismissPrevious(
+            context.getString(R.string.xposed_scope_sync_failed, message)
+        )
     }
 
     fun stopApp(): Boolean {

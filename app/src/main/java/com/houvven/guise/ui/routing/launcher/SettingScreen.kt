@@ -114,8 +114,8 @@ private fun ContainerSwitch(
 private fun ThemeModeSetting() {
     Column(Modifier.fillMaxWidth()) {
         ListItem(
-            headlineContent = { Text("APP 风格") },
-            supportingContent = { Text("设置应用的明暗外观") },
+            headlineContent = { Text(stringResource(R.string.settings_app_style)) },
+            supportingContent = { Text(stringResource(R.string.settings_app_style_summary)) },
             leadingContent = {
                 Icon(
                     when (themeMode.value) {
@@ -134,9 +134,9 @@ private fun ThemeModeSetting() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             listOf(
-                ThemeMode.SYSTEM to "系统",
-                ThemeMode.LIGHT to "浅色",
-                ThemeMode.DARK to "深色",
+                ThemeMode.SYSTEM to stringResource(R.string.settings_theme_system),
+                ThemeMode.LIGHT to stringResource(R.string.settings_theme_light),
+                ThemeMode.DARK to stringResource(R.string.settings_theme_dark),
             ).forEach { (mode, label) ->
                 val selected = themeMode.value == mode
                 OutlinedButton(
@@ -169,11 +169,11 @@ internal fun SettingScreen() {
 
     @Composable
     fun content() {
-        Title(text = "外观")
+        Title(text = stringResource(R.string.settings_appearance))
         ThemeModeSetting()
         ListItem(
-            headlineContent = { Text("莫奈取色") },
-            supportingContent = { Text("根据系统壁纸自动生成主题配色") },
+            headlineContent = { Text(stringResource(R.string.settings_dynamic_color)) },
+            supportingContent = { Text(stringResource(R.string.settings_dynamic_color_summary)) },
             leadingContent = { Icon(Icons.Default.Palette, contentDescription = null) },
             trailingContent = {
                 Switch(
@@ -184,28 +184,28 @@ internal fun SettingScreen() {
             modifier = Modifier.clickable { setDynamicColor(!dynamicColor.value) },
         )
 
-        Title(text = "配置项")
+        Title(text = stringResource(R.string.settings_configuration))
         ContainerSwitch(
-            label = "隐藏桌面图标",
+            label = stringResource(R.string.settings_hide_launcher_icon),
             state = remember { mutableStateOf(isHideLauncherIcon()) },
             onChange = { hideLauncherIcon(it) },
         )
 
-        Title(text = "关于")
+        Title(text = stringResource(R.string.settings_about))
         Container(verticalPadding = 7.dp) {
-            Text("版本:", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_version), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})",
                 modifier = Modifier.padding(start = 5.dp),
             )
         }
         Container(verticalPadding = 7.dp) {
-            Text("维护者:", style = MaterialTheme.typography.bodyLarge)
-            Text("大侠阿木", modifier = Modifier.padding(start = 5.dp))
+            Text(stringResource(R.string.settings_maintainer), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.maintainer_name), modifier = Modifier.padding(start = 5.dp))
         }
         Container(verticalPadding = 7.dp) {
-            Text("原作者:", style = MaterialTheme.typography.bodyLarge)
-            Text("Houvven", modifier = Modifier.padding(start = 5.dp))
+            Text(stringResource(R.string.settings_original_author), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.original_author_name), modifier = Modifier.padding(start = 5.dp))
         }
 
         Row(
@@ -213,7 +213,7 @@ internal fun SettingScreen() {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Hyperlink(
-                label = "更新地址",
+                label = stringResource(R.string.settings_update_address),
                 url = "https://github.com/daxiaamu/Guise_Reborn/releases",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleMedium,
@@ -221,7 +221,7 @@ internal fun SettingScreen() {
             SimplifyIcon(Icons.Default.Link, tint = MaterialTheme.colorScheme.primary)
         }
 
-        Title(text = "反馈地址")
+        Title(text = stringResource(R.string.settings_feedback_address))
         Container(verticalPadding = 7.dp) {
             Hyperlink(
                 label = "GitHub Issues",
@@ -230,12 +230,12 @@ internal fun SettingScreen() {
             )
         }
 
-        Title(text = "捐赠通道")
+        Title(text = stringResource(R.string.settings_donation_channels))
         Container(verticalPadding = 7.dp) {
             Column {
-                Text("大侠阿木", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.maintainer_name), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "大侠阿木不接受捐赠，但如果本APP对您有用，肯请您给下面原作者捐赠",
+                    text = stringResource(R.string.maintainer_donation_notice),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 )
@@ -243,10 +243,10 @@ internal fun SettingScreen() {
         }
         Container(verticalPadding = 7.dp) {
             Column {
-                Text("原作者：Houvven", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.original_author_with_name), style = MaterialTheme.typography.titleMedium)
                 Row(modifier = Modifier.padding(top = 6.dp)) {
                     Text(
-                        DonatePays.ALIPAY.label,
+                        stringResource(R.string.donate_alipay),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.clickable {
                             receiptCode.value = DonatePays.ALIPAY.base64.toBitmap()
@@ -254,7 +254,7 @@ internal fun SettingScreen() {
                     )
                     Spacer(modifier = Modifier.width(15.dp))
                     Text(
-                        DonatePays.WECHAT.label,
+                        stringResource(R.string.donate_wechat),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.clickable {
                             receiptCode.value = DonatePays.WECHAT.base64.toBitmap()
@@ -266,12 +266,12 @@ internal fun SettingScreen() {
         Container {
             Column {
                 Text(
-                    text = "未成年人请勿捐赠",
+                    text = stringResource(R.string.donation_minors_warning),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Black,
                 )
                 Text(
-                    text = "捐赠者可备注昵称，以便在捐赠列表中展示",
+                    text = stringResource(R.string.donation_nickname_note),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )

@@ -80,7 +80,7 @@ fun SaveTemplate(dialogState: MutableState<Boolean>, moduleConfig: ModuleConfig)
                         value = packageName,
                         onValueChange = { packageName = it },
                         singleLine = true,
-                        label = { Text("包名") }, // TODO: 国际化
+                        label = { Text(stringResource(R.string.package_name)) },
                         shape = RoundedCornerShape(10.dp)
                     )
                 }
@@ -97,7 +97,7 @@ fun SaveTemplate(dialogState: MutableState<Boolean>, moduleConfig: ModuleConfig)
                     supportingText = {
                         if (nameError) {
                             Text(
-                                text = "模板名称不能为空", // TODO: 国际化
+                                text = stringResource(R.string.template_name_required),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -198,7 +198,7 @@ fun SaveEditTemplate(
                         value = packageName,
                         onValueChange = { packageName = it },
                         singleLine = true,
-                        label = { Text("包名") }, // TODO: 国际化
+                        label = { Text(stringResource(R.string.package_name)) },
                         shape = RoundedCornerShape(10.dp)
                     )
                 }
@@ -215,7 +215,7 @@ fun SaveEditTemplate(
                     supportingText = {
                         if (nameError) {
                             Text(
-                                text = "模板名称不能为空", // TODO: 国际化
+                                text = stringResource(R.string.template_name_required),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )

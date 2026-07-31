@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LogScreen() {
+    val resources = LocalResources.current
     val moduleLogDao = ModuleLogDBHelper.moduleLogDao
     val scope = rememberCoroutineScope()
     var logs by remember { mutableStateOf(emptyList<com.houvven.ktx_xposed.logger.ModuleLog>()) }
@@ -82,9 +84,13 @@ internal fun LogScreen() {
                         logs.forEach { log -> appendLine(log.toString()) }
                     }
                 ).onSuccess {
-                    GlobalSnackbarHost.showByDismissPrevious("保存成功 $it") // TODO: 国际化
+                    GlobalSnackbarHost.showByDismissPrevious(
+                        resources.getString(R.string.save_success, it)
+                    )
                 }.onFailure {
-                    GlobalSnackbarHost.showOnErrorByDismissPrevious("保存失败 ${it.message}") // TODO:  国际化
+                    GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                        resources.getString(R.string.save_failed, it.message.orEmpty())
+                    )
                 }
             }) {
                 SimplifyIcon(Icons.Outlined.Save)
@@ -130,9 +136,9 @@ internal fun LogScreen() {
                     }
                 }
             } else {
-                Text(text = "仅在本APP运行时才会记录模块运行时日志") // TODO: 国际化
+                Text(text = stringResource(R.string.runtime_log_recording_notice))
                 Text(
-                    text = "No logs found", // TODO: 国际化
+                    text = stringResource(R.string.no_logs_found),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

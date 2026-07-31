@@ -76,4 +76,54 @@
     <string name="cancel">Cancel</string>
     <string name="name">Name</string>
     <string name="description">Description</string>
+
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_app_style">App theme</string>
+    <string name="settings_app_style_summary">Choose the application light or dark appearance</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color</string>
+    <string name="settings_dynamic_color_summary">Generate theme colors from the system wallpaper</string>
+    <string name="settings_configuration">Configuration</string>
+    <string name="settings_hide_launcher_icon">Hide launcher icon</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version:</string>
+    <string name="settings_maintainer">Maintainer:</string>
+    <string name="maintainer_name" translatable="false">大侠阿木</string>
+    <string name="settings_original_author">Original author:</string>
+    <string name="original_author_name" translatable="false">Houvven</string>
+    <string name="settings_update_address">Updates</string>
+    <string name="settings_feedback_address">Feedback</string>
+    <string name="settings_donation_channels">Donation</string>
+    <string name="maintainer_donation_notice">大侠阿木 does not accept donations. If this app is useful to you, please consider donating to the original author below.</string>
+    <string name="original_author_with_name">Original author: Houvven</string>
+    <string name="donate_alipay">Alipay</string>
+    <string name="donate_wechat">WeChat Pay</string>
+    <string name="donation_minors_warning">Minors should not donate</string>
+    <string name="donation_nickname_note">Donors may include a nickname for display in the donation list</string>
+
+    <string name="package_name">Package name</string>
+    <string name="template_name_required">Template name cannot be empty</string>
+    <string name="notice">Notice</string>
+    <string name="enable_template_question">Enable this template?</string>
+    <string name="user_apps">User apps</string>
+    <string name="system_apps">System apps</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="import_data">Import</string>
+    <string name="export_data">Export</string>
+    <string name="import_success">Import successful</string>
+    <string name="import_failed">Import failed: %1$s</string>
+    <string name="export_success">Export successful: %1$s</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="save_success">Saved successfully: %1$s</string>
+    <string name="save_failed">Save failed: %1$s</string>
+    <string name="exclusive_template_app_not_installed">The target app for this exclusive template is not installed. Install it first.</string>
+    <string name="runtime_log_recording_notice">Module runtime logs are recorded only while Guise is running</string>
+    <string name="no_logs_found">No logs found</string>
+    <string name="operation_successful">Success</string>
+    <string name="location_cell_fail">Invalidate cell location</string>
+    <string name="xposed_service_not_connected">Xposed service is not connected</string>
+    <string name="xposed_scope_sync_failed">Xposed scope synchronization failed: %1$s</string>
 </resources>

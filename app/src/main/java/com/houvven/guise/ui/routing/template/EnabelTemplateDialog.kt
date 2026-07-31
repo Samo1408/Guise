@@ -17,8 +17,8 @@ import com.houvven.guise.xposed.PackageConfig
 fun EnableTemplateDialog(state: MutableState<Boolean>, template: Template) {
     if (!state.value) return
     AlertDialog(
-        title = { Text(text = "提示") }, // TODO: 国际化
-        text = { Text(text = "是否启用模板？") }, // TODO: 国际化
+        title = { Text(text = stringResource(R.string.notice)) },
+        text = { Text(text = stringResource(R.string.enable_template_question)) },
         onDismissRequest = { state.value = false },
         confirmButton = {
             TextButton(onClick = {

@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,7 @@ private val requestEnableTemplate = mutableStateOf<Template?>(null)
 @Composable
 private fun TemplateCard(template: Template) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val installed = remember { mutableStateOf(true) }
     var expanded by remember { mutableStateOf(false) }
 
@@ -133,7 +135,7 @@ private fun TemplateCard(template: Template) {
                 onClick = {
                     if (template.type == Template.Type.EXCLUSIVE && !installed.value) {
                         GlobalSnackbarHost.showOnErrorByDismissPrevious(
-                            "该专属模板的目标应用未安装, 请先安装目标应用" // TODO: 国际化
+                            resources.getString(R.string.exclusive_template_app_not_installed)
                         )
                     } else if (template.type == Template.Type.EXCLUSIVE) {
                         requestEnable.value = true
@@ -161,14 +163,14 @@ private fun TemplateCard(template: Template) {
             onDismissRequest = { expanded = false },
             offset = DpOffset(10.dp, (-5).dp)
         ) {
-            SimplifyDropdownMenuItem(text = "修改" /* todo 国际化 */, onClick = {
+            SimplifyDropdownMenuItem(text = stringResource(R.string.edit), onClick = {
                 expanded = false
                 LocalNavController.current.navigateWithTemplate(
                     NavRoutingTypes.EDIT_TEMPLATE.name,
                     template,
                 )
             })
-            SimplifyDropdownMenuItem(text = "删除" /* todo 国际化 */, onClick = {
+            SimplifyDropdownMenuItem(text = stringResource(R.string.delete), onClick = {
                 expanded = false
                 LauncherState.deleteTemplate(template)
             })
@@ -181,6 +183,7 @@ private fun TemplateCard(template: Template) {
 @Composable
 internal fun TemplateScreen() {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val navController = LocalNavController.current
 
     val topBar = @Composable {
@@ -199,36 +202,44 @@ internal fun TemplateScreen() {
                     val resultLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.GetContent()
                     ) { result ->
-                        if (result != null) {
-                            context.contentResolver.openInputStream(result)?.bufferedReader()?.use {
-                                val templates = Json.decodeFromString<List<Template>>(it.readText())
-                                LauncherState.addTemplates(templates)
-                            }
-                        }
                         topBarMenuExpanded = false
-                        GlobalSnackbarHost.showByDismissPrevious("导入成功")
+                        if (result == null) return@rememberLauncherForActivityResult
+                        runCatching {
+                            context.contentResolver.openInputStream(result)?.bufferedReader()?.use {
+                                Json.decodeFromString<List<Template>>(it.readText())
+                            } ?: error("Unable to open selected file")
+                        }.onSuccess { templates ->
+                            LauncherState.addTemplates(templates)
+                            GlobalSnackbarHost.showByDismissPrevious(
+                                resources.getString(R.string.import_success)
+                            )
+                        }.onFailure {
+                            GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                                resources.getString(R.string.import_failed, it.message.orEmpty())
+                            )
+                        }
                     }
 
                     SimplifyDropdownMenuItem(
-                        text = "导入" /* todo 国际化 */,
+                        text = stringResource(R.string.import_data),
                         onClick = {
-                            runCatching {
-                                resultLauncher.launch("application/json")
-                            }.onFailure {
-                                GlobalSnackbarHost.showByDismissPrevious("导入失败 ${it.message}")
-                            }
+                            resultLauncher.launch("application/json")
                         }
                     )
                     SimplifyDropdownMenuItem(
-                        text = "导出" /* todo 国际化 */,
+                        text = stringResource(R.string.export_data),
                         onClick = {
                             saveFileToDownloadDir(
                                 "Guise-Template-${System.currentTimeMillis()}.json",
                                 Json.encodeToString(LauncherState.templates.value)
                             ).onSuccess {
-                                GlobalSnackbarHost.showByDismissPrevious("导出成功 $it") // TODO: 国际化
+                                GlobalSnackbarHost.showByDismissPrevious(
+                                    resources.getString(R.string.export_success, it)
+                                )
                             }.onFailure {
-                                GlobalSnackbarHost.showOnErrorByDismissPrevious("导出失败 ${it.message}") // TODO:  国际化
+                                GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                                    resources.getString(R.string.export_failed, it.message.orEmpty())
+                                )
                             }
                         }
                     )

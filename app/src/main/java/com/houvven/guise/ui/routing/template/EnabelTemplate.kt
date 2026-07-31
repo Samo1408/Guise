@@ -38,11 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.module.apps.AppInfo
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
@@ -165,12 +167,12 @@ fun EnableTemplateScreen(template: Template) {
         ) {
             PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                 Tab(
-                    text = { Text(text = "用户应用") },
+                    text = { Text(text = stringResource(R.string.user_apps)) },
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 }
                 )
                 Tab(
-                    text = { Text(text = "系统应用") },
+                    text = { Text(text = stringResource(R.string.system_apps)) },
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 }
                 )
