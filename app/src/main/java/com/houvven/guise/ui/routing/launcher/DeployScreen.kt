@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
 import com.houvven.guise.constant.AppConfigKey
@@ -62,8 +63,6 @@ import com.houvven.guise.ui.components.simplify.NoBtnAlertDialog
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
 import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.routing.LauncherState
-import com.houvven.guise.ui.routing.LocalNavController
-import com.houvven.guise.ui.routing.NavRoutingTypes
 import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.config.ModuleConfigManager
 import kotlinx.coroutines.Dispatchers
@@ -135,14 +134,9 @@ private fun generateApps(prioritizedPackages: Collection<String>): List<AppInfo>
 private fun AppCard(
     appInfo: AppInfo,
     showSelection: Boolean,
+    onOpenConfig: (AppInfo) -> Unit,
     onEnabledChange: (Boolean) -> Unit,
 ) {
-    val clickable = {
-        val name = appInfo.label
-        val packageName = appInfo.packageName
-        LocalNavController.current.navigate("${NavRoutingTypes.DEPLOY_CONFIG_EDITOR.name}/$name/$packageName")
-    }
-
     val containerColor = if (appInfo.isEnable) {
         MaterialTheme.colorScheme.surfaceVariant
     } else {
@@ -153,7 +147,7 @@ private fun AppCard(
         .clip(MaterialTheme.shapes.medium)
         .background(containerColor)
         .fillMaxWidth()
-        .clickable(onClick = { clickable() })
+        .clickable(onClick = { onOpenConfig(appInfo) })
         .padding(horizontal = 8.dp, vertical = 10.dp)
 
     Row(
@@ -166,15 +160,31 @@ private fun AppCard(
         SimplifyImage(appInfo.icon.asImageBitmap(), iconModifier)
         val typography = MaterialTheme.typography
         Column(Modifier.weight(1f)) {
-            Text(appInfo.label, style = typography.titleMedium, softWrap = false)
             val appType = stringResource(
                 if (appInfo.isSystemApp) R.string.app_type_system else R.string.app_type_user
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = appInfo.label,
+                    modifier = Modifier.weight(1f),
+                    style = typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = appType,
+                    modifier = Modifier.padding(start = 6.dp, end = 4.dp),
+                    style = typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                    maxLines = 1,
+                )
+            }
             Text(
-                text = "$appType · ${appInfo.packageName}",
+                text = appInfo.packageName,
                 style = typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f),
-                softWrap = false,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
         if (showSelection) {
@@ -193,7 +203,7 @@ private fun AppCard(
     ExperimentalMaterial3Api::class,
 )
 @Composable
-fun DeployScreen() {
+fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
 
     var displayMenu by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
@@ -362,32 +372,36 @@ fun DeployScreen() {
                     AppCard(
                         appInfo = appInfo,
                         showSelection = index != clippedBottomItemIndex,
-                    ) { enabled ->
-                        val manager = ModuleConfigManager.of(ModuleConfig.get(appInfo.packageName))
-                        if (enabled) {
-                            manager.setEnabled(true)
-                            com.houvven.guise.ui.GlobalSnackbarHost.showByDismissPrevious(
-                                restartToApplyMessage
+                        onOpenConfig = onOpenConfig,
+                        onEnabledChange = { enabled ->
+                            val manager = ModuleConfigManager.of(
+                                ModuleConfig.get(appInfo.packageName)
                             )
-                        } else {
-                            coroutineScope.launch {
-                                val stopResult = manager.stopIfHooked()
-                                manager.setEnabled(false)
-                                stopResult.fold(
-                                    onSuccess = {
-                                        com.houvven.guise.ui.GlobalSnackbarHost
-                                            .showByDismissPrevious(restartToApplyMessage)
-                                    },
-                                    onFailure = {
-                                        com.houvven.guise.ui.GlobalSnackbarHost
-                                            .showOnErrorByDismissPrevious(
-                                                "$restartToApplyMessage\n${it.message ?: it}"
-                                            )
-                                    },
+                            if (enabled) {
+                                manager.setEnabled(true)
+                                com.houvven.guise.ui.GlobalSnackbarHost.showByDismissPrevious(
+                                    restartToApplyMessage
                                 )
+                            } else {
+                                coroutineScope.launch {
+                                    val stopResult = manager.stopIfHooked()
+                                    manager.setEnabled(false)
+                                    stopResult.fold(
+                                        onSuccess = {
+                                            com.houvven.guise.ui.GlobalSnackbarHost
+                                                .showByDismissPrevious(restartToApplyMessage)
+                                        },
+                                        onFailure = {
+                                            com.houvven.guise.ui.GlobalSnackbarHost
+                                                .showOnErrorByDismissPrevious(
+                                                    "$restartToApplyMessage\n${it.message ?: it}"
+                                                )
+                                        },
+                                    )
+                                }
                             }
-                        }
-                    }
+                        },
+                    )
                 }
             }
         }

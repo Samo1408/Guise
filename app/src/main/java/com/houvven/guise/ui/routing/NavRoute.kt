@@ -20,7 +20,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.houvven.guise.db.Template
 import com.houvven.guise.ui.routing.editor.AddTemplateScreen
-import com.houvven.guise.ui.routing.editor.DeployConfigEditScreen
 import com.houvven.guise.ui.routing.editor.EditTemplateScreen
 import com.houvven.guise.ui.routing.launcher.LauncherRoute
 import com.houvven.guise.ui.routing.template.EnableTemplateScreen
@@ -91,18 +90,6 @@ fun NavigationRoute() {
         },
     ) {
         composable(NavRoutingTypes.LAUNCHER.name) { LauncherRoute() }
-
-        composable(
-            route = "${NavRoutingTypes.DEPLOY_CONFIG_EDITOR.name}/{name}/{packageName}",
-            arguments = listOf(
-                navArgument("name") { type = NavType.StringType },
-                navArgument("packageName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val name = backStackEntry.arguments!!.getString("name")!!
-            val packageName = backStackEntry.arguments!!.getString("packageName")!!
-            DeployConfigEditScreen(name, packageName)
-        }
 
         composable(NavRoutingTypes.ADD_TEMPLATE.name) { AddTemplateScreen() }
 

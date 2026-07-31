@@ -21,8 +21,8 @@
     <string name="apps_reverse_order">Reverse order</string>
     <string name="also_search_for_package">Also search for the package name</string>
     <string name="display_system_apps">Display system apps</string>
-    <string name="app_type_system">System app</string>
-    <string name="app_type_user">User app</string>
+    <string name="app_type_system">System</string>
+    <string name="app_type_user">User</string>
     <string name="title_device_parameter">Device Parameters</string>
     <string name="title_net_info">Network Info</string>
     <string name="title_unique_id">Unique ID</string>
@@ -116,17 +116,28 @@
     <string name="settings_version">Version:</string>
     <string name="settings_maintainer">Maintainer:</string>
     <string name="maintainer_name" translatable="false">大侠阿木</string>
+    <string name="maintainer_description">Maintaining versions 1.2.0 and later</string>
     <string name="settings_original_author">Original author:</string>
     <string name="original_author_name" translatable="false">Houvven</string>
+    <string name="original_author_entry_description">Original author of Guise · Tap to donate</string>
     <string name="settings_update_address">Updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_already_latest">You’re up to date (%1$s)</string>
+    <string name="update_check_failed">Unable to check for updates. Please try again later.</string>
+    <string name="update_available_title">New version %1$s</string>
+    <string name="update_notes">What’s new</string>
+    <string name="update_go_to_download">View update</string>
+    <string name="update_ignore_version">Ignore this version</string>
+    <string name="update_later">Later</string>
     <string name="settings_feedback_address">Feedback</string>
     <string name="settings_donation_channels">Donation</string>
     <string name="maintainer_donation_notice">大侠阿木 does not accept donations. If this app is useful to you, please consider donating to the original author below.</string>
     <string name="original_author_with_name">Original author: Houvven</string>
+    <string name="original_author_donation_description">Thanks to Houvven for creating and open-sourcing Guise. If this app is useful to you, you can support the original author below.</string>
     <string name="donate_alipay">Alipay</string>
     <string name="donate_wechat">WeChat Pay</string>
     <string name="donation_minors_warning">Minors should not donate</string>
-    <string name="donation_nickname_note">Donors may include a nickname for display in the donation list</string>
+    <string name="donation_nickname_note">Donors may include a nickname</string>
 
     <string name="package_name">Package name</string>
     <string name="template_name_required">Template name cannot be empty</string>

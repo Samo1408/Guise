@@ -2,6 +2,7 @@ package com.houvven.guise.ui.routing.launcher
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,11 +28,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
+import com.houvven.guise.ui.routing.editor.DeployConfigEditScreen
 
 
 private enum class LauncherScreenType(
@@ -67,6 +71,8 @@ private val currentPage by derivedStateOf { mutableStateOf(LauncherScreenType.DE
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LauncherRoute() {
+    var editorName by rememberSaveable { mutableStateOf<String?>(null) }
+    var editorPackageName by rememberSaveable { mutableStateOf<String?>(null) }
 
     @Composable
     fun RowScope.LauncherNavBarItem(
@@ -82,35 +88,52 @@ fun LauncherRoute() {
         )
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0),
-        bottomBar = {
-            NavigationBar {
-                LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
+    Box(Modifier.fillMaxSize()) {
+        Scaffold(
+            contentWindowInsets = WindowInsets(0),
+            bottomBar = {
+                NavigationBar {
+                    LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
+                }
             }
-        }
-    ) { pd ->
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier
-                .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
-                .fillMaxSize()
-        ) {
-            Column {
-                Crossfade(currentPage.value, animationSpec = tween(
-                    durationMillis = 300,
-                    delayMillis = 0,
-                    easing = { it }
-                )) { screen ->
-                    when (screen) {
-                        LauncherScreenType.DEPLOY -> DeployScreen()
-                        LauncherScreenType.TEMPLATE -> TemplateScreen()
-                        LauncherScreenType.LOG -> LogScreen()
-                        LauncherScreenType.SETTINGS -> SettingScreen()
+        ) { pd ->
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
+                    .fillMaxSize()
+            ) {
+                Column {
+                    Crossfade(currentPage.value, animationSpec = tween(
+                        durationMillis = 300,
+                        delayMillis = 0,
+                        easing = { it }
+                    )) { screen ->
+                        when (screen) {
+                            LauncherScreenType.DEPLOY -> DeployScreen { appInfo ->
+                                editorName = appInfo.label
+                                editorPackageName = appInfo.packageName
+                            }
+                            LauncherScreenType.TEMPLATE -> TemplateScreen()
+                            LauncherScreenType.LOG -> LogScreen()
+                            LauncherScreenType.SETTINGS -> SettingScreen()
+                        }
                     }
                 }
             }
         }
 
+        val openEditorName = editorName
+        val openEditorPackageName = editorPackageName
+        if (openEditorName != null && openEditorPackageName != null) {
+            DeployConfigEditScreen(
+                name = openEditorName,
+                packageName = openEditorPackageName,
+                onExit = {
+                    editorName = null
+                    editorPackageName = null
+                },
+            )
+        }
     }
 }

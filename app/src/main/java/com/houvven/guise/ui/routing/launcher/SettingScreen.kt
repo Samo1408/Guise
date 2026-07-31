@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,22 +23,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -64,17 +64,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.R
 import com.houvven.guise.constant.DonatePays
 import com.houvven.guise.module.ktx.toBitmap
-import com.houvven.guise.ui.components.Hyperlink
-import com.houvven.guise.ui.components.simplify.SimplifyIcon
 import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.theme.ThemeMode
 import com.houvven.guise.ui.theme.customThemeColor
@@ -87,6 +87,8 @@ import com.houvven.guise.ui.theme.setThemeMode
 import com.houvven.guise.ui.theme.themeMode
 import com.houvven.guise.ui.utils.hideLauncherIcon
 import com.houvven.guise.ui.utils.isHideLauncherIcon
+import com.houvven.guise.update.AppUpdateManager
+import com.houvven.guise.util.android.IntentUtils
 import kotlin.math.roundToInt
 
 @Composable
@@ -100,18 +102,17 @@ private fun Title(text: String, topPadding: Dp = 30.dp) {
 }
 
 @Composable
-private fun Container(
-    verticalPadding: Dp = 1.dp,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
-    content: @Composable RowScope.() -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = verticalPadding),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = horizontalArrangement,
-        content = content,
+private fun LinkSettingItem(icon: ImageVector, title: String, url: String) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = {
+            Text(url, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        },
+        leadingContent = { Icon(icon, contentDescription = null) },
+        trailingContent = {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+        },
+        modifier = Modifier.clickable { IntentUtils.openBrowser(url) },
     )
 }
 
@@ -173,6 +174,7 @@ private fun ThemeModeSetting() {
 internal fun SettingScreen() {
     val receiptCode = remember { mutableStateOf<Bitmap?>(null) }
     val showColorDialog = remember { mutableStateOf(false) }
+    val showDonationDialog = remember { mutableStateOf(false) }
 
     @Composable
     fun content() {
@@ -203,6 +205,12 @@ internal fun SettingScreen() {
                             .clip(CircleShape)
                             .background(Color(customThemeColor.value))
                             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    )
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable { showColorDialog.value = true },
@@ -251,101 +259,54 @@ internal fun SettingScreen() {
         Title(text = stringResource(R.string.settings_about))
         ListItem(
             headlineContent = { Text(stringResource(R.string.settings_version)) },
-            supportingContent = { Text("${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})") },
+            supportingContent = {
+                Text(
+                    if (AppUpdateManager.checking) {
+                        stringResource(R.string.update_checking)
+                    } else {
+                        "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+                    },
+                )
+            },
             leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
+            trailingContent = {
+                if (AppUpdateManager.checking) {
+                    CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                    )
+                }
+            },
+            modifier = Modifier.clickable { AppUpdateManager.check(manual = true) },
         )
         ListItem(
-            headlineContent = { Text(stringResource(R.string.settings_maintainer)) },
-            supportingContent = { Text(stringResource(R.string.maintainer_name)) },
+            headlineContent = { Text(stringResource(R.string.maintainer_name)) },
+            supportingContent = { Text(stringResource(R.string.maintainer_description)) },
             leadingContent = { Icon(Icons.Default.Person, contentDescription = null) },
         )
         ListItem(
-            headlineContent = { Text(stringResource(R.string.settings_original_author)) },
-            supportingContent = { Text(stringResource(R.string.original_author_name)) },
+            headlineContent = { Text(stringResource(R.string.original_author_name)) },
+            supportingContent = {
+                Text(stringResource(R.string.original_author_entry_description))
+            },
             leadingContent = { Icon(Icons.Default.HistoryEdu, contentDescription = null) },
+            trailingContent = {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+            },
+            modifier = Modifier.clickable { showDonationDialog.value = true },
         )
-
-        Row(
-            modifier = Modifier.padding(start = 20.dp, top = 30.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(Icons.Default.SystemUpdate, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Hyperlink(
-                label = stringResource(R.string.settings_update_address),
-                url = "https://github.com/daxiaamu/Guise_Reborn/releases",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            SimplifyIcon(Icons.Default.Link, tint = MaterialTheme.colorScheme.primary)
-        }
-
-        HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-        Title(text = stringResource(R.string.settings_feedback_address))
-        Container(verticalPadding = 7.dp) {
-            Icon(Icons.Default.BugReport, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Hyperlink(
-                label = "GitHub Issues",
-                url = "https://github.com/daxiaamu/Guise_Reborn/issues",
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-
-        HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-        Title(text = stringResource(R.string.settings_donation_channels))
-        Container(verticalPadding = 7.dp) {
-            Icon(Icons.Default.VolunteerActivism, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(stringResource(R.string.maintainer_name), style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = stringResource(R.string.maintainer_donation_notice),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                )
-            }
-        }
-        Container(verticalPadding = 7.dp) {
-            Icon(Icons.Default.Payments, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(stringResource(R.string.original_author_with_name), style = MaterialTheme.typography.titleMedium)
-                Row(modifier = Modifier.padding(top = 6.dp)) {
-                    Text(
-                        stringResource(R.string.donate_alipay),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.clickable {
-                            receiptCode.value = DonatePays.ALIPAY.base64.toBitmap()
-                        },
-                    )
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Text(
-                        stringResource(R.string.donate_wechat),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.clickable {
-                            receiptCode.value = DonatePays.WECHAT.base64.toBitmap()
-                        },
-                    )
-                }
-            }
-        }
-        Container {
-            Icon(Icons.Default.Info, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.donation_minors_warning),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Black,
-                )
-                Text(
-                    text = stringResource(R.string.donation_nickname_note),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                )
-            }
-        }
+        LinkSettingItem(
+            icon = Icons.Default.SystemUpdate,
+            title = stringResource(R.string.settings_update_address),
+            url = "https://github.com/daxiaamu/Guise_Reborn/releases",
+        )
+        LinkSettingItem(
+            icon = Icons.Default.BugReport,
+            title = stringResource(R.string.settings_feedback_address),
+            url = "https://github.com/daxiaamu/Guise_Reborn/issues",
+        )
     }
 
     Scaffold(
@@ -367,6 +328,53 @@ internal fun SettingScreen() {
             Spacer(modifier = Modifier.height(1.dp))
             SimplifyImage(bitmap.asImageBitmap(), contentScale = ContentScale.Fit)
         }
+    }
+    if (showDonationDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDonationDialog.value = false },
+            icon = { Icon(Icons.Default.Payments, contentDescription = null) },
+            title = { Text(stringResource(R.string.original_author_name)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(R.string.maintainer_donation_notice))
+                    Text(stringResource(R.string.original_author_donation_description))
+                    Text(
+                        text = stringResource(R.string.donation_minors_warning),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(R.string.donation_nickname_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    FilledTonalButton(
+                        onClick = {
+                            showDonationDialog.value = false
+                            receiptCode.value = DonatePays.ALIPAY.base64.toBitmap()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.donate_alipay))
+                    }
+                    FilledTonalButton(
+                        onClick = {
+                            showDonationDialog.value = false
+                            receiptCode.value = DonatePays.WECHAT.base64.toBitmap()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.donate_wechat))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDonationDialog.value = false }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
     }
     if (showColorDialog.value) {
         ThemeColorDialog(

@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.ui.routing.NavigationRoute
 import com.houvven.guise.ui.theme.GuiseTheme
+import com.houvven.guise.update.AppUpdateHost
 
 
 class MainActivity : ComponentActivity() {
@@ -56,7 +58,10 @@ class MainActivity : ComponentActivity() {
                             top = it.calculateTopPadding(), bottom = it.calculateBottomPadding()
                         )
                     ) {
-                        NavigationRoute()
+                        Box {
+                            NavigationRoute()
+                            AppUpdateHost()
+                        }
                     }
                 }
             }
