@@ -1,17 +1,20 @@
 package com.houvven.guise.xposed.config
 
 import android.content.Intent
-import android.provider.Settings
+import android.net.Uri
+import android.os.Bundle
 import androidx.compose.runtime.MutableState
 import androidx.core.content.edit
-import androidx.core.net.toUri
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
 import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.PackageConfig
-import com.houvven.guise.util.android.ShellExecutor
+import com.houvven.guise.xposed.ProcessControl
+import io.github.libxposed.service.HotReloadResult
+import io.github.libxposed.service.HookedTarget
 import io.github.libxposed.service.XposedService
+import kotlinx.coroutines.delay
 
 class ModuleConfigManager
 private constructor(
@@ -28,7 +31,7 @@ private constructor(
         state.clear()
     }
 
-    fun save() {
+    fun save(notifyOnScopeError: Boolean = true) {
         this.updateConfigFromState()
         val json = config.toJson()
         val enable = config.isEnable
@@ -38,24 +41,30 @@ private constructor(
         } else {
             safePrefs.edit(commit = true) { remove(config.packageName) }
         }
-        syncLsposedScope(enable)
+        syncLsposedScope(enable, notifyOnScopeError)
     }
 
-    private fun syncLsposedScope(enable: Boolean) {
+    private fun syncLsposedScope(enable: Boolean, notifyOnError: Boolean) {
         val service = ContextAmbient.xposedService ?: run {
-            reportScopeError(context.getString(R.string.xposed_service_not_connected))
+            if (notifyOnError) {
+                reportScopeError(context.getString(R.string.xposed_service_not_connected))
+            }
             return
         }
         if (!enable) {
             runCatching { service.removeScope(listOf(config.packageName)) }
-                .onFailure { reportScopeError(it.message ?: it.toString()) }
+                .onFailure {
+                    if (notifyOnError) reportScopeError(it.message ?: it.toString())
+                }
             return
         }
         service.requestScope(
             listOf(config.packageName),
             object : XposedService.OnScopeEventListener {
                 override fun onScopeRequestApproved(approved: List<String>) = Unit
-                override fun onScopeRequestFailed(message: String) = reportScopeError(message)
+                override fun onScopeRequestFailed(message: String) {
+                    if (notifyOnError) reportScopeError(message)
+                }
             },
         )
     }
@@ -66,30 +75,74 @@ private constructor(
         )
     }
 
-    fun stopApp(): Boolean {
-        this.save()
-        var isUseRootSucceed = true
-        val result = ShellExecutor.execute("am force-stop ${config.packageName}", asRoot = true)
-        result.onFailure {
-            isUseRootSucceed = false
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = "package:${config.packageName}".toUri()
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-        }
-        return isUseRootSucceed
+    suspend fun stopApp(): Result<Unit> {
+        this.save(notifyOnScopeError = false)
+        return requestProcessExit().fold(
+            onSuccess = { Result.success(Unit) },
+            onFailure = { Result.failure(it) },
+        )
     }
 
-    fun restartApp(): Result<Unit> {
-        this.save()
+    suspend fun restartApp(): Result<Unit> {
+        this.save(notifyOnScopeError = false)
         return runCatching {
-            ShellExecutor.execute("am force-stop ${config.packageName}", asRoot = true).onFailure {
-                throw RuntimeException(context.getString(R.string.no_root_prompt))
-            }
-            val packageManager = context.packageManager
-            val intent = packageManager.getLaunchIntentForPackage(config.packageName)!!
+            requestProcessExit().getOrThrow()
+            val intent = context.packageManager.getLaunchIntentForPackage(config.packageName)
+                ?: error(context.getString(R.string.app_not_launchable))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
         }
+    }
+
+    private suspend fun requestProcessExit(): Result<Int> = runCatching {
+        val service = ContextAmbient.xposedService ?: run {
+            openApplicationDetails()
+            error(context.getString(R.string.manual_force_stop_required))
+        }
+        val targets = service.getRunningTargets().filter(::isTargetProcess)
+        if (targets.isEmpty()) {
+            openApplicationDetails()
+            error(context.getString(R.string.manual_force_stop_required))
+        }
+        val targetPids = targets.mapTo(mutableSetOf()) { it.pid }
+        val extras = Bundle().apply {
+            putString(ProcessControl.EXTRA_COMMAND, ProcessControl.COMMAND_EXIT)
+        }
+        targets.forEach { target ->
+            service.hotReloadModule(
+                target,
+                Bundle(extras),
+                object : XposedService.HotReloadCallback {
+                    override fun onHotReloadResult(
+                        target: HookedTarget,
+                        result: HotReloadResult,
+                    ) = Unit
+                },
+            )
+        }
+        delay(PROCESS_EXIT_WAIT_MS)
+        val remainingPids = service.getRunningTargets()
+            .asSequence()
+            .filter(::isTargetProcess)
+            .map { it.pid }
+            .filterTo(mutableSetOf()) { it in targetPids }
+        if (remainingPids.isNotEmpty()) {
+            error(context.getString(R.string.xposed_target_process_exit_failed))
+        }
+        targets.size
+    }
+
+    private fun isTargetProcess(target: HookedTarget): Boolean =
+        target.processName == config.packageName ||
+            target.processName.startsWith("${config.packageName}:")
+
+    private fun openApplicationDetails() {
+        context.startActivity(
+            Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", config.packageName, null),
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
     }
 
     fun updateConfigFromState() {
@@ -99,6 +152,7 @@ private constructor(
             state.javaClass.declaredFields.filter { it.type == MutableState::class.java }
         for (stateFiled in stateFields) {
             val configField = configFields.find { it.name == stateFiled.name } ?: continue
+            stateFiled.isAccessible = true
             val value = (stateFiled.get(state) as MutableState<*>).value
             configField.isAccessible = true
             // if (configField.get(empty) == value) continue
@@ -140,6 +194,8 @@ private constructor(
     }
 
     companion object {
+
+        private const val PROCESS_EXIT_WAIT_MS = 800L
 
         fun of(config: ModuleConfig, state: ModuleConfigState) = ModuleConfigManager(config, state)
 

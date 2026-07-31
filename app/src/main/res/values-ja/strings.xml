@@ -1,5 +1,5 @@
 <resources>
-    <string name="no_root_prompt">ルート権限が取得されていません。最初にこのアプリにルート権限を付与してください</string>
+    <string name="app_not_launchable">このアプリには起動可能な画面がありません</string>
     <string name="action_deploy">配備</string>
     <string name="action_template">テンプレート</string>
     <string name="action_log">ログ</string>
@@ -73,6 +73,14 @@
     <string name="settings_theme_dark">ダーク</string>
     <string name="settings_dynamic_color">ダイナミックカラー</string>
     <string name="settings_dynamic_color_summary">システムの壁紙からテーマカラーを生成します</string>
+    <string name="settings_custom_theme_color">テーマカラー</string>
+    <string name="settings_custom_theme_color_summary">ダイナミックカラーを無効にしたときに使用します</string>
+    <string name="settings_choose_theme_color">テーマカラーを選択</string>
+    <string name="settings_predictive_back">予測型「戻る」</string>
+    <string name="settings_predictive_back_summary">スワイプで戻るときに前の画面をプレビューします</string>
+    <string name="color_red">赤</string>
+    <string name="color_green">緑</string>
+    <string name="color_blue">青</string>
     <string name="settings_configuration">設定項目</string>
     <string name="settings_hide_launcher_icon">ランチャーアイコンを非表示</string>
     <string name="settings_about">このアプリについて</string>
@@ -112,5 +120,7 @@
     <string name="operation_successful">操作が完了しました</string>
     <string name="location_cell_fail">基地局の位置情報を無効化</string>
     <string name="xposed_service_not_connected">Xposed サービスに接続されていません</string>
+    <string name="manual_force_stop_required">Guise はまだこのプロセスに読み込まれていません。「強制停止」をタップしてからアプリを開き直し、フックを有効にしてください</string>
+    <string name="xposed_target_process_exit_failed">対象プロセスを終了できませんでした。手動で停止してください</string>
     <string name="xposed_scope_sync_failed">Xposed スコープの同期に失敗しました：%1$s</string>
 </resources>

@@ -1,5 +1,9 @@
 package com.houvven.guise.xposed
 
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Process
 import android.util.Log
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.xposed.hook.BatteryHook
@@ -19,8 +23,11 @@ import com.houvven.ktx_xposed.hook.ModernXposedRuntime
 import com.houvven.ktx_xposed.logger.XposedLogger
 import com.houvven.ktx_xposed.utils.runXposedCatching
 import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface.HotReloadedParam
+import io.github.libxposed.api.XposedModuleInterface.HotReloadingParam
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
+import kotlin.system.exitProcess
 
 @Suppress("unused")
 class HookInit : XposedModule() {
@@ -30,6 +37,15 @@ class HookInit : XposedModule() {
     override fun onModuleLoaded(param: ModuleLoadedParam) {
         processName = param.processName
         log(Log.INFO, TAG, "Loaded in ${param.processName}; API $apiVersion")
+    }
+
+    override fun onHotReloading(param: HotReloadingParam): Boolean {
+        if (scheduleProcessExit(param.extras)) return false
+        return super.onHotReloading(param)
+    }
+
+    override fun onHotReloaded(param: HotReloadedParam) {
+        super.onHotReloaded(param)
     }
 
     override fun onPackageReady(param: PackageReadyParam) {
@@ -66,7 +82,18 @@ class HookInit : XposedModule() {
         XposedLogger.doHookModuleLog()
     }
 
+    private fun scheduleProcessExit(extras: Bundle?): Boolean {
+        if (!ProcessControl.isExitRequest(extras)) return false
+        log(Log.INFO, TAG, "Process exit requested for $processName")
+        Handler(Looper.getMainLooper()).postDelayed({
+            Process.killProcess(Process.myPid())
+            exitProcess(0)
+        }, PROCESS_EXIT_DELAY_MS)
+        return true
+    }
+
     companion object {
         private const val TAG = "Guise"
+        private const val PROCESS_EXIT_DELAY_MS = 150L
     }
 }

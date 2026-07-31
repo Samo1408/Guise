@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,6 +29,7 @@ import com.houvven.guise.ui.routing.LocalNavController
 import com.houvven.guise.ui.utils.oneClickRandom
 import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.config.ModuleConfigManager
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -37,6 +39,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     val navHostController = LocalNavController.current
     val moduleConfigManager = ModuleConfigManager.of(ModuleConfig.get(packageName))
     val isSaveRequest = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     SaveTemplate(isSaveRequest, moduleConfigManager.config)
 
@@ -71,18 +74,28 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
                         SimplifyDropdownMenuItem(
                             text = stringResource(R.string.stop_app),
                             onClick = {
-                                val isUseRootSucceed = moduleConfigManager.stopApp()
-                                if (isUseRootSucceed) GlobalSnackbarHost.showSuccess()
+                                expanded = false
+                                coroutineScope.launch {
+                                    moduleConfigManager.stopApp().fold(
+                                        onSuccess = { GlobalSnackbarHost.showSuccess() },
+                                        onFailure = {
+                                            GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                                                it.message ?: it.toString()
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         )
                         SimplifyDropdownMenuItem(
                             text = stringResource(R.string.restart_app),
                             onClick = {
-                                moduleConfigManager.restartApp().let {
-                                    if (it.isFailure) {
-                                        it.exceptionOrNull()?.message?.let { message ->
-                                            GlobalSnackbarHost.showOnErrorByDismissPrevious(message)
-                                        }
+                                expanded = false
+                                coroutineScope.launch {
+                                    moduleConfigManager.restartApp().onFailure {
+                                        GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                                            it.message ?: it.toString()
+                                        )
                                     }
                                 }
                             }

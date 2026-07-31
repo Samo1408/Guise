@@ -13,6 +13,8 @@ object AppConfigKey {
 
     const val THEME_MODE = "theme.mode"
     const val DYNAMIC_COLOR = "dynamic.color"
+    const val CUSTOM_THEME_COLOR = "custom.theme.color"
+    const val PREDICTIVE_BACK = "predictive.back"
 
 
 

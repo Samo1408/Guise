@@ -159,7 +159,6 @@ internal fun OperateInputBox(
                 FieldIconButton(Icons.TwoTone.Delete, stringResource(R.string.delete)) {
                     state.value = ""
                 }
-                Spacer(modifier = Modifier.width(13.dp))
             }
         }
     }

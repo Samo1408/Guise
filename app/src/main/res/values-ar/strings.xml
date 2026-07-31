@@ -1,5 +1,5 @@
 <resources>
-    <string name="no_root_prompt">لم يتم الحصول على إذن الجذر ، يرجى منح إذن الجذر لهذا التطبيق أولاً</string>
+    <string name="app_not_launchable">لا توجد لهذا التطبيق واجهة قابلة للتشغيل</string>
     <string name="action_deploy">التهيئة</string>
     <string name="action_template">القوالب</string>
     <string name="action_log">سجل</string>
@@ -73,6 +73,14 @@
     <string name="settings_theme_dark">داكن</string>
     <string name="settings_dynamic_color">الألوان الديناميكية</string>
     <string name="settings_dynamic_color_summary">إنشاء ألوان السمة من خلفية النظام</string>
+    <string name="settings_custom_theme_color">لون السمة</string>
+    <string name="settings_custom_theme_color_summary">يُستخدم عند تعطيل الألوان الديناميكية</string>
+    <string name="settings_choose_theme_color">اختيار لون السمة</string>
+    <string name="settings_predictive_back">الرجوع التنبؤي</string>
+    <string name="settings_predictive_back_summary">معاينة الشاشة السابقة أثناء السحب للرجوع</string>
+    <string name="color_red">أحمر</string>
+    <string name="color_green">أخضر</string>
+    <string name="color_blue">أزرق</string>
     <string name="settings_configuration">التهيئة</string>
     <string name="settings_hide_launcher_icon">إخفاء أيقونة المشغل</string>
     <string name="settings_about">حول التطبيق</string>
@@ -112,5 +120,7 @@
     <string name="operation_successful">تمت العملية بنجاح</string>
     <string name="location_cell_fail">تعطيل معلومات موقع برج الاتصالات</string>
     <string name="xposed_service_not_connected">خدمة Xposed غير متصلة</string>
+    <string name="manual_force_stop_required">لم يتم تحميل Guise في هذه العملية بعد. اضغط «فرض الإيقاف»، ثم افتح التطبيق مجددًا لتفعيل الربط</string>
+    <string name="xposed_target_process_exit_failed">لم تخرج العملية الهدف. أوقفها يدويًا</string>
     <string name="xposed_scope_sync_failed">فشلت مزامنة نطاق Xposed: %1$s</string>
 </resources>

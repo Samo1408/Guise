@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="no_root_prompt">未获取到Root权限, 请先授予本APP Root权限</string>
+    <string name="app_not_launchable">此应用没有可启动的界面</string>
     <string name="action_deploy">配置</string>
     <string name="action_template">模板</string>
     <string name="action_log">日志</string>
@@ -72,6 +72,14 @@
     <string name="settings_theme_dark">深色</string>
     <string name="settings_dynamic_color">莫奈取色</string>
     <string name="settings_dynamic_color_summary">根据系统壁纸自动生成主题配色</string>
+    <string name="settings_custom_theme_color">主题色</string>
+    <string name="settings_custom_theme_color_summary">关闭莫奈取色时使用</string>
+    <string name="settings_choose_theme_color">选择主题色</string>
+    <string name="settings_predictive_back">预测性返回</string>
+    <string name="settings_predictive_back_summary">滑动返回时预览上一页</string>
+    <string name="color_red">红</string>
+    <string name="color_green">绿</string>
+    <string name="color_blue">蓝</string>
     <string name="settings_configuration">配置项</string>
     <string name="settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="settings_about">关于</string>
@@ -111,5 +119,7 @@
     <string name="operation_successful">操作成功</string>
     <string name="location_cell_fail">使基站位置信息失效</string>
     <string name="xposed_service_not_connected">尚未连接 Xposed 服务</string>
+    <string name="manual_force_stop_required">Guise 尚未加载到此进程，请点“强行停止”，再打开应用使 Hook 生效</string>
+    <string name="xposed_target_process_exit_failed">目标进程未能退出，请手动停止</string>
     <string name="xposed_scope_sync_failed">Xposed 作用域自动同步失败：%1$s</string>
 </resources>

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
@@ -17,12 +16,10 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,8 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
 
@@ -79,34 +74,19 @@ fun LauncherRoute() {
     ) {
         val selected = currentPage.value == routerType
         val icon = if (selected) routerType.selectedIcon else routerType.icon
-        val w = if (selected) FontWeight.W900 else FontWeight.Normal
-
         NavigationBarItem(
             selected = currentPage.value == routerType,
             onClick = { currentPage.value = routerType },
             icon = { SimplifyIcon(icon) },
-            label = { Text(routerType.label(), fontWeight = w) },
-            alwaysShowLabel = true,
-            modifier = Modifier.wrapContentHeight(),
-            colors = NavigationBarItemDefaults.colors(
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                indicatorColor = MaterialTheme.colorScheme.surface,
-            )
+            label = { Text(routerType.label()) },
         )
     }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            Column {
-                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                NavigationBar(
-                    modifier = Modifier.wrapContentHeight(),
-                    tonalElevation = 0.dp
-                ) {
-                    LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
-                }
+            NavigationBar {
+                LauncherScreenType.values().forEach { LauncherNavBarItem(it) }
             }
         }
     ) { pd ->

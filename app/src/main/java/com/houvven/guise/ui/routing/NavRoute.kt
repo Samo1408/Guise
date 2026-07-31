@@ -2,12 +2,14 @@ package com.houvven.guise.ui.routing
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.houvven.guise.db.Template
 import com.houvven.guise.ui.routing.editor.AddTemplateScreen
@@ -15,6 +17,7 @@ import com.houvven.guise.ui.routing.editor.DeployConfigEditScreen
 import com.houvven.guise.ui.routing.editor.EditTemplateScreen
 import com.houvven.guise.ui.routing.launcher.LauncherRoute
 import com.houvven.guise.ui.routing.template.EnableTemplateScreen
+import com.houvven.guise.ui.theme.predictiveBack
 
 @SuppressLint("StaticFieldLeak")
 object LocalNavController {
@@ -24,7 +27,14 @@ object LocalNavController {
 @Composable
 fun NavigationRoute() {
     val navController = rememberNavController()
+    val currentBackStackEntry = navController.currentBackStackEntryAsState().value
     LocalNavController.current = navController
+    BackHandler(
+        enabled = !predictiveBack.value && currentBackStackEntry?.destination?.route !=
+            NavRoutingTypes.LAUNCHER.name,
+    ) {
+        navController.popBackStack()
+    }
 
     NavHost(navController, NavRoutingTypes.LAUNCHER.name) {
         composable(NavRoutingTypes.LAUNCHER.name) { LauncherRoute() }
