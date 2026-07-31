@@ -2,7 +2,22 @@
 
 This document records metadata extracted from a signed APK supplied for compatibility research. The APK itself and decompiled sources are intentionally not committed.
 
-## Artifact
+## Guise 1.1.2 functional baseline
+
+- Original filename: `Guise-1.1.2.release.apk`
+- SHA-256: `B9190E71967F61AA3A4BBC3723E02D383CEF916B3FFC2096E1498FFA54261510`
+- Package: `com.houvven.guise`
+- Version: `1.1.2` (`versionCode` 12)
+- Minimum SDK: 29
+- Target/compile SDK: 33
+- Native ABI: `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
+- Xposed entry: `com.houvven.guise.xposed.HookInit`
+- Certificate subject: `C=CHN`
+- Certificate SHA-256: `4fefd82891f075e98cc028221bab64e981f55809cf2c87ff80ae36d1a04ccb6e`
+
+The APK version matches `upstream/v1` commit `4e61662`. Its `assets/devices.db` and `assets/xposed_init` are byte-for-byte identical to that source snapshot, and `app/version.properties` contains the same version code and name. This source is therefore used as the complete functional baseline for Guise Reborn.
+
+## Guise 2.0.0-alpha reference
 
 - Original filename: `com.houvven.guise.apk`
 - SHA-256: `0230E97816A0220C324782C796AB47D3037D9CE334E0BD18884F966B714F2B17`

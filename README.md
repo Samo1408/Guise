@@ -10,12 +10,20 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 ## 当前状态
 
-项目正处于接管和构建基线恢复阶段。当前 `2.x` 继续使用 YukiHookAPI 和传统 Xposed 模块接口，暂不同时迁移 Modern Xposed API，以便先恢复可验证的稳定版本。
+当前维护线已恢复到与原版 `Guise 1.1.2` APK 精确对应的完整源码，并升级为可使用 JDK 17、Gradle 8.7、AGP 8.6.1 和 Android SDK 35 构建的 `1.1.3-reborn.1`。此前不完整的 `2.x alpha` 重写不再作为主维护线。
+
+现有功能包括：
+
+- 已安装应用管理、搜索、过滤、排序及 LSPosed 作用域同步。
+- 按应用配置设备型号、系统版本、网络、SIM、Wi-Fi、唯一标识、定位和基站信息。
+- 电池电量、截图限制、窗口隐私及联系人/图片/视频/音频访问控制。
+- 内置设备数据库、配置模板、预设、导入导出、运行日志和应用设置。
 
 目前主要模块：
 
-- `app`：Jetpack Compose 配置界面、应用扫描和 LSPosed 作用域管理。
-- `hook`：目标应用及系统进程中的 Hook 实现。
+- `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。
+- `ktx-xposed`：Xposed Hook、共享配置和模块日志基础设施。
+- `lib`：命令执行及 SQLite 辅助功能。
 
 ## 构建
 
@@ -43,22 +51,13 @@ Windows：
 .\gradlew.bat assembleDebug lintDebug
 ```
 
-Debug 构建不需要发布签名。构建 release 时，可在 `local.properties` 中额外配置：
-
-```properties
-sign.store.file=/path/to/keystore.jks
-sign.store.password=change-me
-sign.key.alias=guise
-sign.key.password=change-me
-```
-
-不要提交签名文件、口令或本机 SDK 路径。
+Debug 构建不需要发布签名。当前 release 构建默认不配置作者签名；正式发布前需由维护者在本机或 CI 中安全配置新的签名，且不要提交签名文件、口令或本机 SDK 路径。
 
 ## 开发原则
 
-1. `2.x` 优先修复构建、崩溃和 Android/LSPosed 兼容问题。
+1. 以完整的 `1.1.2` 功能和配置格式为兼容基线，优先修复构建、崩溃和 Android/LSPosed 兼容问题。
 2. Hook 功能按机型、系统属性、标识符、网络和定位分别验证，避免单个 Hook 失败拖垮目标进程。
-3. Modern Xposed API 迁移放在独立的 `3.x` 路线中进行。
+3. 架构迁移必须在不丢失现有界面、模板、日志和 Hook 功能的前提下进行。
 4. 发布 APK 前必须在真实的、已安装 LSPosed 的测试设备上回归。
 
 ## 许可证

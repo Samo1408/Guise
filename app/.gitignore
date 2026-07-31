@@ -1,3 +1,7 @@
 /build
+/release
+signing.properties
+/release/*.apk
 /src/androidTest
-/gradle.properties
+/src/test
+/schemas

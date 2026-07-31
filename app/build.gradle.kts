@@ -1,13 +1,10 @@
-import org.jetbrains.kotlin.konan.properties.loadProperties
+import java.util.Properties
 
 plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
     kotlin("kapt")
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    // alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -17,49 +14,37 @@ android {
 
     defaultConfig {
         applicationId = namespace
-        minSdk = 24
-        targetSdk = 35
-        val version = loadProperties(file("version.properties").path)
-        versionCode = version.getProperty("version.code").toInt()
-        versionName = version.getProperty("version.name")
+        minSdk = 29
+        // Keep the original target behavior while the storage and package APIs are modernized.
+        targetSdk = 33
+        val versionConfig = getVersionConfig()
+        versionCode = versionConfig["versionCode"].toString().toInt()
+        versionName = versionConfig["versionName"].toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
-    }
-    val signingPropertiesFile = rootProject.file("local.properties")
-    val signingProperties = signingPropertiesFile
-        .takeIf(File::exists)
-        ?.let { loadProperties(it.path) }
-    val hasReleaseSigning = listOf(
-        "sign.store.file",
-        "sign.store.password",
-        "sign.key.alias",
-        "sign.key.password"
-    ).all { signingProperties?.getProperty(it).isNullOrBlank().not() }
 
-    signingConfigs {
-        if (hasReleaseSigning) create("release") {
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
-            storeFile = File(signingProperties!!.getProperty("sign.store.file"))
-            storePassword = signingProperties.getProperty("sign.store.password")
-            keyAlias = signingProperties.getProperty("sign.key.alias")
-            keyPassword = signingProperties.getProperty("sign.key.password")
+        javaCompileOptions {
+            annotationProcessorOptions {
+                argument("room.schemaLocation", "$projectDir/schemas".toString())
+            }
         }
     }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+            setProguardFiles(
+                listOf(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
             )
-            signingConfig = signingConfigs.findByName("release")
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -73,62 +58,105 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.kotlinCompilerExtensionVersion.get()
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
-    packaging {
+    packagingOptions {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    splits {
-        abi {
-            isEnable = true
-            isUniversalApk = true
-            reset()
-            include("arm64-v8a", "x86_64")
+            excludes += "/META-INF/**"
+            excludes += "/kotlin/**"
+            excludes += "/*.txt"
+            excludes += "/*.bin"
         }
     }
 }
 
+tasks.register("updateVersion") {
+    doLast {
+        val versionConfig = Properties()
+        val file = rootProject.file("./app/version.properties")
+        file.inputStream().use { versionConfig.load(it) }
+
+        val versionCode = versionConfig["versionCode"].toString().toInt()
+        versionConfig["versionCode"] = (versionCode + 1).toString()
+        val versionName = versionConfig["versionName"].toString()
+        val versionNameSplit = versionName.split(".")
+        val (major, minor, patch) = versionNameSplit
+        versionConfig["versionName"] = when {
+            patch.toInt() < 9 -> "$major.$minor.${patch.toInt() + 1}"
+            minor.toInt() < 9 -> "$major.${minor.toInt() + 1}.0"
+            else -> "${major.toInt() + 1}.0.0"
+        }
+        file.outputStream().use { versionConfig.store(it, null) }
+        println("Version updated to ${versionConfig["versionName"]}")
+    }
+}
+
 dependencies {
-    implementation(project(":hook"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    // compose
-    implementation(libs.androidx.material.icons.extended)
-    // lifecycle
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // destination
-    implementation(libs.compose.destinations.core)
-    implementation(libs.compose.destinations.bottomSheet)
-    ksp(libs.compose.destinations.ksp)
-    // mmkv
-    implementation(libs.mmkv.static)
-    implementation(libs.mmkv.ktx)
-    // koin
-    implementation(platform(libs.koin.bom))
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.koin.androidx.compose.navigation)
+    implementation(project(mapOf("path" to ":lib")))
+    val composeVersion = "1.3.2"
+    val accompanistVersion = "0.28.0"
+    val roomVersion = "2.5.0"
 
-    implementation(libs.kotlin.serialization.json)
-    implementation(libs.betterandroid.extension.system)
-    implementation(libs.lservice)
-    implementation(libs.libsu.core)
-    implementation(libs.libsu.service)
-    implementation(libs.hiddenapibypass)
+
+    compileOnly("de.robv.android.xposed:api:82")
+    implementation(project(":ktx-xposed"))
+    implementation("com.tencent:mmkv:1.2.15")
+    // implementation("io.github.admin4j:http:0.4.0")
+
+    // Ktor
+    implementation("io.ktor:ktor-client-android:1.6.4")
+    implementation("io.ktor:ktor-client-serialization:1.6.4")
+    implementation("io.ktor:ktor-client-okhttp:1.6.4")
+
+
+    // Kotlin-serilization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+
+    // Activity Result API
+    implementation("com.google.accompanist:accompanist-permissions:0.28.0")
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation("androidx.activity:activity-compose:1.6.1")
+
+    androidTestImplementation(platform("androidx.compose:compose-bom:2022.10.00"))
+    implementation(platform("androidx.compose:compose-bom:2023.01.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3")
+
+    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("com.google.accompanist:accompanist-navigation-animation:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-insets-ui:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+fun getVersionConfig(): Map<*, *> {
+    val versionConfig = Properties()
+    rootProject.file("app/version.properties").inputStream().use {
+        versionConfig.load(it)
+        return versionConfig.toMap()
+    }
 }
