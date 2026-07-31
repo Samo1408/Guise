@@ -1,7 +1,8 @@
 package com.houvven.guise.ui.components
 
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,21 +23,19 @@ fun Hyperlink(
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
-    onTextLayout: (TextLayoutResult) -> Unit = {}
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
-    val string = buildAnnotatedString {
+    val text = buildAnnotatedString {
         append(label ?: url)
         addStyle(SpanStyle(color = color), 0, length)
     }
-    ClickableText(
-        text = string,
-        modifier = modifier,
+    Text(
+        text = text,
+        modifier = modifier.clickable { IntentUtils.openBrowser(url) },
         style = style,
         softWrap = softWrap,
         overflow = overflow,
         maxLines = maxLines,
-        onTextLayout = onTextLayout
-    ) {
-        IntentUtils.openBrowser(url)
-    }
+        onTextLayout = onTextLayout,
+    )
 }

@@ -1,7 +1,7 @@
 package com.houvven.guise.xposed
 
+import android.util.Log
 import com.houvven.guise.BuildConfig
-import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.hook.BatteryHook
 import com.houvven.guise.xposed.hook.BuildConfigHook
 import com.houvven.guise.xposed.hook.LocalHook
@@ -13,24 +13,38 @@ import com.houvven.guise.xposed.hook.location.LocationHook
 import com.houvven.guise.xposed.hook.netowork.NetworkHook
 import com.houvven.guise.xposed.other.BlankPass
 import com.houvven.guise.xposed.other.HookSuccessHint
-import com.houvven.ktx_xposed.handler.HookLoadPackageHandler
+import com.houvven.ktx_xposed.LoadPackageHookAdapter
+import com.houvven.ktx_xposed.hook.LoadPackageContext
+import com.houvven.ktx_xposed.hook.ModernXposedRuntime
 import com.houvven.ktx_xposed.logger.XposedLogger
-import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.houvven.ktx_xposed.utils.runXposedCatching
+import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
 
 @Suppress("unused")
-class HookInit : HookLoadPackageHandler {
+class HookInit : XposedModule() {
 
-    private val packageConfig: ModuleConfig
-        get() = PackageConfig.current
+    private var processName: String = ""
 
-    override val packageName = BuildConfig.APPLICATION_ID
+    override fun onModuleLoaded(param: ModuleLoadedParam) {
+        processName = param.processName
+        log(Log.INFO, TAG, "Loaded in ${param.processName}; API $apiVersion")
+    }
 
-    override fun loadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+    override fun onPackageReady(param: PackageReadyParam) {
+        if (!param.isFirstPackage || param.packageName == BuildConfig.APPLICATION_ID) return
 
-        XposedLogger.i("start loadPackage: ${lpparam.packageName} [${lpparam.appInfo.name}]")
-        PackageConfig.doRefresh(lpparam.packageName)
-        if (!packageConfig.isEnable) {
-            XposedLogger.i("loadPackage: ${lpparam.packageName} is not enable, skip.")
+        ModernXposedRuntime.initialize(
+            this,
+            LoadPackageContext(param.packageName, processName, param.classLoader),
+        )
+        ModernXposedPreferences.current = getRemotePreferences(PackageConfig.PREF_FILE_NAME)
+
+        XposedLogger.i("start onPackageReady: ${param.packageName}")
+        PackageConfig.doRefresh(param.packageName)
+        if (!PackageConfig.current.isEnable) {
+            XposedLogger.i("${param.packageName} is not enabled, skip")
             return
         }
 
@@ -45,8 +59,14 @@ class HookInit : HookLoadPackageHandler {
             ScreenshotsHook(),
             UniquelyIdHook(),
             BlankPass(),
-            BuildConfigHook()
-        ).let { doHookLoadPackage(it) }
+            BuildConfigHook(),
+        ).forEach { hook: LoadPackageHookAdapter ->
+            runXposedCatching { hook.onHook() }
+        }
+        XposedLogger.doHookModuleLog()
     }
 
+    companion object {
+        private const val TAG = "Guise"
+    }
 }

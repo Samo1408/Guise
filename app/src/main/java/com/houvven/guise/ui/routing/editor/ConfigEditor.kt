@@ -1,8 +1,6 @@
 package com.houvven.guise.ui.routing.editor
 
 import android.os.Build
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
@@ -22,14 +20,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +33,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +51,6 @@ import com.houvven.guise.module.preset.SimPreset
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
-import kotlinx.coroutines.launch
 
 
 private val localSetValue = mutableStateOf({ _: String -> })
@@ -216,20 +209,19 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
 }
 @Composable
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class
 )
 internal fun ConfigEditorView(
     moduleConfigState: ModuleConfigState,
     topBar: @Composable () -> Unit,
 ) {
-    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val scope = rememberCoroutineScope()
+    var showPresets by remember { mutableStateOf(false) }
     var search by remember { mutableStateOf(false) }
     var key by remember { mutableStateOf("") }
 
 
-    if (!state.isVisible) {
+    if (!showPresets) {
         search = false
         key = ""
     }
@@ -240,19 +232,14 @@ internal fun ConfigEditorView(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Divider(
+                HorizontalDivider(
                     color = MaterialTheme.colorScheme.primary,
                     thickness = 5.dp,
                     modifier = Modifier
                         .width(50.dp)
                         .padding(vertical = 20.dp)
                         .clip(RoundedCornerShape(25.dp))
-                        .clickable {
-                            if (!search) scope.launch {
-                                state.animateTo(ModalBottomSheetValue.Expanded, spring())
-                            }
-                            search = !search
-                        }
+                        .clickable { search = !search }
                 )
 
                 val presets =
@@ -269,7 +256,7 @@ internal fun ConfigEditorView(
                 ) {
                     items(presets) {
                         ElevatedAssistChip(
-                            onClick = { localSetValue.value(it.value); scope.launch { state.hide() } },
+                            onClick = { localSetValue.value(it.value); showPresets = false },
                             label = { Row(Modifier.padding(vertical = 15.dp)) { Text(it.label) } },
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 4.dp)
                         )
@@ -280,33 +267,26 @@ internal fun ConfigEditorView(
         }
     }
 
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetShape = RoundedCornerShape(15.dp),
-        sheetContent = { content() }
-    ) {
-        Scaffold(topBar = topBar) {
-            Surface(
+    Scaffold(topBar = topBar) {
+        Surface(
+            modifier = Modifier
+                .padding(top = it.calculateTopPadding())
+                .fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
                 modifier = Modifier
-                    .padding(top = it.calculateTopPadding())
-                    .fillMaxSize(),
-                color = MaterialTheme.colorScheme.surface
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .clipScrollableContainer(Orientation.Vertical)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .clipScrollableContainer(Orientation.Vertical)
-                ) {
-                    ConfigEditorItems(moduleConfigState) { scope.launch { state.show() } }
-                }
+                ConfigEditorItems(moduleConfigState) { showPresets = true }
             }
         }
     }
 
-    BackHandler(
-        enabled = state.isVisible,
-        onBack = { scope.launch { state.hide() } }
-    )
+    if (showPresets) {
+        ModalBottomSheet(onDismissRequest = { showPresets = false }) { content() }
+    }
 
 }

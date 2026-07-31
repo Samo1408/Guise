@@ -1,18 +1,14 @@
 package com.houvven.guise.ui.routing
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.compose.animation.ExperimentalAnimationApi
+import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.core.os.bundleOf
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.NavType
-import androidx.navigation.Navigator
 import androidx.navigation.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.houvven.guise.db.Template
 import com.houvven.guise.ui.routing.editor.AddTemplateScreen
 import com.houvven.guise.ui.routing.editor.DeployConfigEditScreen
@@ -25,13 +21,12 @@ object LocalNavController {
     lateinit var current: NavHostController
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavigationRoute() {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
     LocalNavController.current = navController
 
-    AnimatedNavHost(navController, NavRoutingTypes.LAUNCHER.name) {
+    NavHost(navController, NavRoutingTypes.LAUNCHER.name) {
         composable(NavRoutingTypes.LAUNCHER.name) { LauncherRoute() }
 
         composable(
@@ -48,29 +43,25 @@ fun NavigationRoute() {
 
         composable(NavRoutingTypes.ADD_TEMPLATE.name) { AddTemplateScreen() }
 
-        composable(NavRoutingTypes.EDIT_TEMPLATE.name) {
-            val template = it.arguments?.get("template") as Template
+        composable(
+            route = "${NavRoutingTypes.EDIT_TEMPLATE.name}/{template}",
+            arguments = listOf(navArgument("template") { type = NavType.StringType })
+        ) {
+            val template = Template.deserialization(it.arguments!!.getString("template")!!)
             EditTemplateScreen(template)
         }
 
-        composable(NavRoutingTypes.ENABLE_TEMPLATE.name) {
-            val template = it.arguments?.get("template") as Template
+        composable(
+            route = "${NavRoutingTypes.ENABLE_TEMPLATE.name}/{template}",
+            arguments = listOf(navArgument("template") { type = NavType.StringType })
+        ) {
+            val template = Template.deserialization(it.arguments!!.getString("template")!!)
             EnableTemplateScreen(template)
         }
     }
 }
 
 
-fun NavHostController.navigateAndArgument(
-    route: String,
-    args: List<Pair<String, Any>>? = null,
-    navOptions: NavOptions? = null,
-    navigatorExtras: Navigator.Extras? = null
-) {
-    navigate(route = route, navOptions = navOptions, navigatorExtras = navigatorExtras)
-
-    if (args.isNullOrEmpty()) return
-
-    val bundle = backQueue.lastOrNull()?.arguments
-    bundle?.putAll(bundleOf(*args.toTypedArray()))
+fun NavHostController.navigateWithTemplate(route: String, template: Template) {
+    navigate("$route/${Uri.encode(template.serialization())}")
 }

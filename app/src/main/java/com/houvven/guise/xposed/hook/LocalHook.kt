@@ -18,8 +18,9 @@ class LocalHook : LoadPackageHandler {
         }
 
         runCatching {
-            if (country.isBlank()) Locale(language)
-            else Locale(language, country)
+            Locale.Builder().setLanguage(language).apply {
+                if (country.isNotBlank()) setRegion(country)
+            }.build()
         }.onSuccess { locale ->
             country = locale.country
             val displayLanguage = locale.displayLanguage

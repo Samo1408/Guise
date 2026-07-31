@@ -19,7 +19,6 @@ abstract class ModuleLogDBHelper : RoomDatabase() {
         fun init(context: Context) {
             db = Room
                 .databaseBuilder(context, ModuleLogDBHelper::class.java, "module_log.db")
-                .allowMainThreadQueries()
                 .build()
             moduleLogDao = db.moduleLogDao()
         }

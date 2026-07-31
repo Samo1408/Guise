@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.houvven.guise.ui.components.ElevatedTextField
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun Title(text: String, topPadding: Dp = 22.dp) {
@@ -119,7 +116,7 @@ internal fun InputBox(
 }
 
 
-@OptIn(ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun OperateInputBox(
     state: MutableState<String>,
@@ -133,7 +130,7 @@ internal fun OperateInputBox(
 
     val onClick = {
         focusManager.clearFocus()
-        GlobalScope.launch { keyboardController?.hide() }.start()
+        keyboardController?.hide()
         clickable()
     }
 

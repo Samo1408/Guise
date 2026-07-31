@@ -1,41 +1,29 @@
 package com.houvven.ktx_xposed.hook
 
-import com.houvven.ktx_xposed.utils.runXposedCatching
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import kotlin.jvm.Throws
+import io.github.libxposed.api.XposedModule
 
+data class LoadPackageContext(
+    val packageName: String,
+    val processName: String,
+    val classLoader: ClassLoader,
+)
 
-lateinit var lppram: LoadPackageParam
+object ModernXposedRuntime {
+    lateinit var module: XposedModule
+    lateinit var packageContext: LoadPackageContext
 
-fun setLpparam(lpparam: LoadPackageParam) {
-    lppram = lpparam
+    fun initialize(module: XposedModule, context: LoadPackageContext) {
+        this.module = module
+        packageContext = context
+    }
 }
 
+val lppram: LoadPackageContext
+    get() = ModernXposedRuntime.packageContext
+
 val classLoader: ClassLoader
-    get() = if (::lppram.isInitialized) lppram.classLoader else throw IllegalStateException("lpparam is not initialized")
+    get() = lppram.classLoader
 
-@Throws(XposedHelpers.ClassNotFoundError::class)
-fun findClass(className: String): Class<*> = XposedHelpers.findClass(className, classLoader)
+fun findClass(className: String): Class<*> = Class.forName(className, false, classLoader)
 
-fun findClassIfExists(className: String): Class<*>?  =
-    XposedHelpers.findClassIfExists(className, classLoader)
-
-
-fun hookMethod(clazz: Class<*>, methodName: String, vararg parameterTypesAndCallback: Any) =
-    runXposedCatching {
-        XposedHelpers.findAndHookMethod(clazz, methodName, *parameterTypesAndCallback)
-    }
-
-fun hookAllMethods(clazz: Class<*>, methodName: String, callback: XC_MethodHook) =
-    XposedBridge.hookAllMethods(clazz, methodName, callback)
-
-fun hookConstructor(clazz: Class<*>, vararg parameterTypesAndCallback: Any) =
-    runXposedCatching {
-        XposedHelpers.findAndHookConstructor(clazz, *parameterTypesAndCallback)
-    }
-
-fun hookAllConstructors(clazz: Class<*>, callback: XC_MethodHook) =
-    XposedBridge.hookAllConstructors(clazz, callback)
+fun findClassIfExists(className: String): Class<*>? = runCatching { findClass(className) }.getOrNull()

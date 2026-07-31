@@ -10,7 +10,16 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 
 ## 当前状态
 
-当前维护线已恢复到与原版 `Guise 1.1.2` APK 精确对应的完整源码，并升级为可使用 JDK 17、Gradle 8.7、AGP 8.6.1 和 Android SDK 35 构建的 `1.1.3-reborn.1`。此前不完整的 `2.x alpha` 重写不再作为主维护线。
+当前维护线以原版 `Guise 1.1.2` 的完整功能为起点，已经转为现代化主线。应用仍保留 `1.1.3-reborn.1` 版本号（正式发布前再统一调整），当前面向 Android 17 / API 37 构建。
+
+本轮刷新包括：
+
+- 使用 JDK 17、Gradle 9.6.1、Android Gradle Plugin 9.3.1、Kotlin 2.4.10、Android SDK 与 Build Tools 37。
+- UI 迁移到当前稳定版 Jetpack Compose BOM `2026.06.01` 和 Material 3，启用 edge-to-edge、系统/浅色/深色主题及 Monet 动态取色。
+- 模块入口、Hook 拦截器、Remote Preferences 和作用域管理迁移到 Modern Xposed API 102；不再使用旧版 XposedBridge/XposedHelpers、旧模块元数据和直接修改 LSPosed 数据库的实现。
+- 采用 MediaStore 与系统文件选择器导入导出，移除“所有文件访问”、旧外部存储权限和明文网络配置。
+- 升级 Room、MMKV 2、KSP、协程、序列化和 AndroidX；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及单独的通用 `lib` 模块。
+- MMKV 2 官方仅提供 64 位 Android 原生库，因此当前 APK 仅构建 `arm64-v8a`。
 
 现有功能包括：
 
@@ -22,16 +31,15 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 目前主要模块：
 
 - `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。
-- `ktx-xposed`：Xposed Hook、共享配置和模块日志基础设施。
-- `lib`：命令执行及 SQLite 辅助功能。
+- `ktx-xposed`：基于 Modern Xposed API 的 Hook 适配层和模块日志基础设施。
 
 ## 构建
 
 需要：
 
 - JDK 17
-- Android SDK Platform 35
-- Android SDK Build-Tools 35.0.0 或兼容版本
+- Android SDK Platform 37
+- Android SDK Build-Tools 37.0.0
 
 在仓库根目录创建不纳入版本控制的 `local.properties`：
 
@@ -51,14 +59,16 @@ Windows：
 .\gradlew.bat assembleDebug lintDebug
 ```
 
-Debug 构建不需要发布签名。当前 release 构建默认不配置作者签名；正式发布前需由维护者在本机或 CI 中安全配置新的签名，且不要提交签名文件、口令或本机 SDK 路径。
+当前不配置正式发布签名，Debug APK 沿用 Android 默认调试签名。不要向仓库提交签名文件、口令或本机 SDK 路径。
 
 ## 开发原则
 
-1. 以完整的 `1.1.2` 功能和配置格式为兼容基线，优先修复构建、崩溃和 Android/LSPosed 兼容问题。
-2. Hook 功能按机型、系统属性、标识符、网络和定位分别验证，避免单个 Hook 失败拖垮目标进程。
-3. 架构迁移必须在不丢失现有界面、模板、日志和 Hook 功能的前提下进行。
-4. 发布 APK 前必须在真实的、已安装 LSPosed 的测试设备上回归。
+1. Android 与 Modern Xposed 的正式新 API 优先；旧实现妨碍安全性、可维护性或新系统支持时直接替换。
+2. 保留现有用户配置和模板的数据迁移能力，但不为无效或危险的内部实现长期背负兼容层。
+3. Hook 功能按机型、系统属性、标识符、网络和定位分别隔离，单个 Hook 失败不得拖垮目标进程。
+4. 发布 APK 前必须在真实的、已安装支持 Modern Xposed API 102 框架的 Android 设备上回归。
+
+Android 17 对面向 API 37 的应用收紧了 `static final` 字段修改。设备构建字段伪装会继续兼容较旧目标应用，但不能把反射篡改视为面向 API 37 应用的可靠能力；版本信息伪装已经改为修改系统 `PackageInfo` 返回值。
 
 ## 许可证
 

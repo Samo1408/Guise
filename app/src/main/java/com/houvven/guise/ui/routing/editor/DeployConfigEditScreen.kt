@@ -2,7 +2,7 @@ package com.houvven.guise.ui.routing.editor
 
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.rounded.MoreVert
@@ -46,7 +46,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
 
             navigationIcon = {
                 IconButton(onClick = { navHostController.popBackStack() }) {
-                    SimplifyIcon(Icons.Default.ArrowBack)
+                    SimplifyIcon(Icons.AutoMirrored.Filled.ArrowBack)
                 }
             },
 

@@ -1,21 +1,17 @@
 package com.houvven.guise.xposed.config
 
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.MutableState
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import com.houvven.guise.BuildConfig
+import androidx.core.net.toUri
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
-import com.houvven.guise.lsposed.LsposedHelper
-import com.houvven.guise.module.ktx.runThread
 import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.PackageConfig
-import com.houvven.ktx_xposed.SafeSharePrefs
-import com.houvven.lib.command.ShellActuators
+import com.houvven.guise.util.android.ShellExecutor
+import io.github.libxposed.service.XposedService
 
 class ModuleConfigManager
 private constructor(
@@ -23,13 +19,8 @@ private constructor(
     val state: ModuleConfigState,
 ) {
 
-    private val modulePkgName = BuildConfig.APPLICATION_ID
-
     private val safePrefs
-        get() = SafeSharePrefs.of(
-            ContextAmbient.current,
-            PackageConfig.PREF_FILE_NAME
-        )
+        get() = PackageConfig.safePrefs
 
     private val context = ContextAmbient.current
 
@@ -50,29 +41,39 @@ private constructor(
         syncLsposedScope(enable)
     }
 
-    private fun syncLsposedScope(enable: Boolean) = runThread {
-        LsposedHelper.download()
-            .onSuccess {
-                if (enable) LsposedHelper.addScope(modulePkgName, config.packageName)
-                else LsposedHelper.removeScope(modulePkgName, config.packageName)
-            }
-            .onFailure {
-                GlobalSnackbarHost.showOnErrorByDismissPrevious(
-                    "LSPosed 作用域自动同步失败：${it.message ?: it}",
-                )
-            }
+    private fun syncLsposedScope(enable: Boolean) {
+        val service = ContextAmbient.xposedService ?: run {
+            reportScopeError("尚未连接 Xposed 服务")
+            return
+        }
+        if (!enable) {
+            runCatching { service.removeScope(listOf(config.packageName)) }
+                .onFailure { reportScopeError(it.message ?: it.toString()) }
+            return
+        }
+        service.requestScope(
+            listOf(config.packageName),
+            object : XposedService.OnScopeEventListener {
+                override fun onScopeRequestApproved(approved: List<String>) = Unit
+                override fun onScopeRequestFailed(message: String) = reportScopeError(message)
+            },
+        )
+    }
+
+    private fun reportScopeError(message: String) {
+        GlobalSnackbarHost.showOnErrorByDismissPrevious("Xposed 作用域自动同步失败：$message")
     }
 
     fun stopApp(): Boolean {
         this.save()
         var isUseRootSucceed = true
-        val result = ShellActuators.exec("am force-stop ${config.packageName}", true)
+        val result = ShellExecutor.execute("am force-stop ${config.packageName}", asRoot = true)
         result.onFailure {
             isUseRootSucceed = false
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.parse("package:${config.packageName}")
+            intent.data = "package:${config.packageName}".toUri()
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            ContextCompat.startActivity(context, intent, null)
+            context.startActivity(intent)
         }
         return isUseRootSucceed
     }
@@ -80,12 +81,12 @@ private constructor(
     fun restartApp(): Result<Unit> {
         this.save()
         return runCatching {
-            ShellActuators.exec("am force-stop ${config.packageName}", true).onFailure {
+            ShellExecutor.execute("am force-stop ${config.packageName}", asRoot = true).onFailure {
                 throw RuntimeException(context.getString(R.string.no_root_prompt))
             }
             val packageManager = context.packageManager
             val intent = packageManager.getLaunchIntentForPackage(config.packageName)!!
-            ContextCompat.startActivity(context, intent, null)
+            context.startActivity(intent)
         }
     }
 

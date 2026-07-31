@@ -1,6 +1,5 @@
 package com.houvven.guise.ui.routing.launcher
 
-import android.os.Environment
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -21,9 +19,6 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -32,9 +27,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,30 +45,34 @@ import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.utils.saveFileToDownloadDir
 import com.houvven.ktx_xposed.logger.ModuleLogDBHelper
 import com.houvven.ktx_xposed.logger.XposedLogger
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.File
 
 
-@OptIn(
-    DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LogScreen() {
     val moduleLogDao = ModuleLogDBHelper.moduleLogDao
-    var logs by remember { mutableStateOf(moduleLogDao.getAll()) }
+    val scope = rememberCoroutineScope()
+    var logs by remember { mutableStateOf(emptyList<com.houvven.ktx_xposed.logger.ModuleLog>()) }
+
+    fun refreshLogs() {
+        scope.launch { logs = withContext(Dispatchers.IO) { moduleLogDao.getAll() } }
+    }
+
+    LaunchedEffect(Unit) { refreshLogs() }
 
     Scaffold(topBar = {
         TopAppBar(title = { Text(text = stringResource(R.string.action_log)) }, actions = {
             IconButton({
-                GlobalScope.launch(Dispatchers.Default) {
-                    moduleLogDao.clearAll()
-                    logs = moduleLogDao.getAll()
+                scope.launch {
+                    logs = withContext(Dispatchers.IO) {
+                        moduleLogDao.clearAll()
+                        moduleLogDao.getAll()
+                    }
                 }
             }) { SimplifyIcon(Icons.Outlined.Delete) }
 
@@ -81,7 +82,7 @@ internal fun LogScreen() {
                         logs.forEach { log -> appendLine(log.toString()) }
                     }
                 ).onSuccess {
-                    GlobalSnackbarHost.showByDismissPrevious("保存成功 ${it.absolutePath}") // TODO: 国际化
+                    GlobalSnackbarHost.showByDismissPrevious("保存成功 $it") // TODO: 国际化
                 }.onFailure {
                     GlobalSnackbarHost.showOnErrorByDismissPrevious("保存失败 ${it.message}") // TODO:  国际化
                 }
@@ -91,7 +92,7 @@ internal fun LogScreen() {
         })
     }, floatingActionButton = {
         FloatingActionButton(
-            onClick = { logs = moduleLogDao.getAll() },
+            onClick = ::refreshLogs,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             SimplifyIcon(Icons.Default.Refresh)

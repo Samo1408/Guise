@@ -29,7 +29,7 @@ class OsBuildHook : LoadPackageHandler {
             ).forEach { (fields, value) ->
                 if (value.toString().isNotBlank() && value.toString() != "-1") {
                     fields.forEach { field ->
-                        Build.VERSION::class.java.setStaticField(field, value)
+                        Build.VERSION::class.java.setStaticField<Any>(field, value)
                     }
                 }
             }

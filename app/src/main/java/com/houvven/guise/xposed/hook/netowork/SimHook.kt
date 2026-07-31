@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.houvven.guise.xposed.hook.netowork
 
 import android.telephony.CellIdentityCdma
@@ -81,7 +83,6 @@ internal class SimHook : LoadPackageHandler {
             ),
             value = config.simOperatorName
         )
-        String
     }
 
     private fun hookSimCountryIso() {

@@ -16,7 +16,7 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -97,7 +97,7 @@ fun LauncherRoute() {
 
     Scaffold(bottomBar = {
         Column {
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             NavigationBar(
                 modifier = Modifier.wrapContentHeight(),
                 tonalElevation = 0.dp

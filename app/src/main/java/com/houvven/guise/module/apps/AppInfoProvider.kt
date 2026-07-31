@@ -8,14 +8,13 @@ import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.xposed.PackageConfig
-import com.houvven.ktx_xposed.SafeSharePrefs
 
 @SuppressLint("StaticFieldLeak")
 object AppInfoProvider {
 
     private val context = ContextAmbient.current
     private val packageManager get() = context.packageManager
-    private val safeSharePrefs get() = SafeSharePrefs.of(context, PackageConfig.PREF_FILE_NAME)
+    private val safeSharePrefs get() = PackageConfig.safePrefs
 
 
     fun getList(): ArrayList<AppInfo> {

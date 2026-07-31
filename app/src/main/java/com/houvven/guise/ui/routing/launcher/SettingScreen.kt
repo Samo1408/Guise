@@ -1,7 +1,6 @@
 package com.houvven.guise.ui.routing.launcher
 
 import android.graphics.Bitmap
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
@@ -17,21 +16,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -41,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,7 +60,6 @@ import com.houvven.guise.ui.theme.setThemeMode
 import com.houvven.guise.ui.theme.themeMode
 import com.houvven.guise.ui.utils.hideLauncherIcon
 import com.houvven.guise.ui.utils.isHideLauncherIcon
-import kotlinx.coroutines.launch
 
 @Composable
 private fun Title(text: String, topPadding: Dp = 30.dp) {
@@ -120,8 +114,8 @@ private fun ContainerSwitch(
 private fun ThemeModeSetting() {
     Column(Modifier.fillMaxWidth()) {
         ListItem(
-            headlineText = { Text("APP 风格") },
-            supportingText = { Text("设置应用的明暗外观") },
+            headlineContent = { Text("APP 风格") },
+            supportingContent = { Text("设置应用的明暗外观") },
             leadingContent = {
                 Icon(
                     when (themeMode.value) {
@@ -168,20 +162,18 @@ private fun ThemeModeSetting() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingScreen() {
     val receiptCode = remember { mutableStateOf<Bitmap?>(null) }
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val coroutineScope = rememberCoroutineScope()
 
     @Composable
     fun content() {
         Title(text = "外观")
         ThemeModeSetting()
         ListItem(
-            headlineText = { Text("莫奈取色") },
-            supportingText = { Text("根据系统壁纸自动生成主题配色") },
+            headlineContent = { Text("莫奈取色") },
+            supportingContent = { Text("根据系统壁纸自动生成主题配色") },
             leadingContent = { Icon(Icons.Default.Palette, contentDescription = null) },
             trailingContent = {
                 Switch(
@@ -258,7 +250,6 @@ internal fun SettingScreen() {
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.clickable {
                             receiptCode.value = DonatePays.ALIPAY.base64.toBitmap()
-                            coroutineScope.launch { modalBottomSheetState.show() }
                         },
                     )
                     Spacer(modifier = Modifier.width(15.dp))
@@ -267,7 +258,6 @@ internal fun SettingScreen() {
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.clickable {
                             receiptCode.value = DonatePays.WECHAT.base64.toBitmap()
-                            coroutineScope.launch { modalBottomSheetState.show() }
                         },
                     )
                 }
@@ -292,32 +282,21 @@ internal fun SettingScreen() {
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.action_setting)) }) },
     ) { padding ->
-        ModalBottomSheetLayout(
-            sheetState = modalBottomSheetState,
-            sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-            sheetBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-            sheetContent = {
-                Column {
-                    Spacer(modifier = Modifier.height(1.dp))
-                    receiptCode.value?.let {
-                        SimplifyImage(it.asImageBitmap(), contentScale = ContentScale.Fit)
-                    }
-                }
-            },
+        Column(
+            modifier = Modifier
+                .padding(top = padding.calculateTopPadding())
+                .verticalScroll(rememberScrollState())
+                .clipScrollableContainer(Orientation.Vertical),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = padding.calculateTopPadding())
-                    .verticalScroll(rememberScrollState())
-                    .clipScrollableContainer(Orientation.Vertical),
-            ) {
-                content()
-                Spacer(modifier = Modifier.height(20.dp))
-            }
+            content()
+            Spacer(modifier = Modifier.height(20.dp))
         }
+    }
 
-        BackHandler(modalBottomSheetState.isVisible) {
-            coroutineScope.launch { modalBottomSheetState.hide() }
+    receiptCode.value?.let { bitmap ->
+        ModalBottomSheet(onDismissRequest = { receiptCode.value = null }) {
+            Spacer(modifier = Modifier.height(1.dp))
+            SimplifyImage(bitmap.asImageBitmap(), contentScale = ContentScale.Fit)
         }
     }
 }

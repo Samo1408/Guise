@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.houvven.guise.xposed.hook.netowork
 
 import android.net.NetworkInfo

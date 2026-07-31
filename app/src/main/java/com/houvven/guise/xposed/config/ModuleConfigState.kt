@@ -5,88 +5,72 @@ import androidx.compose.runtime.mutableStateOf
 
 class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
 
-    lateinit var brand: MutableState<String>
-    lateinit var model: MutableState<String>
-    lateinit var product: MutableState<String>
-    lateinit var device: MutableState<String>
-    lateinit var board: MutableState<String>
-    lateinit var hardware: MutableState<String>
-    lateinit var androidVersion: MutableState<String>
-    lateinit var sdkInt: MutableState<String>
-    lateinit var fingerPrint: MutableState<String>
+    val brand = mutableStateOf(moduleConfig.brand)
+    val model = mutableStateOf(moduleConfig.model)
+    val product = mutableStateOf(moduleConfig.product)
+    val device = mutableStateOf(moduleConfig.device)
+    val board = mutableStateOf(moduleConfig.board)
+    val hardware = mutableStateOf(moduleConfig.hardware)
+    val androidVersion = mutableStateOf(moduleConfig.androidVersion)
+    val sdkInt = mutableStateOf(moduleConfig.sdkInt.display(-1))
+    val fingerPrint = mutableStateOf(moduleConfig.fingerPrint)
 
-    lateinit var networkType: MutableState<String>
-    lateinit var wifiSSID: MutableState<String>
-    lateinit var wifiBSSID: MutableState<String>
-    lateinit var wifiMacAddress: MutableState<String>
-    lateinit var simOperator: MutableState<String>
-    lateinit var simOperatorName: MutableState<String>
-    lateinit var simCountry: MutableState<String>
+    val networkType = mutableStateOf(moduleConfig.networkType.display(HooksValue.NET_UNHOOK))
+    val wifiSSID = mutableStateOf(moduleConfig.wifiSSID)
+    val wifiBSSID = mutableStateOf(moduleConfig.wifiBSSID)
+    val wifiMacAddress = mutableStateOf(moduleConfig.wifiMacAddress)
+    val simOperator = mutableStateOf(moduleConfig.simOperator)
+    val simOperatorName = mutableStateOf(moduleConfig.simOperatorName)
+    val simCountry = mutableStateOf(moduleConfig.simCountry)
 
+    val imei = mutableStateOf(moduleConfig.imei)
+    val phoneNum = mutableStateOf(moduleConfig.phoneNum)
+    val androidId = mutableStateOf(moduleConfig.androidId)
 
-    lateinit var imei: MutableState<String>
-    lateinit var phoneNum: MutableState<String>
-    lateinit var androidId: MutableState<String>
+    val lac = mutableStateOf(moduleConfig.lac.display(-1))
+    val cid = mutableStateOf(moduleConfig.cid.display(-1))
 
-    lateinit var lac: MutableState<String>
-    lateinit var cid: MutableState<String>
+    val longitude = mutableStateOf(moduleConfig.longitude.display(-1.0))
+    val latitude = mutableStateOf(moduleConfig.latitude.display(-1.0))
+    val randomOffset = mutableStateOf(moduleConfig.randomOffset)
+    val makeWifiLocationFail = mutableStateOf(moduleConfig.makeWifiLocationFail)
+    val makeCellLocationFail = mutableStateOf(moduleConfig.makeCellLocationFail)
 
-    lateinit var longitude: MutableState<String>
-    lateinit var latitude: MutableState<String>
-    lateinit var randomOffset: MutableState<Boolean>
-    lateinit var makeWifiLocationFail: MutableState<Boolean>
-    lateinit var makeCellLocationFail: MutableState<Boolean>
+    val versionCode = mutableStateOf(moduleConfig.versionCode.display(-1))
+    val versionName = mutableStateOf(moduleConfig.versionName)
 
-    lateinit var versionCode: MutableState<String>
-    lateinit var versionName: MutableState<String>
+    val batteryLevel = mutableStateOf(moduleConfig.batteryLevel.display(-1))
+    val language = mutableStateOf(moduleConfig.language)
+    val screenshotsFlag = mutableStateOf(moduleConfig.screenshotsFlag.display(HooksValue.SCREENSHOTS_UNHOOK))
+    val hookSuccessHint = mutableStateOf(moduleConfig.hookSuccessHint)
 
-    lateinit var batteryLevel: MutableState<String>
-    lateinit var language: MutableState<String>
-    lateinit var screenshotsFlag: MutableState<String>
-    lateinit var hookSuccessHint: MutableState<Boolean>
-
-    lateinit var passContacts: MutableState<Boolean>
-    lateinit var passPhoto: MutableState<Boolean>
-    lateinit var passVideo: MutableState<Boolean>
-    lateinit var passAudio: MutableState<Boolean>
-
-
-    init {
-        val stateFields = this.javaClass.declaredFields
-            .filter { it.type == MutableState::class.java }
-            .toMutableList()
-        val configFields = moduleConfig.javaClass.declaredFields
-        val empty = ModuleConfig()
-        for (configField in configFields) {
-            val stateField = stateFields.find { it.name == configField.name }
-            if (stateField != null) {
-                configField.isAccessible = true
-                when (val value = configField.get(moduleConfig)) {
-                    is Boolean -> stateField.set(this, mutableStateOf(value))
-                    is String -> stateField.set(this, mutableStateOf(value.toString()))
-                    else -> {
-                        val v = if (configField.get(empty) == value) "" else value.toString()
-                        stateField.set(this, mutableStateOf(v))
-                    }
-                }
-                stateFields.remove(stateField)
-            }
-            if (stateFields.isEmpty()) break
-        }
-    }
+    val passContacts = mutableStateOf(moduleConfig.passContacts)
+    val passPhoto = mutableStateOf(moduleConfig.passPhoto)
+    val passVideo = mutableStateOf(moduleConfig.passVideo)
+    val passAudio = mutableStateOf(moduleConfig.passAudio)
 
     internal fun clear() {
-        val stateFields =
-            this.javaClass.declaredFields.filter { it.type == MutableState::class.java }
-        for (stateField in stateFields) {
-            val state = (stateField.get(this) as MutableState<*>)
-            if (state.value is Boolean) (state as MutableState<Boolean>).value = false
-            else (state as MutableState<String>).value = ""
-        }
+        stringStates.forEach { it.value = "" }
+        booleanStates.forEach { it.value = false }
     }
+
+    private val stringStates: List<MutableState<String>>
+        get() = listOf(
+            brand, model, product, device, board, hardware, androidVersion, sdkInt, fingerPrint,
+            networkType, wifiSSID, wifiBSSID, wifiMacAddress, simOperator, simOperatorName,
+            simCountry, imei, phoneNum, androidId, lac, cid, longitude, latitude, versionCode,
+            versionName, batteryLevel, language, screenshotsFlag,
+        )
+
+    private val booleanStates: List<MutableState<Boolean>>
+        get() = listOf(
+            randomOffset, makeWifiLocationFail, makeCellLocationFail, hookSuccessHint,
+            passContacts, passPhoto, passVideo, passAudio,
+        )
 
     companion object {
         fun of(moduleConfig: ModuleConfig) = ModuleConfigState(moduleConfig)
     }
-
 }
+
+private fun Any.display(default: Any): String = if (this == default) "" else toString()

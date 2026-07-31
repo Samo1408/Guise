@@ -2,7 +2,7 @@ package com.houvven.guise.util.android
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import com.houvven.guise.ContextAmbient
 
 
@@ -20,7 +20,7 @@ object IntentUtils {
     const val FILE_TYPE_TEXT = "text/plain"
 
     fun openBrowser(url: String) {
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         val intent = Intent()
         intent.action = "android.intent.action.VIEW"
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK

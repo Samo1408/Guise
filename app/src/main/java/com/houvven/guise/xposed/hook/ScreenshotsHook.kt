@@ -52,7 +52,7 @@ class ScreenshotsHook : LoadPackageHandler {
             "addSystemFlags"
         ) {
             if (it.args[0] == WindowManager.LayoutParams.FLAG_SECURE)
-                it.thisObject.callMethod("clearFlags", WindowManager.LayoutParams.FLAG_SECURE)
+                it.thisObject?.callMethod("clearFlags", WindowManager.LayoutParams.FLAG_SECURE)
         }
     }
 

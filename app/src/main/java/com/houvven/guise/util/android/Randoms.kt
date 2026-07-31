@@ -25,7 +25,7 @@ object Randoms {
                 1 -> result = (Math.random() * 25 + 97).roundToInt().toLong()
                 2 -> result = (Math.random() * 9 + 48).roundToInt().toLong()
             }
-            sb.append(result.toChar())
+            sb.append(result.toInt().toChar())
         }
         return sb.toString()
     }

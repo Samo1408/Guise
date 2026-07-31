@@ -1,7 +1,6 @@
 package com.houvven.guise.ui.routing.launcher
 
 import android.content.Intent
-import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,8 +33,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,15 +54,13 @@ import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.routing.LocalNavController
 import com.houvven.guise.ui.routing.NavRoutingTypes
-import com.houvven.guise.ui.routing.navigateAndArgument
+import com.houvven.guise.ui.routing.navigateWithTemplate
 import com.houvven.guise.ui.routing.template.EnableTemplateDialog
 import com.houvven.guise.ui.utils.saveFileToDownloadDir
-import com.houvven.guise.util.android.UriUtil
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.File
 
 private object TemplateTypeFilter {
     const val ALL = -1
@@ -71,10 +68,9 @@ private object TemplateTypeFilter {
     const val EXCLUSIVE = Template.Type.EXCLUSIVE
 }
 
-private val typeFilter by derivedStateOf { mutableStateOf(TemplateTypeFilter.ALL) }
-
-private val requestEnable by derivedStateOf { mutableStateOf(false) }
-private val requestEnableTemplate by derivedStateOf { mutableStateOf<Template?>(null) }
+private val typeFilter = mutableIntStateOf(TemplateTypeFilter.ALL)
+private val requestEnable = mutableStateOf(false)
+private val requestEnableTemplate = mutableStateOf<Template?>(null)
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -144,9 +140,9 @@ private fun TemplateCard(template: Template) {
                         requestEnableTemplate.value = template
                     } else {
                         val navHostController = LocalNavController.current
-                        navHostController.navigateAndArgument(
+                        navHostController.navigateWithTemplate(
                             NavRoutingTypes.ENABLE_TEMPLATE.name,
-                            args = listOf(Pair("template", template))
+                            template,
                         )
                     }
                 },
@@ -167,9 +163,9 @@ private fun TemplateCard(template: Template) {
         ) {
             SimplifyDropdownMenuItem(text = "修改" /* todo 国际化 */, onClick = {
                 expanded = false
-                LocalNavController.current.navigateAndArgument(
+                LocalNavController.current.navigateWithTemplate(
                     NavRoutingTypes.EDIT_TEMPLATE.name,
-                    args = listOf(Pair("template", template))
+                    template,
                 )
             })
             SimplifyDropdownMenuItem(text = "删除" /* todo 国际化 */, onClick = {
@@ -204,9 +200,8 @@ internal fun TemplateScreen() {
                         contract = ActivityResultContracts.GetContent()
                     ) { result ->
                         if (result != null) {
-                            UriUtil.getFileRealPath(context, result)?.let {
-                                val templates =
-                                    Json.decodeFromString<List<Template>>(File(it).readText())
+                            context.contentResolver.openInputStream(result)?.bufferedReader()?.use {
+                                val templates = Json.decodeFromString<List<Template>>(it.readText())
                                 LauncherState.addTemplates(templates)
                             }
                         }
@@ -231,7 +226,7 @@ internal fun TemplateScreen() {
                                 "Guise-Template-${System.currentTimeMillis()}.json",
                                 Json.encodeToString(LauncherState.templates.value)
                             ).onSuccess {
-                                GlobalSnackbarHost.showByDismissPrevious("导出成功 ${it.absolutePath}") // TODO: 国际化
+                                GlobalSnackbarHost.showByDismissPrevious("导出成功 $it") // TODO: 国际化
                             }.onFailure {
                                 GlobalSnackbarHost.showOnErrorByDismissPrevious("导出失败 ${it.message}") // TODO:  国际化
                             }
@@ -256,8 +251,8 @@ internal fun TemplateScreen() {
         @Composable
         fun TypeFilterChip(label: String, value: Int) {
             FilterChip(
-                selected = typeFilter.value == value,
-                onClick = { typeFilter.value = value },
+                selected = typeFilter.intValue == value,
+                onClick = { typeFilter.intValue = value },
                 label = { Text(label) }
             )
         }
@@ -296,8 +291,8 @@ internal fun TemplateScreen() {
                 columns = StaggeredGridCells.Fixed(2),
                 contentPadding = PaddingValues(horizontal = 10.dp),
             ) {
-                val items = if (typeFilter.value != TemplateTypeFilter.ALL)
-                    LauncherState.templates.value.filter { it.type == typeFilter.value }
+                val items = if (typeFilter.intValue != TemplateTypeFilter.ALL)
+                    LauncherState.templates.value.filter { it.type == typeFilter.intValue }
                 else
                     LauncherState.templates.value
 

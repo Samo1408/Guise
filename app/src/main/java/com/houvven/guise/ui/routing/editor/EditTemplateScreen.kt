@@ -1,7 +1,7 @@
 package com.houvven.guise.ui.routing.editor
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +39,7 @@ fun EditTemplateScreen(template: Template) {
             },
             navigationIcon = {
                 androidx.compose.material3.IconButton(onClick = { navHostController.popBackStack() }) {
-                    SimplifyIcon(Icons.Default.ArrowBack)
+                    SimplifyIcon(Icons.AutoMirrored.Filled.ArrowBack)
                 }
             },
             actions = {

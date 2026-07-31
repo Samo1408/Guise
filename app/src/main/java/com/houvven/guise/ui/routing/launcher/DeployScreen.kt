@@ -1,6 +1,5 @@
 package com.houvven.guise.ui.routing.launcher
 
-import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,25 +13,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +38,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,10 +61,9 @@ import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.routing.LocalNavController
 import com.houvven.guise.ui.routing.NavRoutingTypes
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.Collator
 import java.util.Locale
 
@@ -165,10 +162,8 @@ private fun AppCard(appInfo: AppInfo) {
 }
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
-    DelicateCoroutinesApi::class
+    ExperimentalMaterial3Api::class,
 )
 @Composable
 fun DeployScreen() {
@@ -176,21 +171,18 @@ fun DeployScreen() {
     var displayMenu by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
     var refreshing by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    val onRefresh = {
-        refreshing = true
-        GlobalScope.launch(Dispatchers.Default) {
-            LauncherState.refreshApps()
+    val onRefresh: () -> Unit = {
+        coroutineScope.launch {
+            refreshing = true
+            val apps = withContext(Dispatchers.Default) {
+                com.houvven.guise.module.apps.AppInfoProvider.getList()
+            }
+            LauncherState.apps.value = apps
             refreshing = false
         }
     }
-
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = refreshing,
-        onRefresh = { onRefresh() },
-        refreshThreshold = 60.dp,
-        refreshingOffset = 80.dp
-    )
 
     val cancelSearch = { searching = false; searchKeyWorld.value = "" }
 
@@ -207,7 +199,7 @@ fun DeployScreen() {
                     placeholder = { Text(stringResource(R.string.search_placeholder)) },
                     leadingIcon = { SimplifyIcon(Icons.Default.Search) },
                     singleLine = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent
                     ),
@@ -284,7 +276,7 @@ fun DeployScreen() {
         }) {
             Column {
                 AppSortTypes.values().forEach { RadioItem(it.depict, it, appSortType) }
-                Divider(Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(Modifier.padding(vertical = 10.dp))
                 CheckboxItem(
                     text = stringResource(R.string.also_search_for_package),
                     state = searchByPackageName
@@ -305,21 +297,16 @@ fun DeployScreen() {
     Scaffold(
         topBar = { Bar() }
     ) { pd ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
-                .fillMaxSize()
-                .pullRefresh(pullRefreshState),
-            contentAlignment = Alignment.TopCenter
+                .fillMaxSize(),
         ) {
             LazyColumn { items(generateApps()) { AppCard(it) } }
-            PullRefreshIndicator(
-                refreshing = refreshing,
-                state = pullRefreshState,
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                scale = true
-            )
+        }
+        LaunchedEffect(Unit) {
             if (LauncherState.apps.value.isEmpty()) onRefresh()
         }
         if (displayMenu) Menu()

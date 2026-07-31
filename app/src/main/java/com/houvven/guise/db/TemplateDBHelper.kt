@@ -18,7 +18,7 @@ abstract class TemplateDBHelper : RoomDatabase() {
                 "template.db"
             )
                 .allowMainThreadQueries()
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
 

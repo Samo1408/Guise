@@ -3,16 +3,21 @@ package com.houvven.guise
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import com.houvven.guise.lsposed.LsposedHelper
+import com.houvven.guise.xposed.PackageConfig
 import com.tencent.mmkv.MMKV
 import com.tencent.mmkv.MMKVLogLevel
-import java.io.File
+import io.github.libxposed.service.XposedService
+import io.github.libxposed.service.XposedServiceHelper
 
-class ContextAmbient : Application() {
+class ContextAmbient : Application(), XposedServiceHelper.OnServiceListener {
 
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var current: Context
+
+        @Volatile
+        var xposedService: XposedService? = null
+            private set
 
         fun getSharedPreferences(
             name: String = BuildConfig.APPLICATION_ID,
@@ -24,8 +29,15 @@ class ContextAmbient : Application() {
         super.onCreate()
         current = applicationContext
         MMKV.initialize(this, MMKVLogLevel.LevelNone)
-        LsposedHelper.init(File(filesDir, "/bin/sqlite3").absolutePath)
+        XposedServiceHelper.registerListener(this)
     }
 
+    override fun onServiceBind(service: XposedService) {
+        xposedService = service
+        PackageConfig.migrateToRemotePreferences(service)
+    }
 
+    override fun onServiceDied(service: XposedService) {
+        if (xposedService === service) xposedService = null
+    }
 }

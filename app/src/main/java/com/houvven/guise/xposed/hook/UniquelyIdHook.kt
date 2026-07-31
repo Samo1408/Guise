@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.houvven.guise.xposed.hook
 
 import android.content.ContentResolver
@@ -6,6 +8,7 @@ import android.provider.Settings.Secure
 import android.telephony.TelephonyManager
 import com.houvven.guise.xposed.LoadPackageHandler
 import com.houvven.guise.xposed.PackageConfig
+import com.houvven.guise.xposed.ModernXposedPreferences
 import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.ktx_xposed.hook.afterHookedMethod
 import com.houvven.ktx_xposed.hook.beforeHookedMethod
@@ -34,7 +37,7 @@ class UniquelyIdHook : LoadPackageHandler {
                 if (config.androidId.isBlank()) {
                     XposedLogger.i("androidId is blank")
                     XposedLogger.i("Web view processName: ${lppram.processName}")
-                    PackageConfig.xSharedPrefs.getString(lppram.processName, "")!!.let { json ->
+                    ModernXposedPreferences.current.getString(lppram.processName, "")!!.let { json ->
                         if (json.isNotBlank()) {
                             val moduleConfig = ModuleConfig.fromJson(json)
                             param.result = moduleConfig.androidId
@@ -55,7 +58,7 @@ class UniquelyIdHook : LoadPackageHandler {
                 if (config.androidId.isBlank()) {
                     XposedLogger.i("androidId is blank")
                     XposedLogger.i("Web view processName: ${lppram.processName}")
-                    PackageConfig.xSharedPrefs.getString(lppram.processName, "")!!.let { json ->
+                    ModernXposedPreferences.current.getString(lppram.processName, "")!!.let { json ->
                         if (json.isNotBlank()) {
                             val moduleConfig = ModuleConfig.fromJson(json)
                             param.result = moduleConfig.androidId

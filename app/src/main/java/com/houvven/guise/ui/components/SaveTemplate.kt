@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +36,7 @@ fun SaveTemplate(dialogState: MutableState<Boolean>, moduleConfig: ModuleConfig)
 
     if (dialogState.value.not()) return
 
-    var type by remember { mutableStateOf(Template.Type.COMMON) }
+    var type by remember { mutableIntStateOf(Template.Type.COMMON) }
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var nameError by remember { mutableStateOf(false) }
@@ -153,7 +154,7 @@ fun SaveEditTemplate(
 
     if (dialogState.value.not()) return
 
-    var type by remember { mutableStateOf(template.type) }
+    var type by remember { mutableIntStateOf(template.type) }
     var name by remember { mutableStateOf(template.name) }
     var description by remember { mutableStateOf(template.description ?: "") }
     var nameError by remember { mutableStateOf(false) }

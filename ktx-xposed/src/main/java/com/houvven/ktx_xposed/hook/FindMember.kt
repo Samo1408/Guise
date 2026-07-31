@@ -1,77 +1,69 @@
 @file:Suppress("unused")
+
 package com.houvven.ktx_xposed.hook
 
-import de.robv.android.xposed.XposedHelpers
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import kotlin.jvm.Throws
+import java.lang.reflect.Modifier
 
-
-@Throws(NoSuchFieldError::class)
-fun Class<*>.findField(fieldName: String): Field =
-    XposedHelpers.findField(this, fieldName)
-
-fun Class<*>.findFiledIfExists(fieldName: String): Field? =
-    XposedHelpers.findFieldIfExists(this, fieldName)
-
-@Throws(NoSuchFieldError::class)
-fun Class<*>.findFirstFieldByExactType(type: Class<*>): Field? =
-    XposedHelpers.findFirstFieldByExactType(this, type)
-
-/* @Throws(NoSuchFieldError::class)
-fun KClass<*>.findField(fieldName: String) = this.java.findField(fieldName)
-
-fun KClass<*>.findFiledIfExists(fieldName: String) = this.java.findFiledIfExists(fieldName)
-
-@Throws(NoSuchFieldError::class)
-fun KClass<*>.findFirstFieldByExactType(type: Class<*>) = this.java.findFirstFieldByExactType(type) */
-
-
-@Throws(NoSuchMethodError::class, XposedHelpers.ClassNotFoundError::class)
-fun Class<*>.findMethodExact(name: String, vararg parameterTypes: Class<*> = arrayOf()): Method =
-    XposedHelpers.findMethodExact(this, name, *parameterTypes)
-
-@Throws(NoSuchMethodError::class, XposedHelpers.ClassNotFoundError::class)
-fun Class<*>.findMethodExact(name: String, vararg parameterTypes: Any): Method =
-    XposedHelpers.findMethodExact(this, name, *parameterTypes)
-
-fun Class<*>.findMethodExactIfExists(name: String, vararg parameterTypes: Class<*> = arrayOf()): Method? {
-    var method: Method? = null
-    kotlin
-        .runCatching { this@findMethodExactIfExists.findMethodExact(name, *parameterTypes) }
-        .onSuccess { method = it }
-
-    return method
+fun Class<*>.findField(fieldName: String): Field {
+    var current: Class<*>? = this
+    while (current != null) {
+        runCatching { current.getDeclaredField(fieldName) }.getOrNull()?.let {
+            it.isAccessible = true
+            return it
+        }
+        current = current.superclass
+    }
+    throw NoSuchFieldException("$name#$fieldName")
 }
 
-fun Class<*>.findMethodExactIfExists(name: String, vararg parameterTypes: Any): Method? =
-    XposedHelpers.findMethodExactIfExists(this, name, *parameterTypes)
+fun Class<*>.findFiledIfExists(fieldName: String): Field? = runCatching { findField(fieldName) }.getOrNull()
 
-/* @Throws(NoSuchMethodError::class, XposedHelpers.ClassNotFoundError::class)
-fun KClass<*>.findMethodExact(name: String, vararg parameterTypes: Class<*> = arrayOf()) =
-    this.java.findMethodExact(name, *parameterTypes)
+fun Class<*>.findFirstFieldByExactType(type: Class<*>): Field? =
+    generateSequence(this) { it.superclass }
+        .flatMap { it.declaredFields.asSequence() }
+        .firstOrNull { it.type == type }
+        ?.apply { isAccessible = true }
 
-@Throws(NoSuchMethodError::class, XposedHelpers.ClassNotFoundError::class)
-fun KClass<*>.findMethodExact(name: String, vararg parameterTypes: Any) =
-    this.java.findMethodExact(name, *parameterTypes)
+fun Class<*>.findMethodExact(name: String, vararg parameterTypes: Class<*>): Method {
+    var current: Class<*>? = this
+    while (current != null) {
+        runCatching { current.getDeclaredMethod(name, *parameterTypes) }.getOrNull()?.let {
+            it.isAccessible = true
+            return it
+        }
+        current = current.superclass
+    }
+    throw NoSuchMethodException("${this.name}#$name")
+}
 
-fun KClass<*>.findMethodExactIfExists(name: String, vararg parameterTypes: Class<*> = arrayOf()) =
-    this.java.findMethodExactIfExists(name, *parameterTypes)
+fun Class<*>.findMethodExactIfExists(name: String, vararg parameterTypes: Class<*>): Method? =
+    runCatching { findMethodExact(name, *parameterTypes) }.getOrNull()
 
-fun KClass<*>.findMethodExactIfExists(name: String, vararg parameterTypes: Any) =
-    this.java.findMethodExactIfExists(name, *parameterTypes) */
+fun Class<*>.findMethodBestMatch(name: String, vararg parameterTypes: Class<*>): Method =
+    allMethods().firstOrNull { method ->
+        method.name == name && method.parameterTypes.size == parameterTypes.size &&
+            method.parameterTypes.zip(parameterTypes).all { (expected, actual) -> expected.isAssignableFrom(actual) }
+    }?.apply { isAccessible = true } ?: throw NoSuchMethodException("${this.name}#$name")
 
-@Throws(NoSuchMethodError::class)
-fun Class<*>.findMethodBestMatch(name: String, vararg parameterTypes: Class<*> = arrayOf()): Method =
-    XposedHelpers.findMethodBestMatch(this, name, *parameterTypes)
-
-@Throws(NoSuchMethodError::class)
 fun Class<*>.findMethodBestMatch(name: String, vararg parameterTypes: Any): Method =
-    XposedHelpers.findMethodBestMatch(this, name, *parameterTypes)
+    findMethodBestMatch(name, *parameterTypes.map { it as Class<*> }.toTypedArray())
 
-fun Class<*>.findMethodBestMatch(name: String, parameterTypes: Array<Class<*>>, args: Array<Any>): Method? =
-    XposedHelpers.findMethodBestMatch(this, name, parameterTypes, args)
+fun Class<*>.findMethodBestMatch(
+    name: String,
+    parameterTypes: Array<Class<*>>,
+    args: Array<Any>,
+): Method? = runCatching { findMethodBestMatch(name, *parameterTypes) }.getOrNull()
 
+fun Class<*>.findMethodsByExactParameters(
+    returnType: Class<*>,
+    vararg parameterTypes: Class<*>,
+): Array<Method> = allMethods().filter {
+    it.returnType == returnType && it.parameterTypes.contentEquals(parameterTypes)
+}.toList().toTypedArray()
 
-fun Class<*>.findMethodsByExactParameters(returnType: Class<*>, vararg parameterTypes: Class<*> = arrayOf()): Array<Method> =
-    XposedHelpers.findMethodsByExactParameters(this, returnType, *parameterTypes)
+internal fun Class<*>.allMethods(): Sequence<Method> =
+    generateSequence(this) { it.superclass }
+        .flatMap { it.declaredMethods.asSequence() }
+        .distinctBy { method -> method.name to method.parameterTypes.toList() }
