@@ -95,7 +95,7 @@ private val reverseOrder by derivedStateOf {
 private val searchKeyWorld by derivedStateOf { mutableStateOf("") }
 
 
-private fun generateApps(): List<AppInfo> {
+private fun generateApps(prioritizedPackages: Set<String>): List<AppInfo> {
     var result = LauncherState.apps.value
     if (!displaySystemApp.value) result = result.filterNot { it.isSystemApp }
 
@@ -120,7 +120,11 @@ private fun generateApps(): List<AppInfo> {
         AppSortTypes.UPDATE_TIME -> result.sortedBy { it.updateTime }
     }
     if (reverseOrder.value) result = result.reversed()
-    return result.sortedWith { a, b -> if (a.isEnable == b.isEnable) 0 else if (a.isEnable) -1 else 1 }
+    return result.sortedWith { a, b ->
+        val aPrioritized = a.packageName in prioritizedPackages
+        val bPrioritized = b.packageName in prioritizedPackages
+        if (aPrioritized == bPrioritized) 0 else if (aPrioritized) -1 else 1
+    }
 }
 
 
@@ -176,6 +180,11 @@ fun DeployScreen() {
     var displayMenu by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
     var refreshing by rememberSaveable { mutableStateOf(false) }
+    var prioritizedPackages by remember {
+        mutableStateOf(
+            LauncherState.apps.value.filter { it.isEnable }.mapTo(mutableSetOf()) { it.packageName }
+        )
+    }
     val coroutineScope = rememberCoroutineScope()
 
     val onRefresh: () -> Unit = {
@@ -185,6 +194,7 @@ fun DeployScreen() {
                 com.houvven.guise.module.apps.AppInfoProvider.getList()
             }
             LauncherState.apps.value = apps
+            prioritizedPackages = apps.filter { it.isEnable }.mapTo(mutableSetOf()) { it.packageName }
             refreshing = false
         }
     }
@@ -310,7 +320,7 @@ fun DeployScreen() {
                 .fillMaxSize(),
         ) {
             LazyColumn {
-                items(generateApps(), key = { it.packageName }) { appInfo ->
+                items(generateApps(prioritizedPackages), key = { it.packageName }) { appInfo ->
                     AppCard(appInfo) { enabled ->
                         val manager = ModuleConfigManager.of(ModuleConfig.get(appInfo.packageName))
                         if (enabled) {
