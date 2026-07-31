@@ -184,6 +184,7 @@ internal fun OperateInputBox(
     validate: (String) -> Boolean = { true },
     operateIcon: ImageVector = Icons.AutoMirrored.TwoTone.List,
     operateContentDescription: String = stringResource(R.string.choose_preset),
+    secondaryAction: InputFieldAction? = null,
     clickable: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -196,10 +197,10 @@ internal fun OperateInputBox(
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    val onClick = {
+    fun runAction(action: () -> Unit) {
         focusManager.clearFocus()
         keyboardController?.hide()
-        clickable()
+        action()
     }
 
     BasicInputBox(state, label, supportingText, validate) {
@@ -209,7 +210,15 @@ internal fun OperateInputBox(
                     operateIcon,
                     operateContentDescription,
                     tint = operateIconTint,
-                    clickable = onClick,
+                    clickable = { runAction(clickable) },
+                )
+            }
+            secondaryAction?.let { action ->
+                FieldIconButton(
+                    action.icon,
+                    action.contentDescription,
+                    tint = operateIconTint,
+                    clickable = { runAction(action.onClick) },
                 )
             }
             if (state.value.isNotBlank()) {
@@ -243,3 +252,9 @@ internal fun RandomInputBox(
         clickable = { state.value = randomGenerator() }
     )
 }
+
+internal data class InputFieldAction(
+    val icon: ImageVector,
+    val contentDescription: String,
+    val onClick: () -> Unit,
+)

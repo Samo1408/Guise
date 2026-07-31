@@ -65,6 +65,7 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     val hasUnsavedChanges by remember(moduleConfigManager, savedSnapshotGeneration) {
         derivedStateOf(moduleConfigManager::hasUnsavedChanges)
     }
+    val requiresExitDecision = hasUnsavedChanges || savedChangesNeedApply
 
     fun leaveEditor() {
         exitDialog = EditorExitDialog.NONE
@@ -115,7 +116,9 @@ fun DeployConfigEditScreen(name: String, packageName: String) {
     }
 
     BackHandler(enabled = !predictiveBack.value) { requestExit() }
-    PredictiveBackHandler(enabled = predictiveBack.value) { progress ->
+    PredictiveBackHandler(
+        enabled = predictiveBack.value && requiresExitDecision,
+    ) { progress ->
         progress.collect()
         requestExit()
     }

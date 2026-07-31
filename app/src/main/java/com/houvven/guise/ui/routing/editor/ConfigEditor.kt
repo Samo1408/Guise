@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Casino
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,11 +44,10 @@ import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.PresetAdapter
 import com.houvven.guise.module.preset.CarrierPresetRepository
 import com.houvven.guise.module.preset.PresetRepository
-import com.houvven.guise.module.preset.ResourcePreset
+import com.houvven.guise.module.preset.TimeZonePresetRepository
 import com.houvven.guise.ui.components.SearchBox
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
-import java.time.ZoneId
 import kotlin.math.roundToInt
 
 
@@ -65,23 +66,34 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         supportingText: String? = null,
         showOperateIcon: Boolean = true,
         validate: (String) -> Boolean = { true },
+        randomGenerator: (() -> String)? = null,
         setValue: (String) -> Unit = { value -> state.value = value },
-    ) = OperateInputBox(state, label, supportingText, showOperateIcon, validate) {
-        localPreset.value = preset
-        localSetValue.value = setValue
-        launch()
-    }
+    ) = OperateInputBox(
+        state = state,
+        label = label,
+        supportingText = supportingText,
+        showOperateIcon = showOperateIcon,
+        validate = validate,
+        secondaryAction = randomGenerator?.let { generate ->
+            InputFieldAction(
+                icon = Icons.TwoTone.Casino,
+                contentDescription = stringResource(R.string.one_click_random),
+                onClick = { setValue(generate()) },
+            )
+        },
+        clickable = {
+            localPreset.value = preset
+            localSetValue.value = setValue
+            launch()
+        },
+    )
 
 
     val context = LocalContext.current
     val localConfiguration = LocalConfiguration.current
     val carrierPresets = remember(context) { CarrierPresetRepository.get(context) }
     val presetCatalog = remember(context) { PresetRepository.get(context) }
-    val timeZonePresets = remember {
-        ZoneId.getAvailableZoneIds()
-            .sorted()
-            .map { id -> ResourcePreset(label = id, value = id) }
-    }
+    val timeZonePresets = remember { TimeZonePresetRepository.presets }
     val equivalentSmallestWidthDp = state.densityDpi.value.toIntOrNull()
         ?.takeIf { it in 72..1000 && localConfiguration.smallestScreenWidthDp > 0 }
         ?.let { targetDensityDpi ->
@@ -240,6 +252,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         label = stringResource(R.string.other_time_zone),
         preset = timeZonePresets,
         supportingText = stringResource(R.string.other_time_zone_summary),
+        randomGenerator = TimeZonePresetRepository::randomId,
     )
     ContainerSwitch(
         state.allowForceScreenshots,

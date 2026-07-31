@@ -5,6 +5,7 @@ import com.houvven.guise.db.DeviceDBHelper
 import com.houvven.guise.module.ktx.runThread
 import com.houvven.guise.module.preset.CarrierPresetRepository
 import com.houvven.guise.module.preset.PresetRepository
+import com.houvven.guise.module.preset.TimeZonePresetRepository
 import com.houvven.guise.util.android.Randoms
 import com.houvven.guise.xposed.config.ModuleConfigState
 
@@ -44,6 +45,7 @@ fun oneClickRandom(state: ModuleConfigState, context: Context) {
             phoneNum.value = Randoms.randomPhoneNum()
 
             batteryLevel.value = Randoms.randomBatteryLevel().toString()
+            timeZone.value = TimeZonePresetRepository.randomId()
         }
     }
 

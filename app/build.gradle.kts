@@ -121,7 +121,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("com.materialkolor:material-kolor:4.1.1")
 
-    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("androidx.navigation:navigation-compose:2.10.0-alpha06")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
