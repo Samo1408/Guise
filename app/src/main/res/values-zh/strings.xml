@@ -121,5 +121,8 @@
     <string name="xposed_service_not_connected">尚未连接 Xposed 服务</string>
     <string name="manual_force_stop_required">Guise 尚未加载到此进程，请点“强行停止”，再打开应用使 Hook 生效</string>
     <string name="xposed_target_process_exit_failed">目标进程未能退出，请手动停止</string>
+    <string name="root_force_stop_failed">ROOT 强行停止失败</string>
+    <string name="root_force_stop_timeout">等待 ROOT 授权超时</string>
+    <string name="invalid_package_name">应用包名无效</string>
     <string name="xposed_scope_sync_failed">Xposed 作用域自动同步失败：%1$s</string>
 </resources>

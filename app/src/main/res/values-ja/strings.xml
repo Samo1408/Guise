@@ -122,5 +122,8 @@
     <string name="xposed_service_not_connected">Xposed サービスに接続されていません</string>
     <string name="manual_force_stop_required">Guise はまだこのプロセスに読み込まれていません。「強制停止」をタップしてからアプリを開き直し、フックを有効にしてください</string>
     <string name="xposed_target_process_exit_failed">対象プロセスを終了できませんでした。手動で停止してください</string>
+    <string name="root_force_stop_failed">ROOT による強制停止に失敗しました</string>
+    <string name="root_force_stop_timeout">ROOT 権限の承認待ちがタイムアウトしました</string>
+    <string name="invalid_package_name">パッケージ名が無効です</string>
     <string name="xposed_scope_sync_failed">Xposed スコープの同期に失敗しました：%1$s</string>
 </resources>

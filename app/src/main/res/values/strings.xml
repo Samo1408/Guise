@@ -136,5 +136,8 @@
     <string name="xposed_service_not_connected">Xposed service is not connected</string>
     <string name="manual_force_stop_required">Guise has not been loaded into this process yet. Tap Force stop, then open the app again to activate the hook.</string>
     <string name="xposed_target_process_exit_failed">The target process did not exit. Please stop it manually.</string>
+    <string name="root_force_stop_failed">ROOT force stop failed</string>
+    <string name="root_force_stop_timeout">Timed out waiting for ROOT authorization</string>
+    <string name="invalid_package_name">Invalid package name</string>
     <string name="xposed_scope_sync_failed">Xposed scope synchronization failed: %1$s</string>
 </resources>

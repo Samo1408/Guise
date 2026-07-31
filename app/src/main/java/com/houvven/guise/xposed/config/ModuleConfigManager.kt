@@ -15,6 +15,9 @@ import io.github.libxposed.service.HotReloadResult
 import io.github.libxposed.service.HookedTarget
 import io.github.libxposed.service.XposedService
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 class ModuleConfigManager
 private constructor(
@@ -82,16 +85,13 @@ private constructor(
 
     suspend fun stopApp(): Result<Unit> {
         this.save()
-        return requestProcessExit().fold(
-            onSuccess = { Result.success(Unit) },
-            onFailure = { Result.failure(it) },
-        )
+        return stopWithFallback()
     }
 
     suspend fun restartApp(): Result<Unit> {
         this.save()
         return runCatching {
-            requestProcessExit().getOrThrow()
+            stopWithFallback().getOrThrow()
             val intent = context.packageManager.getLaunchIntentForPackage(config.packageName)
                 ?: error(context.getString(R.string.app_not_launchable))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -100,26 +100,25 @@ private constructor(
     }
 
     suspend fun stopIfHooked(): Result<Unit> =
-        requestProcessExit(openDetailsWhenUnavailable = false).map { }
+        requestProcessExit().map { }
 
-    private suspend fun requestProcessExit(
-        openDetailsWhenUnavailable: Boolean = true,
-    ): Result<Int> = runCatching {
-        val service = ContextAmbient.xposedService ?: run {
-            if (openDetailsWhenUnavailable) {
-                openApplicationDetails()
-                error(context.getString(R.string.manual_force_stop_required))
-            }
-            return@runCatching 0
-        }
+    private suspend fun stopWithFallback(): Result<Unit> {
+        val rootResult = forceStopWithRoot()
+        if (rootResult.isSuccess) return rootResult
+
+        val xposedResult = requestProcessExit()
+        if (xposedResult.getOrNull()?.let { it > 0 } == true) return Result.success(Unit)
+
+        openApplicationDetails()
+        return Result.failure(
+            IllegalStateException(context.getString(R.string.manual_force_stop_required))
+        )
+    }
+
+    private suspend fun requestProcessExit(): Result<Int> = runCatching {
+        val service = ContextAmbient.xposedService ?: return@runCatching 0
         val targets = service.getRunningTargets().filter(::isTargetProcess)
-        if (targets.isEmpty()) {
-            if (openDetailsWhenUnavailable) {
-                openApplicationDetails()
-                error(context.getString(R.string.manual_force_stop_required))
-            }
-            return@runCatching 0
-        }
+        if (targets.isEmpty()) return@runCatching 0
         val targetPids = targets.mapTo(mutableSetOf()) { it.pid }
         val extras = Bundle().apply {
             putString(ProcessControl.EXTRA_COMMAND, ProcessControl.COMMAND_EXIT)
@@ -146,6 +145,27 @@ private constructor(
             error(context.getString(R.string.xposed_target_process_exit_failed))
         }
         targets.size
+    }
+
+    private suspend fun forceStopWithRoot(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(PACKAGE_NAME_PATTERN.matches(config.packageName)) {
+                context.getString(R.string.invalid_package_name)
+            }
+            val command =
+                "am force-stop --user current ${config.packageName}"
+            val process = ProcessBuilder("su", "-c", command)
+                .redirectErrorStream(true)
+                .start()
+            if (!process.waitFor(ROOT_COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                process.destroy()
+                error(context.getString(R.string.root_force_stop_timeout))
+            }
+            val output = process.inputStream.bufferedReader().use { it.readText().trim() }
+            check(process.exitValue() == 0) {
+                output.ifBlank { context.getString(R.string.root_force_stop_failed) }
+            }
+        }
     }
 
     private fun isTargetProcess(target: HookedTarget): Boolean =
@@ -212,6 +232,8 @@ private constructor(
     companion object {
 
         private const val PROCESS_EXIT_WAIT_MS = 800L
+        private const val ROOT_COMMAND_TIMEOUT_SECONDS = 15L
+        private val PACKAGE_NAME_PATTERN = Regex("[A-Za-z0-9._]+")
 
         fun of(config: ModuleConfig, state: ModuleConfigState) = ModuleConfigManager(config, state)
 
