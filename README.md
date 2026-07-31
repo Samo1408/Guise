@@ -47,7 +47,7 @@ Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模�
 .\gradlew.bat :guise-test:assembleDebug :guise-test:lintDebug
 ```
 
-产物位于 `guise-test/build/outputs/apk/debug/guise-test-debug.apk`，使用 Android 默认调试签名。
+产物位于 `guise-test/build/outputs/apk/debug/guise-test-debug.apk`，经过 R8 优化和资源收缩，并使用 Android 默认调试签名。
 
 ## 构建
 
