@@ -3,6 +3,7 @@ package com.houvven.guise.ui.routing.launcher
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -142,16 +143,15 @@ private fun AppCard(
         LocalNavController.current.navigate("${NavRoutingTypes.DEPLOY_CONFIG_EDITOR.name}/$name/$packageName")
     }
 
-    val disable = Modifier
-        .padding(horizontal = 5.dp)
-
-    val enable = Modifier
-        .padding(horizontal = 5.dp)
-        .clip(RoundedCornerShape(15.dp))
-        .background(MaterialTheme.colorScheme.surfaceVariant)
-
-    val modifier = (if (appInfo.isEnable) enable else disable)
-        .clip(RoundedCornerShape(10.dp))
+    val containerColor = if (appInfo.isEnable) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        Color.Transparent
+    }
+    val modifier = Modifier
+        .padding(horizontal = 8.dp)
+        .clip(MaterialTheme.shapes.medium)
+        .background(containerColor)
         .fillMaxWidth()
         .clickable(onClick = { clickable() })
         .padding(horizontal = 10.dp, vertical = 15.dp)
@@ -339,7 +339,10 @@ fun DeployScreen() {
                 .padding(top = pd.calculateTopPadding(), bottom = pd.calculateBottomPadding())
                 .fillMaxSize(),
         ) {
-            LazyColumn(state = listState) {
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 itemsIndexed(
                     items = generateApps(prioritizedPackages),
                     key = { _, appInfo -> appInfo.packageName },
