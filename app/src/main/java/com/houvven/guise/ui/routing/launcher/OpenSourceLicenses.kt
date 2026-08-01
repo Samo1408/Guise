@@ -104,7 +104,10 @@ private val openSourceProjects = listOf(
 internal fun OpenSourceLicensesSheet(onDismiss: () -> Unit) {
     var selectedProject by remember { mutableStateOf<OpenSourceProject?>(null) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetGesturesEnabled = false,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

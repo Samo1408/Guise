@@ -109,7 +109,15 @@
     <string name="update_check_failed">暂时无法检查更新，请稍后重试</string>
     <string name="update_available_title">发现新版本 %1$s</string>
     <string name="update_notes">更新内容</string>
-    <string name="update_go_to_download">前往更新</string>
+    <string name="update_action">更新</string>
+    <string name="update_install">安装</string>
+    <string name="update_downloading">正在下载</string>
+    <string name="update_downloading_progress">%1$d%%</string>
+    <string name="update_download_failed">下载失败，请重试</string>
+    <string name="update_download_no_apk">当前版本没有可下载的 APK</string>
+    <string name="update_notification_channel">应用更新</string>
+    <string name="update_notification_channel_summary">新版本下载完成后的安装提示</string>
+    <string name="update_download_ready">更新已下载，点击安装</string>
     <string name="update_ignore_version">忽略此版本</string>
     <string name="update_later">稍后</string>
     <string name="settings_donation_channels">捐赠通道</string>

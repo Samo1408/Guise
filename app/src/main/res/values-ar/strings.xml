@@ -110,7 +110,15 @@
     <string name="update_check_failed">تعذر التحقق من التحديثات. حاول مرة أخرى لاحقًا.</string>
     <string name="update_available_title">إصدار جديد %1$s</string>
     <string name="update_notes">ما الجديد</string>
-    <string name="update_go_to_download">عرض التحديث</string>
+    <string name="update_action">تحديث</string>
+    <string name="update_install">تثبيت</string>
+    <string name="update_downloading">جارٍ التنزيل</string>
+    <string name="update_downloading_progress">%1$d%%</string>
+    <string name="update_download_failed">فشل التنزيل. حاول مرة أخرى.</string>
+    <string name="update_download_no_apk">لا يتوفر ملف APK قابل للتنزيل لهذا الإصدار.</string>
+    <string name="update_notification_channel">تحديثات التطبيق</string>
+    <string name="update_notification_channel_summary">إشعار التثبيت بعد تنزيل التحديث</string>
+    <string name="update_download_ready">تم تنزيل التحديث. اضغط للتثبيت.</string>
     <string name="update_ignore_version">تجاهل هذا الإصدار</string>
     <string name="update_later">لاحقًا</string>
     <string name="settings_donation_channels">التبرع</string>

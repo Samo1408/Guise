@@ -3,9 +3,12 @@ package com.houvven.guise.update
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,15 +16,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
 import com.houvven.guise.ui.GlobalSnackbarHost
-import com.houvven.guise.util.android.IntentUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -39,6 +44,8 @@ object AppUpdateManager {
         private set
     var availableUpdate by mutableStateOf<UpdateInfo?>(null)
         private set
+    var detectedUpdate by mutableStateOf<UpdateInfo?>(null)
+        private set
 
     fun check(manual: Boolean) {
         if (checking) {
@@ -55,9 +62,11 @@ object AppUpdateManager {
             result.onSuccess { info ->
                 if (updater.isNewer(info)) {
                     if (reportResult || !UpdatePromptPreferences.isIgnored(ContextAmbient.current, info.versionCode)) {
+                        detectedUpdate = info
                         availableUpdate = info
                     }
                 } else if (reportResult) {
+                    detectedUpdate = null
                     GlobalSnackbarHost.showByDismissPrevious(
                         ContextAmbient.current.getString(
                             R.string.update_already_latest,
@@ -89,6 +98,7 @@ object AppUpdateManager {
 
     fun ignore(info: UpdateInfo) {
         UpdatePromptPreferences.ignore(ContextAmbient.current, info.versionCode)
+        detectedUpdate = null
         availableUpdate = null
     }
 }
@@ -97,6 +107,51 @@ object AppUpdateManager {
 fun AppUpdateHost() {
     LaunchedEffect(Unit) { AppUpdateManager.startStartupCheck() }
     val info = AppUpdateManager.availableUpdate ?: return
+    val context = LocalContext.current
+    val downloadFailedMessage = stringResource(R.string.update_download_failed)
+    val updater = remember { AppUpdater() }
+    var downloadId by remember(info.versionCode) { mutableStateOf<Long?>(null) }
+    var readyDownloadId by remember(info.versionCode) { mutableStateOf<Long?>(null) }
+    var progress by remember(info.versionCode) { mutableStateOf<Float?>(null) }
+    var error by remember(info.versionCode) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(info.versionCode) {
+        UpdateInstaller.pending(context)
+            .takeIf { it >= 0L && UpdateInstaller.isSuccessful(context, it) }
+            ?.let { readyDownloadId = it }
+    }
+
+    LaunchedEffect(downloadId) {
+        val id = downloadId ?: return@LaunchedEffect
+        while (true) {
+            val state = updater.downloadProgress(context, id)
+            if (state == null) {
+                downloadId = null
+                progress = null
+                error = downloadFailedMessage
+                return@LaunchedEffect
+            }
+            progress = state.fraction
+            when {
+                state.active -> delay(400L)
+                state.successful -> {
+                    downloadId = null
+                    progress = null
+                    readyDownloadId = id
+                    UpdateInstaller.markReady(context, id)
+                    UpdateInstallActivity.open(context, id)
+                    AppUpdateManager.dismiss()
+                    return@LaunchedEffect
+                }
+                else -> {
+                    downloadId = null
+                    progress = null
+                    error = downloadFailedMessage
+                    return@LaunchedEffect
+                }
+            }
+        }
+    }
     AlertDialog(
         onDismissRequest = AppUpdateManager::dismiss,
         icon = { Icon(Icons.Default.SystemUpdate, contentDescription = null) },
@@ -111,14 +166,50 @@ fun AppUpdateHost() {
                     )
                     UpdateNotesText(info.notes)
                 }
+                error?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                AppUpdateManager.dismiss()
-                IntentUtils.openBrowser(info.actionUrl)
-            }) {
-                Text(stringResource(R.string.update_go_to_download))
+            TextButton(
+                enabled = downloadId == null,
+                onClick = {
+                    error = null
+                    val readyId = readyDownloadId
+                    if (readyId != null) {
+                        UpdateInstallActivity.open(context, readyId)
+                    } else {
+                        runCatching { updater.download(context, info) }
+                            .onSuccess { downloadId = it }
+                            .onFailure {
+                                error = it.message ?: downloadFailedMessage
+                            }
+                    }
+                },
+            ) {
+                if (downloadId != null) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text(
+                        progress?.let {
+                            stringResource(R.string.update_downloading_progress, (it * 100).toInt())
+                        } ?: stringResource(R.string.update_downloading),
+                    )
+                } else {
+                    Text(
+                        stringResource(
+                            if (readyDownloadId != null) {
+                                R.string.update_install
+                            } else {
+                                R.string.update_action
+                            },
+                        ),
+                    )
+                }
             }
         },
         dismissButton = {

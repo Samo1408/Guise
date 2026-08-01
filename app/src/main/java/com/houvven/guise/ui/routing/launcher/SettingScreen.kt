@@ -237,27 +237,33 @@ internal fun SettingScreen() {
         ListItem(
             headlineContent = { Text(stringResource(R.string.settings_version)) },
             supportingContent = {
-                Text(
-                    if (AppUpdateManager.checking) {
-                        stringResource(R.string.update_checking)
-                    } else {
-                        "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
-                    },
-                )
+                Text("${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
             },
             leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
             trailingContent = {
-                if (AppUpdateManager.checking) {
-                    CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
-                } else {
+                TextButton(
+                    onClick = { AppUpdateManager.check(manual = true) },
+                    enabled = !AppUpdateManager.checking,
+                ) {
+                    if (AppUpdateManager.checking) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                    }
                     Text(
                         text = stringResource(R.string.update_check_action),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
                     )
+                    if (AppUpdateManager.detectedUpdate != null) {
+                        Spacer(Modifier.width(6.dp))
+                        Box(
+                            Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.error),
+                        )
+                    }
                 }
             },
-            modifier = Modifier.clickable { AppUpdateManager.check(manual = true) },
         )
         ListItem(
             headlineContent = { Text(stringResource(R.string.maintainer_name)) },

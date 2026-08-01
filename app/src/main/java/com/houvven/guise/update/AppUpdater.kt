@@ -1,6 +1,8 @@
 package com.houvven.guise.update
 
+import android.app.DownloadManager
 import android.content.Context
+import android.net.Uri
 import android.util.Base64
 import com.houvven.guise.BuildConfig
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +21,13 @@ data class UpdateInfo(
     val notes: String,
     val releaseUrl: String,
     val apkUrl: String,
-) {
-    val actionUrl: String get() = apkUrl.ifBlank { releaseUrl }
-}
+)
+
+data class UpdateDownloadProgress(
+    val fraction: Float?,
+    val active: Boolean,
+    val successful: Boolean,
+)
 
 class AppUpdater {
     suspend fun check(): UpdateInfo = withContext(Dispatchers.IO) {
@@ -52,6 +58,57 @@ class AppUpdater {
     }
 
     fun isNewer(info: UpdateInfo): Boolean = info.versionCode > BuildConfig.VERSION_CODE
+
+    fun download(context: Context, info: UpdateInfo): Long {
+        check(info.apkUrl.isNotBlank()) {
+            context.getString(com.houvven.guise.R.string.update_download_no_apk)
+        }
+        val manager = context.getSystemService(DownloadManager::class.java)
+        val request = DownloadManager.Request(Uri.parse(info.apkUrl))
+            .setTitle(context.getString(com.houvven.guise.R.string.app_name))
+            .setDescription(context.getString(com.houvven.guise.R.string.update_downloading))
+            .setMimeType(APK_MIME)
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+        return manager.enqueue(request).also { id ->
+            context.getSharedPreferences(UPDATE_PREFERENCES, Context.MODE_PRIVATE)
+                .edit()
+                .putLong(KEY_DOWNLOAD_ID, id)
+                .remove(KEY_READY_DOWNLOAD_ID)
+                .apply()
+        }
+    }
+
+    suspend fun downloadProgress(context: Context, downloadId: Long): UpdateDownloadProgress? =
+        withContext(Dispatchers.IO) {
+            val manager = context.getSystemService(DownloadManager::class.java)
+            runCatching {
+                manager.query(DownloadManager.Query().setFilterById(downloadId)).use { cursor ->
+                    if (!cursor.moveToFirst()) return@use null
+                    val status = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS),
+                    )
+                    val downloaded = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(
+                            DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
+                        ),
+                    )
+                    val total = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES),
+                    )
+                    UpdateDownloadProgress(
+                        fraction = if (total > 0L) {
+                            (downloaded.toDouble() / total.toDouble()).toFloat().coerceIn(0f, 1f)
+                        } else {
+                            null
+                        },
+                        active = status == DownloadManager.STATUS_PENDING ||
+                            status == DownloadManager.STATUS_RUNNING ||
+                            status == DownloadManager.STATUS_PAUSED,
+                        successful = status == DownloadManager.STATUS_SUCCESSFUL,
+                    )
+                }
+            }.getOrNull()
+        }
 
     private fun fetch(source: String): UpdateInfo {
         val separator = if ('?' in source) '&' else '?'
@@ -111,6 +168,10 @@ class AppUpdater {
         private const val MANIFEST_PATH = "daxiaamu/Guise_Reborn@main/latest-release.json"
         private const val CONNECT_TIMEOUT_MS = 6_000
         private const val READ_TIMEOUT_MS = 8_000
+        const val UPDATE_PREFERENCES = "app_update"
+        const val KEY_DOWNLOAD_ID = "download_id"
+        const val KEY_READY_DOWNLOAD_ID = "ready_download_id"
+        const val APK_MIME = "application/vnd.android.package-archive"
         private val UPDATE_SOURCES = listOf(
             "https://api.github.com/repos/daxiaamu/Guise_Reborn/contents/latest-release.json?ref=main",
             "https://cdn.jsdelivr.net/gh/$MANIFEST_PATH",

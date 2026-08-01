@@ -124,7 +124,15 @@
     <string name="update_check_failed">Unable to check for updates. Please try again later.</string>
     <string name="update_available_title">New version %1$s</string>
     <string name="update_notes">What’s new</string>
-    <string name="update_go_to_download">View update</string>
+    <string name="update_action">Update</string>
+    <string name="update_install">Install</string>
+    <string name="update_downloading">Downloading</string>
+    <string name="update_downloading_progress">%1$d%%</string>
+    <string name="update_download_failed">Download failed. Please try again.</string>
+    <string name="update_download_no_apk">No downloadable APK is available for this version.</string>
+    <string name="update_notification_channel">App updates</string>
+    <string name="update_notification_channel_summary">Installation prompt after an update is downloaded</string>
+    <string name="update_download_ready">Update downloaded. Tap to install.</string>
     <string name="update_ignore_version">Ignore this version</string>
     <string name="update_later">Later</string>
     <string name="settings_donation_channels">Donation</string>
