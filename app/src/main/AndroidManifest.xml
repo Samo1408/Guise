@@ -12,6 +12,7 @@
     <application
             android:name=".ContextAmbient"
             android:allowBackup="true"
+            android:usesCleartextTraffic="false"
             android:enableOnBackInvokedCallback="true"
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
