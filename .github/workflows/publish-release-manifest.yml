@@ -62,7 +62,7 @@ jobs:
             --arg cdnPrimary "https://gh-proxy.com/${official_url}" \
             --arg cdnSecondary "https://ghfast.top/${official_url}" \
             --arg cdnThird "https://ghproxy.net/${official_url}" \
-            --arg cdnFourth "https://ghproxy.vip/${official_url}" \
+            --arg cdnFourth "https://ghproxy.vip/${official_url}?sha=${apk_sha256}" \
             --arg cdnFifth "https://gh.jasonzeng.dev/${official_url}" \
             --arg cdnSixth "https://gh.3w.pm/${official_url}" \
             --arg cdnSeventh "https://v6.gh-proxy.com/${official_url}" \
