@@ -116,7 +116,7 @@
     <string name="settings_version">Version:</string>
     <string name="settings_maintainer">Maintainer:</string>
     <string name="maintainer_name" translatable="false">大侠阿木</string>
-    <string name="maintainer_description">Maintaining versions 1.2.0 and later</string>
+    <string name="maintainer_description">Maintains and develops versions 2.0.0 and later</string>
     <string name="settings_original_author">Original author:</string>
     <string name="original_author_name" translatable="false">Houvven</string>
     <string name="original_author_entry_description">Original author of Guise · Tap to donate</string>

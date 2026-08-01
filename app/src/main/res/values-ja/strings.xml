@@ -103,7 +103,7 @@
     <string name="settings_about">このアプリについて</string>
     <string name="settings_version">バージョン：</string>
     <string name="settings_maintainer">管理者：</string>
-    <string name="maintainer_description">バージョン 1.2.0 以降のメンテナンスを担当</string>
+    <string name="maintainer_description">バージョン 2.0.0 以降の保守・開発を担当</string>
     <string name="settings_original_author">原作者：</string>
     <string name="original_author_entry_description">Guise の原作者・タップして寄付</string>
     <string name="update_checking">アップデートを確認中…</string>

@@ -103,7 +103,7 @@
     <string name="settings_about">حول التطبيق</string>
     <string name="settings_version">الإصدار:</string>
     <string name="settings_maintainer">المشرف:</string>
-    <string name="maintainer_description">يتولى صيانة الإصدار 1.2.0 وما بعده</string>
+    <string name="maintainer_description">يتولى صيانة وتطوير الإصدار 2.0.0 وما بعده</string>
     <string name="settings_original_author">المؤلف الأصلي:</string>
     <string name="original_author_entry_description">المؤلف الأصلي لـ Guise · اضغط للتبرع له</string>
     <string name="update_checking">جارٍ التحقق من التحديثات…</string>

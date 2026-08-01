@@ -102,7 +102,7 @@
     <string name="settings_about">关于</string>
     <string name="settings_version">版本：</string>
     <string name="settings_maintainer">维护者：</string>
-    <string name="maintainer_description">接手维护1.2.0及之后版本</string>
+    <string name="maintainer_description">维护和开发2.0.0及之后的版本</string>
     <string name="settings_original_author">原作者：</string>
     <string name="original_author_entry_description">Guise原作者，点击给他捐赠</string>
     <string name="update_checking">正在检查更新…</string>
