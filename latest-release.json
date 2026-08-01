@@ -1,22 +1,22 @@
 {
-    "versionCode":  14,
-    "versionName":  "2.0.0-beta",
-    "title":  "Guise Reborn 2.0.0-beta",
-    "notes":  "Guise Reborn `2.0.0-beta` 是接手维护后的首个现代化预发布版本。本版本弃用旧框架包袱，面向 Android 17 / API 37、Modern Xposed API 102、Jetpack Compose 与 Material 3 重构。\n\n## 主要变化\n\n- 应用列表勾选成为唯一 Hook 启用节点，并同步 LSPosed 作用域。\n- 设备、系统、版本、DPI、标识符、网络、SIM、Wi-Fi、定位、基站、语言、时区、电池、截图与空白通行能力补全。\n- 版本伪装改为修改完整 `PackageInfo` 返回结果，适配 Android 17 对 `static final` 反射修改的限制。\n- 全新 Material 3 界面，支持系统/浅色/深色主题、Monet 动态取色、自定义主题色与预测性返回。\n- 停止/重启目标应用采用 ROOT → Xposed service → 手动停止三级回退。\n- 配置编辑加入脏状态、按需保存与按目标运行状态提示，减少不必要打扰。\n- 新增 GitHub 更新机制：启动/手动检查、忽略至下一版本、可点击更新说明、下载与安装。\n- 更新清单和 APK 下载均支持多 CDN 自动切换；APK 下载失败或 SHA-256 不符会继续尝试下一来源。\n- ROOT 可用时支持静默覆盖安装，并由独立 shell 在安装后重新启动 Guise。\n- 启动链路重构：数据库懒加载、壁纸配色与应用扫描后台化、可见项图标懒加载、LRU 缓存、R8 与 Baseline Profile。\n- 完整维护内容、兼容性影响、数据来源和许可证见仓库 [README](https://github.com/daxiaamu/Guise_Reborn#readme)。\n\n## 兼容性\n\n- 最低 Android 10 / API 29，target/compile API 37。\n- 需要支持 libxposed Modern API 102/service 102 的框架。\n- 当前仅提供 `arm64-v8a` APK。\n- 当前 APK 使用 Android 默认调试签名；与不同签名的旧安装不兼容时需要先导出配置并卸载旧版。\n- 这是 Beta 版本，建议先使用 Guise Test 验证目标应用的实际读取结果。\n\nSHA-256：`FF5225EE72A02D113F8C59BC55EDAE2722A055CF47C1EF82BE362457B27F9BF9`",
-    "releaseUrl":  "https://github.com/daxiaamu/Guise_Reborn/releases/tag/v2.0.0-beta",
-    "apkUrls":  [
-                    "https://gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://ghfast.top/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://ghproxy.net/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://gh.jasonzeng.dev/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://gh.3w.pm/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://v6.gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://v6.gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://xget.xi-xu.me/gh/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-                    "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk"
-                ],
-    "apkUrl":  "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta/Guise-2.0.0-beta.apk",
-    "apkSha256":  "ff5225ee72a02d113f8c59bc55edae2722a055cf47c1ef82be362457b27f9bf9"
+  "versionCode": 16,
+  "versionName": "2.0.0-beta.2",
+  "title": "Guise Reborn 2.0.0-beta.2",
+  "notes": "Guise Reborn 2.0.0-beta.2 是 2.0.0-beta 的修复版。\n\n## 修复与改进\n\n- 设置重新支持隐藏桌面图标；仅禁用 Launcher 入口，隐藏后仍可从 LSPosed 模块页进入 Guise。\n- 增加 LSPosed 专用的模块设置入口，并统一桌面图标显示/隐藏逻辑。\n- 开放源代码许可列表打开后直接完整展开，可顺畅滚动到最后一项，修复顶部抽搐及半展开状态无法继续上拉的问题。\n- 更新清单发布流程修复中文 Release Notes 编码，并在发布后主动请求 jsDelivr 刷新缓存。\n- 明确禁止明文网络流量；更新检查和 APK 下载仍使用 HTTPS、多 CDN 自动切换与 SHA-256 校验。\n\n## 兼容性\n\n- 最低 Android 10 / API 29，目标 Android 17 / API 37。\n- 仅提供 `arm64-v8a` APK。\n- 支持 Modern Xposed API 102。\n- 延续上一版的调试签名，可直接覆盖安装。\n\nSHA-256：`088AC9978AB4FB315135B97D8C35DD287E72D1BCB95ED1D5E9948DB734BCEB10`",
+  "releaseUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/tag/v2.0.0-beta.2",
+  "apkUrls": [
+    "https://gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://ghfast.top/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://ghproxy.net/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://gh.jasonzeng.dev/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://gh.3w.pm/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://v6.gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://v6.gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://xget.xi-xu.me/gh/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+    "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk"
+  ],
+  "apkUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.2/Guise-2.0.0-beta.2.apk",
+  "apkSha256": "088ac9978ab4fb315135b97d8c35dd287e72d1bcb95ed1d5e9948db734bceb10"
 }
