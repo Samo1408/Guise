@@ -26,8 +26,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_TITLE: ${{ github.event.release.name }}
-          RELEASE_NOTES: ${{ github.event.release.body }}
         shell: bash
         run: |
           set -euo pipefail
@@ -52,11 +50,14 @@ jobs:
           official_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${asset_name}"
           xget_url="https://xget.xi-xu.me/gh/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${asset_name}"
           release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
+          release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
+          release_title="$(jq -r '.name // empty' <<<"${release_json}")"
+          release_notes="$(jq -r '.body // empty' <<<"${release_json}")"
           jq -n \
             --argjson versionCode "${version_code}" \
             --arg versionName "${version_name}" \
-            --arg title "${RELEASE_TITLE:-Guise Reborn ${version_name}}" \
-            --arg notes "${RELEASE_NOTES:-}" \
+            --arg title "${release_title:-Guise Reborn ${version_name}}" \
+            --arg notes "${release_notes}" \
             --arg releaseUrl "${release_url}" \
             --arg cdnPrimary "https://gh-proxy.com/${official_url}" \
             --arg cdnSecondary "https://ghfast.top/${official_url}" \
