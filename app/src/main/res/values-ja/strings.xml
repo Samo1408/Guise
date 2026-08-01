@@ -95,6 +95,8 @@
     <string name="settings_choose_theme_color">テーマカラーを選択</string>
     <string name="settings_predictive_back">予測型「戻る」</string>
     <string name="settings_predictive_back_summary">スワイプで戻るときに前の画面をプレビューします</string>
+    <string name="settings_hide_launcher_icon">デスクトップアイコンを非表示</string>
+    <string name="settings_hide_launcher_icon_summary">ランチャーから Guise を非表示にしても、LSPosed から引き続き開けます</string>
     <string name="color_red">赤</string>
     <string name="color_green">緑</string>
     <string name="color_blue">青</string>

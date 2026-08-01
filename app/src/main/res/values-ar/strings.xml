@@ -95,6 +95,8 @@
     <string name="settings_choose_theme_color">اختيار لون السمة</string>
     <string name="settings_predictive_back">الرجوع التنبؤي</string>
     <string name="settings_predictive_back_summary">معاينة الشاشة السابقة أثناء السحب للرجوع</string>
+    <string name="settings_hide_launcher_icon">إخفاء أيقونة سطح المكتب</string>
+    <string name="settings_hide_launcher_icon_summary">إخفاء Guise من مشغّل التطبيقات مع إبقاء إمكانية فتحه من LSPosed</string>
     <string name="color_red">أحمر</string>
     <string name="color_green">أخضر</string>
     <string name="color_blue">أزرق</string>

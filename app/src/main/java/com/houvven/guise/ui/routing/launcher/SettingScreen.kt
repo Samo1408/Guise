@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,6 +76,7 @@ import com.houvven.guise.BuildConfig
 import com.houvven.guise.R
 import com.houvven.guise.constant.DonatePays
 import com.houvven.guise.module.ktx.toBitmap
+import com.houvven.guise.ui.LauncherIconController
 import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.theme.ThemeMode
 import com.houvven.guise.ui.theme.customThemeColor
@@ -169,10 +172,14 @@ private fun ThemeModeSetting() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingScreen() {
+    val context = LocalContext.current
     val receiptCode = remember { mutableStateOf<Bitmap?>(null) }
     val showColorDialog = remember { mutableStateOf(false) }
     val showDonationDialog = remember { mutableStateOf(false) }
     val showOpenSourceLicenses = remember { mutableStateOf(false) }
+    var launcherIconHidden by remember {
+        mutableStateOf(LauncherIconController.isHidden(context))
+    }
 
     @Composable
     fun content() {
@@ -230,6 +237,29 @@ internal fun SettingScreen() {
                 )
             },
             modifier = Modifier.clickable { setPredictiveBack(!predictiveBack.value) },
+        )
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.settings_hide_launcher_icon)) },
+            supportingContent = {
+                Text(stringResource(R.string.settings_hide_launcher_icon_summary))
+            },
+            leadingContent = {
+                Icon(Icons.Default.VisibilityOff, contentDescription = null)
+            },
+            trailingContent = {
+                Switch(
+                    checked = launcherIconHidden,
+                    onCheckedChange = {
+                        launcherIconHidden = LauncherIconController.setHidden(context, it)
+                    },
+                )
+            },
+            modifier = Modifier.clickable {
+                launcherIconHidden = LauncherIconController.setHidden(
+                    context,
+                    !launcherIconHidden,
+                )
+            },
         )
 
         HorizontalDivider(Modifier.padding(horizontal = 16.dp))

@@ -94,6 +94,8 @@
     <string name="settings_choose_theme_color">选择主题色</string>
     <string name="settings_predictive_back">预测性返回</string>
     <string name="settings_predictive_back_summary">滑动返回时预览上一页</string>
+    <string name="settings_hide_launcher_icon">隐藏桌面图标</string>
+    <string name="settings_hide_launcher_icon_summary">从桌面启动器中隐藏 Guise，仍可从 LSPosed 模块页打开</string>
     <string name="color_red">红</string>
     <string name="color_green">绿</string>
     <string name="color_blue">蓝</string>

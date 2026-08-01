@@ -107,6 +107,8 @@
     <string name="settings_choose_theme_color">Choose theme color</string>
     <string name="settings_predictive_back">Predictive back</string>
     <string name="settings_predictive_back_summary">Preview the previous screen while swiping back</string>
+    <string name="settings_hide_launcher_icon">Hide desktop icon</string>
+    <string name="settings_hide_launcher_icon_summary">Hide Guise from the launcher; you can still open it from LSPosed</string>
     <string name="color_red">Red</string>
     <string name="color_green">Green</string>
     <string name="color_blue">Blue</string>
