@@ -43,13 +43,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,9 +58,9 @@ import com.houvven.guise.R
 import com.houvven.guise.constant.AppConfigKey
 import com.houvven.guise.module.apps.AppInfo
 import com.houvven.guise.module.apps.AppSortTypes
+import com.houvven.guise.ui.components.AppIcon
 import com.houvven.guise.ui.components.simplify.NoBtnAlertDialog
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
-import com.houvven.guise.ui.components.simplify.SimplifyImage
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.config.ModuleConfigManager
@@ -155,7 +155,7 @@ private fun AppCard(
         val iconModifier = Modifier
             .padding(horizontal = 8.dp)
             .size(36.dp)
-        SimplifyImage(appInfo.icon.asImageBitmap(), iconModifier)
+        AppIcon(appInfo.packageName, iconModifier)
         val typography = MaterialTheme.typography
         Column(Modifier.weight(1f)) {
             val appType = stringResource(
@@ -213,7 +213,7 @@ fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
     val onRefresh: () -> Unit = {
         coroutineScope.launch {
             refreshing = true
-            val apps = withContext(Dispatchers.Default) {
+            val apps = withContext(Dispatchers.IO) {
                 com.houvven.guise.module.apps.AppInfoProvider.getList()
             }
             LauncherState.apps.value = apps
@@ -391,6 +391,9 @@ fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
             }
         }
         LaunchedEffect(Unit) {
+            // Let Compose present the first frame before package-manager Binder calls,
+            // label decoding and icon rasterization begin.
+            withFrameNanos { }
             if (LauncherState.apps.value.isEmpty()) onRefresh()
         }
         if (displayMenu) Menu()

@@ -5,7 +5,6 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.core.graphics.drawable.toBitmap
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.xposed.config.ModuleConfig
 
@@ -46,7 +45,6 @@ object AppInfoProvider {
 
         val isEnable = ModuleConfig.get(packageName).enabled
         val label = applicationInfo.loadLabel(packageManager).toString()
-        val icon = applicationInfo.loadIcon(packageManager).toBitmap()
         val installTime = packageInfo.firstInstallTime
         val updateTime = packageInfo.lastUpdateTime
         val isSystemApp = (applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
@@ -55,7 +53,6 @@ object AppInfoProvider {
             isEnable = isEnable,
             label = label,
             packageName = packageName,
-            icon = icon,
             installTime = installTime,
             updateTime = updateTime,
             isSystemApp = isSystemApp

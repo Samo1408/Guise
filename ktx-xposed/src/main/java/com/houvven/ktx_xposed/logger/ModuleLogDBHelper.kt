@@ -11,16 +11,23 @@ abstract class ModuleLogDBHelper : RoomDatabase() {
     abstract fun moduleLogDao(): ModuleLogDao
 
     companion object {
+        @Volatile
+        private var applicationContext: Context? = null
 
-        private lateinit var db: ModuleLogDBHelper
+        private val db: ModuleLogDBHelper by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            Room.databaseBuilder(
+                checkNotNull(applicationContext) { "ModuleLogDBHelper is not initialized" },
+                ModuleLogDBHelper::class.java,
+                "module_log.db",
+            ).build()
+        }
 
-        lateinit var moduleLogDao: ModuleLogDao
+        val moduleLogDao: ModuleLogDao by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            db.moduleLogDao()
+        }
 
         fun init(context: Context) {
-            db = Room
-                .databaseBuilder(context, ModuleLogDBHelper::class.java, "module_log.db")
-                .build()
-            moduleLogDao = db.moduleLogDao()
+            applicationContext = context.applicationContext
         }
     }
 }

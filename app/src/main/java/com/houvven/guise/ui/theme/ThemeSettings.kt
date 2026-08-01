@@ -1,5 +1,6 @@
 package com.houvven.guise.ui.theme
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.houvven.guise.constant.AppConfigKey
 
@@ -24,7 +25,7 @@ val dynamicColor = mutableStateOf(
     AppConfigKey.run { mmkv.decodeBool(DYNAMIC_COLOR, true) },
 )
 
-val customThemeColor = mutableStateOf(
+val customThemeColor = mutableIntStateOf(
     AppConfigKey.run { mmkv.decodeInt(CUSTOM_THEME_COLOR, DEFAULT_THEME_COLOR) },
 )
 
@@ -43,7 +44,7 @@ fun setDynamicColor(enabled: Boolean) {
 }
 
 fun setCustomThemeColor(color: Int) {
-    customThemeColor.value = color
+    customThemeColor.intValue = color
     AppConfigKey.run { mmkv.encode(CUSTOM_THEME_COLOR, color) }
 }
 

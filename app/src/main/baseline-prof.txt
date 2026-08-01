@@ -1,0 +1,8 @@
+# Compile Guise-owned startup and UI code ahead of time. Dependency profiles are
+# merged separately by AGP; these rules cover the application code they cannot know.
+HSPLcom/houvven/guise/**->**(**)**
+Lcom/houvven/guise/**
+
+# ContextAmbient registers the Xposed service during Application startup.
+HSPLcom/houvven/ktx_xposed/**->**(**)**
+Lcom/houvven/ktx_xposed/**

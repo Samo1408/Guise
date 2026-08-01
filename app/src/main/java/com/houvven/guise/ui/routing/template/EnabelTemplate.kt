@@ -37,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -46,6 +45,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.module.apps.AppInfo
+import com.houvven.guise.ui.components.AppIcon
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.ui.routing.LocalNavController
@@ -121,10 +121,9 @@ fun EnableTemplateScreen(template: Template) {
                     .padding(start = 5.dp),
                 // horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SimplifyIcon(
-                    appInfo.icon.asImageBitmap(),
+                AppIcon(
+                    packageName = appInfo.packageName,
                     modifier = Modifier.size(30.dp),
-                    tint = Color.Unspecified
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Text(

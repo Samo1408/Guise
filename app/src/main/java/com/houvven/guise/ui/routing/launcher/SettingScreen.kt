@@ -201,7 +201,7 @@ internal fun SettingScreen() {
                         Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(customThemeColor.value))
+                            .background(Color(customThemeColor.intValue))
                             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                     )
                 },
@@ -374,7 +374,7 @@ internal fun SettingScreen() {
     }
     if (showColorDialog.value) {
         ThemeColorDialog(
-            initialColor = Color(customThemeColor.value),
+            initialColor = Color(customThemeColor.intValue),
             onDismiss = { showColorDialog.value = false },
             onConfirm = {
                 setCustomThemeColor(it.toArgb())
