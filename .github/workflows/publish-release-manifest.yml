@@ -110,3 +110,11 @@ jobs:
           git commit -m "Publish ${RELEASE_TAG} update manifest"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      - name: Purge mutable jsDelivr cache
+        shell: bash
+        run: |
+          purge_url="https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/latest-release.json"
+          if ! curl --fail --silent --show-error --retry 3 "${purge_url}"; then
+            echo "::warning::Could not purge jsDelivr manifest cache; GitHub API remains authoritative"
+          fi

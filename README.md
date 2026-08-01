@@ -138,6 +138,7 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 - 更新说明支持可点击的 HTTPS 超链接。
 - 更新清单以 GitHub API 为权威源，并发准备 jsDelivr、Fastly、Gcore 和 GitHub Raw 回退，权威源失败时自动使用可用镜像中版本号最高的清单。
 - 发布 Guise Release 后由 GitHub Actions 下载已上传附件、计算 SHA-256，并自动提交 `latest-release.json`；Guise Test 的独立 Tag 不触发 Guise 更新清单。
+- 清单提交后工作流会调用 jsDelivr 官方 purge 端点请求清除 `main` 分支别名缓存，尽量缩短 CDN 继续返回旧版本的时间；客户端会比较所有成功来源并采用版本号最高的清单，GitHub API 始终作为权威来源。
 - APK 下载清单支持 `apkUrls` 候选列表，按 CDN/镜像/官方 GitHub 地址依次交给系统 `DownloadManager`；下载失败、记录丢失、返回错误文件或 SHA-256 不匹配时会自动尝试下一来源。
 - 当前发布工作流生成 10 个经 Release 附件单字节探测验证的代理/CDN 地址，并把官方 GitHub Release 地址作为最终兜底；失效候选可在工作流中集中维护，无需修改客户端代码。
 - 下载计划会持久化候选地址、当前来源和预期 SHA-256；即使 Guise 进程被系统回收，下载完成广播仍可继续校验或切换来源。
