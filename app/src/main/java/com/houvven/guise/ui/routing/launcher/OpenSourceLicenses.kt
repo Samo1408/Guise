@@ -3,12 +3,14 @@ package com.houvven.guise.ui.routing.launcher
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Code
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -103,29 +106,35 @@ private val openSourceProjects = listOf(
 @Composable
 internal fun OpenSourceLicensesSheet(onDismiss: () -> Unit) {
     var selectedProject by remember { mutableStateOf<OpenSourceProject?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetGesturesEnabled = false,
+        sheetState = sheetState,
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.9f)
-                .verticalScroll(rememberScrollState()),
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            Text(
-                text = stringResource(R.string.settings_open_source_licenses),
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = stringResource(R.string.settings_open_source_licenses_summary),
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            openSourceProjects.forEach { project ->
+            item {
+                Text(
+                    text = stringResource(R.string.settings_open_source_licenses),
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+            item {
+                Text(
+                    text = stringResource(R.string.settings_open_source_licenses_summary),
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            items(openSourceProjects, key = { it.name }) { project ->
                 ListItem(
                     headlineContent = { Text(project.name) },
                     supportingContent = {
