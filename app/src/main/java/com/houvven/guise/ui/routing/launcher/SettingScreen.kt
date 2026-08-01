@@ -265,7 +265,7 @@ internal fun SettingScreen() {
         ListItem(
             headlineContent = { Text(stringResource(R.string.settings_version)) },
             supportingContent = {
-                Text("${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
+                Text(BuildConfig.VERSION_NAME)
             },
             leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
             trailingContent = {
