@@ -249,9 +249,7 @@ internal fun SettingScreen() {
             trailingContent = {
                 Switch(
                     checked = launcherIconHidden,
-                    onCheckedChange = {
-                        launcherIconHidden = LauncherIconController.setHidden(context, it)
-                    },
+                    onCheckedChange = null,
                 )
             },
             modifier = Modifier.clickable {
