@@ -13,9 +13,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.houvven.guise.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileInputStream
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 class UpdateDownloadReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,6 +45,7 @@ class UpdateDownloadReceiver : BroadcastReceiver() {
 object UpdateInstaller {
     private const val CHANNEL_ID = "app_update_install"
     private const val NOTIFICATION_ID = 0x4755
+    private const val ROOT_INSTALL_TIMEOUT_SECONDS = 180L
 
     fun markReady(context: Context, downloadId: Long) {
         context.getSharedPreferences(AppUpdater.UPDATE_PREFERENCES, Context.MODE_PRIVATE)
@@ -117,19 +127,93 @@ object UpdateInstaller {
             false
         }
     }
+
+    /**
+     * Copies the DownloadManager content into the app cache, then streams it to PackageManager.
+     * Streaming avoids OEM SELinux rules that prevent PackageManager from opening an APK path
+     * in /data/local/tmp. Keeping the restart in the same root shell lets it continue even when
+     * package replacement kills this process.
+     */
+    suspend fun silentInstallWithRoot(context: Context, downloadId: Long): Boolean =
+        withContext(Dispatchers.IO) {
+            if (!claimRootInstall(downloadId)) return@withContext false
+            val cachedApk = File(context.cacheDir, "updates/guise-$downloadId.apk")
+            try {
+                val manager = context.getSystemService(DownloadManager::class.java)
+                val descriptor = manager.openDownloadedFile(downloadId)
+                cachedApk.parentFile?.mkdirs()
+                val expectedSize = descriptor.statSize
+                descriptor.use { parcelFile ->
+                    FileInputStream(parcelFile.fileDescriptor).use { input ->
+                        cachedApk.outputStream().use(input::copyTo)
+                    }
+                }
+                check(cachedApk.length() > 0L)
+                check(expectedSize <= 0L || cachedApk.length() == expectedSize)
+
+                val source = shellQuote(cachedApk.absolutePath)
+                val component = shellQuote("${context.packageName}/.ui.MainActivity")
+                val command = buildString {
+                    append("cat $source | ")
+                    append("pm install -S ${cachedApk.length()} -r >/dev/null 2>&1; ")
+                    append("result=\$?; ")
+                    append("if [ \$result -eq 0 ]; then ")
+                    append("sleep 1; am start --user current -n $component >/dev/null 2>&1; fi; ")
+                    append("exit \$result")
+                }
+                val process = ProcessBuilder("su", "-c", command)
+                    .redirectInput(ProcessBuilder.Redirect.from(File("/dev/null")))
+                    .redirectOutput(ProcessBuilder.Redirect.to(File("/dev/null")))
+                    .redirectError(ProcessBuilder.Redirect.to(File("/dev/null")))
+                    .start()
+                if (!process.waitFor(ROOT_INSTALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    process.destroy()
+                    return@withContext false
+                }
+                process.exitValue() == 0
+            } catch (_: Exception) {
+                false
+            } finally {
+                cachedApk.delete()
+                releaseRootInstall(downloadId)
+            }
+        }
+
+    @Synchronized
+    private fun claimRootInstall(downloadId: Long): Boolean =
+        rootInstallingId.compareAndSet(-1L, downloadId)
+
+    @Synchronized
+    private fun releaseRootInstall(downloadId: Long) {
+        rootInstallingId.compareAndSet(downloadId, -1L)
+    }
+
+    private fun shellQuote(value: String): String = "'${value.replace("'", "'\\''")}'"
+
+    private val rootInstallingId = AtomicLong(-1L)
 }
 
-class UpdateInstallActivity : Activity() {
+class UpdateInstallActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val downloadId = intent.getLongExtra(
             EXTRA_DOWNLOAD_ID,
             UpdateInstaller.pending(this),
         )
-        if (downloadId >= 0L) {
-            UpdateInstaller.launchInstaller(this, downloadId)
+        if (downloadId < 0L) {
+            finish()
+            return
         }
-        finish()
+        lifecycleScope.launch {
+            val installedWithRoot = UpdateInstaller.silentInstallWithRoot(
+                this@UpdateInstallActivity,
+                downloadId,
+            )
+            if (!installedWithRoot) {
+                UpdateInstaller.launchInstaller(this@UpdateInstallActivity, downloadId)
+            }
+            finish()
+        }
     }
 
     companion object {

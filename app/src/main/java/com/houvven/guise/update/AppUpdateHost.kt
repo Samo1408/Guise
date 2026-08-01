@@ -1,5 +1,6 @@
 package com.houvven.guise.update
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
@@ -108,6 +111,7 @@ fun AppUpdateHost() {
     LaunchedEffect(Unit) { AppUpdateManager.startStartupCheck() }
     val info = AppUpdateManager.availableUpdate ?: return
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val downloadFailedMessage = stringResource(R.string.update_download_failed)
     val updater = remember { AppUpdater() }
     var downloadId by remember(info.versionCode) { mutableStateOf<Long?>(null) }
@@ -139,7 +143,15 @@ fun AppUpdateHost() {
                     progress = null
                     readyDownloadId = id
                     UpdateInstaller.markReady(context, id)
-                    UpdateInstallActivity.open(context, id)
+                    if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                        val installedWithRoot = UpdateInstaller.silentInstallWithRoot(context, id)
+                        if (!installedWithRoot) {
+                            val launched = (context as? Activity)?.let { activity ->
+                                UpdateInstaller.launchInstaller(activity, id)
+                            } ?: false
+                            if (!launched) UpdateInstallActivity.open(context, id)
+                        }
+                    }
                     AppUpdateManager.dismiss()
                     return@LaunchedEffect
                 }
@@ -189,16 +201,21 @@ fun AppUpdateHost() {
                 },
             ) {
                 if (downloadId != null) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                    )
+                    val currentProgress = progress
+                    if (currentProgress != null) {
+                        CircularProgressIndicator(
+                            progress = { currentProgress },
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    }
                     Spacer(Modifier.size(8.dp))
-                    Text(
-                        progress?.let {
-                            stringResource(R.string.update_downloading_progress, (it * 100).toInt())
-                        } ?: stringResource(R.string.update_downloading),
-                    )
+                    Text(stringResource(R.string.update_downloading))
                 } else {
                     Text(
                         stringResource(

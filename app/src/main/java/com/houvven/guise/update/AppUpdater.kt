@@ -68,7 +68,9 @@ class AppUpdater {
             .setTitle(context.getString(com.houvven.guise.R.string.app_name))
             .setDescription(context.getString(com.houvven.guise.R.string.update_downloading))
             .setMimeType(APK_MIME)
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+            .setNotificationVisibility(
+                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
+            )
         return manager.enqueue(request).also { id ->
             context.getSharedPreferences(UPDATE_PREFERENCES, Context.MODE_PRIVATE)
                 .edit()
