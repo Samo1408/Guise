@@ -10,6 +10,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -20,7 +21,8 @@ data class UpdateInfo(
     val title: String,
     val notes: String,
     val releaseUrl: String,
-    val apkUrl: String,
+    val apkUrls: List<String>,
+    val apkSha256: String,
 )
 
 data class UpdateDownloadProgress(
@@ -60,11 +62,55 @@ class AppUpdater {
     fun isNewer(info: UpdateInfo): Boolean = info.versionCode > BuildConfig.VERSION_CODE
 
     fun download(context: Context, info: UpdateInfo): Long {
-        check(info.apkUrl.isNotBlank()) {
+        check(info.apkUrls.isNotEmpty()) {
             context.getString(com.houvven.guise.R.string.update_download_no_apk)
         }
+        return enqueueDownload(
+            context = context,
+            urls = info.apkUrls,
+            sourceIndex = 0,
+            expectedSha256 = info.apkSha256,
+        )
+    }
+
+    fun retryNextDownload(context: Context, failedDownloadId: Long): Long? =
+        synchronized(DOWNLOAD_PLAN_LOCK) {
+            val preferences = downloadPreferences(context)
+            val currentDownloadId = preferences.getLong(KEY_DOWNLOAD_ID, -1L)
+            if (currentDownloadId != failedDownloadId) {
+                return@synchronized currentDownloadId.takeIf { it >= 0L }
+            }
+            val urls = readDownloadUrls(preferences.getString(KEY_DOWNLOAD_URLS, null))
+            val firstNextIndex = preferences.getInt(KEY_DOWNLOAD_SOURCE_INDEX, 0) + 1
+            if (firstNextIndex !in urls.indices) return@synchronized null
+            runCatching {
+                context.getSystemService(DownloadManager::class.java).remove(failedDownloadId)
+            }
+            val expectedSha256 = preferences.getString(KEY_DOWNLOAD_SHA256, null).orEmpty()
+            (firstNextIndex..urls.lastIndex).firstNotNullOfOrNull { sourceIndex ->
+                runCatching {
+                    enqueueDownload(
+                        context = context,
+                        urls = urls,
+                        sourceIndex = sourceIndex,
+                        expectedSha256 = expectedSha256,
+                    )
+                }.getOrNull()
+            }
+        }
+
+    fun expectedSha256(context: Context): String =
+        downloadPreferences(context).getString(KEY_DOWNLOAD_SHA256, null).orEmpty()
+
+    private fun enqueueDownload(
+        context: Context,
+        urls: List<String>,
+        sourceIndex: Int,
+        expectedSha256: String,
+    ): Long {
+        val url = urls[sourceIndex]
         val manager = context.getSystemService(DownloadManager::class.java)
-        val request = DownloadManager.Request(Uri.parse(info.apkUrl))
+        val request = DownloadManager.Request(Uri.parse(url))
             .setTitle(context.getString(com.houvven.guise.R.string.app_name))
             .setDescription(context.getString(com.houvven.guise.R.string.update_downloading))
             .setMimeType(APK_MIME)
@@ -72,9 +118,12 @@ class AppUpdater {
                 DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
             )
         return manager.enqueue(request).also { id ->
-            context.getSharedPreferences(UPDATE_PREFERENCES, Context.MODE_PRIVATE)
+            downloadPreferences(context)
                 .edit()
                 .putLong(KEY_DOWNLOAD_ID, id)
+                .putString(KEY_DOWNLOAD_URLS, JSONArray(urls).toString())
+                .putInt(KEY_DOWNLOAD_SOURCE_INDEX, sourceIndex)
+                .putString(KEY_DOWNLOAD_SHA256, expectedSha256)
                 .remove(KEY_READY_DOWNLOAD_ID)
                 .apply()
         }
@@ -148,8 +197,19 @@ class AppUpdater {
         val releaseUrl = json.optString("releaseUrl")
             .ifBlank { RELEASES_URL }
         check(releaseUrl.startsWith("https://")) { "Invalid releaseUrl" }
-        val apkUrl = json.optString("apkUrl")
-        check(apkUrl.isBlank() || apkUrl.startsWith("https://")) { "Invalid apkUrl" }
+        val apkUrls = buildList {
+            json.optJSONArray("apkUrls")?.let { urls ->
+                repeat(urls.length()) { index ->
+                    urls.optString(index).takeIf(String::isNotBlank)?.let(::add)
+                }
+            }
+            json.optString("apkUrl").takeIf(String::isNotBlank)?.let(::add)
+        }.distinct()
+        check(apkUrls.all { it.startsWith("https://") }) { "Invalid APK URL" }
+        val apkSha256 = json.optString("apkSha256").lowercase()
+        check(apkSha256.isBlank() || SHA256_PATTERN.matches(apkSha256)) {
+            "Invalid APK SHA-256"
+        }
         return UpdateInfo(
             versionCode = versionCode,
             versionName = versionName,
@@ -161,9 +221,22 @@ class AppUpdater {
                 .filter(String::isNotBlank)
                 .joinToString("\n") { if (it.startsWith("- ")) "• ${it.drop(2)}" else it },
             releaseUrl = releaseUrl,
-            apkUrl = apkUrl,
+            apkUrls = apkUrls,
+            apkSha256 = apkSha256,
         )
     }
+
+    private fun downloadPreferences(context: Context) =
+        context.applicationContext.getSharedPreferences(UPDATE_PREFERENCES, Context.MODE_PRIVATE)
+
+    private fun readDownloadUrls(value: String?): List<String> = runCatching {
+        val json = JSONArray(value.orEmpty())
+        buildList {
+            repeat(json.length()) { index ->
+                json.optString(index).takeIf(String::isNotBlank)?.let(::add)
+            }
+        }
+    }.getOrDefault(emptyList())
 
     companion object {
         const val RELEASES_URL = "https://github.com/daxiaamu/Guise_Reborn/releases"
@@ -173,7 +246,12 @@ class AppUpdater {
         const val UPDATE_PREFERENCES = "app_update"
         const val KEY_DOWNLOAD_ID = "download_id"
         const val KEY_READY_DOWNLOAD_ID = "ready_download_id"
+        const val KEY_DOWNLOAD_URLS = "download_urls"
+        const val KEY_DOWNLOAD_SOURCE_INDEX = "download_source_index"
+        const val KEY_DOWNLOAD_SHA256 = "download_sha256"
         const val APK_MIME = "application/vnd.android.package-archive"
+        private val DOWNLOAD_PLAN_LOCK = Any()
+        private val SHA256_PATTERN = Regex("[0-9a-f]{64}")
         private val UPDATE_SOURCES = listOf(
             "https://api.github.com/repos/daxiaamu/Guise_Reborn/contents/latest-release.json?ref=main",
             "https://cdn.jsdelivr.net/gh/$MANIFEST_PATH",

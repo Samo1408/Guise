@@ -1,0 +1,111 @@
+name: Publish release manifest
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-release-manifest
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Generate verified manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TITLE: ${{ github.event.release.name }}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version_code="$(sed -n 's/^versionCode=//p' app/version.properties | tr -d '\r')"
+          version_name="$(sed -n 's/^versionName=//p' app/version.properties | tr -d '\r')"
+          expected_tag="v${version_name}"
+          if [[ "${RELEASE_TAG}" != "${expected_tag}" ]]; then
+            echo "Release tag ${RELEASE_TAG} does not match ${expected_tag}" >&2
+            exit 1
+          fi
+
+          asset_name="Guise-${version_name}.apk"
+          gh release download "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "${asset_name}" \
+            --dir "${RUNNER_TEMP}"
+          apk_path="${RUNNER_TEMP}/${asset_name}"
+          test -s "${apk_path}"
+          apk_sha256="$(sha256sum "${apk_path}" | awk '{print $1}')"
+
+          official_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${asset_name}"
+          xget_url="https://xget.xi-xu.me/gh/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${asset_name}"
+          release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
+          jq -n \
+            --argjson versionCode "${version_code}" \
+            --arg versionName "${version_name}" \
+            --arg title "${RELEASE_TITLE:-Guise Reborn ${version_name}}" \
+            --arg notes "${RELEASE_NOTES:-}" \
+            --arg releaseUrl "${release_url}" \
+            --arg cdnPrimary "https://gh-proxy.com/${official_url}" \
+            --arg cdnSecondary "https://ghfast.top/${official_url}" \
+            --arg cdnThird "https://ghproxy.net/${official_url}" \
+            --arg cdnFourth "https://ghproxy.vip/${official_url}" \
+            --arg cdnFifth "https://gh.jasonzeng.dev/${official_url}" \
+            --arg cdnSixth "https://gh.3w.pm/${official_url}" \
+            --arg cdnSeventh "https://v6.gh-proxy.com/${official_url}" \
+            --arg cdnEighth "https://v6.gh-proxy.org/${official_url}" \
+            --arg cdnNinth "https://gh-proxy.org/${official_url}" \
+            --arg cdnTenth "${xget_url}" \
+            --arg apkUrl "${official_url}" \
+            --arg apkSha256 "${apk_sha256}" \
+            '{
+              versionCode: $versionCode,
+              versionName: $versionName,
+              title: $title,
+              notes: $notes,
+              releaseUrl: $releaseUrl,
+              apkUrls: [
+                $cdnPrimary,
+                $cdnSecondary,
+                $cdnThird,
+                $cdnFourth,
+                $cdnFifth,
+                $cdnSixth,
+                $cdnSeventh,
+                $cdnEighth,
+                $cdnNinth,
+                $cdnTenth,
+                $apkUrl
+              ],
+              apkUrl: $apkUrl,
+              apkSha256: $apkSha256
+            }' > latest-release.json
+
+      - name: Commit manifest to main
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- latest-release.json; then
+            echo "latest-release.json is already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest-release.json
+          git commit -m "Publish ${RELEASE_TAG} update manifest"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,80 +1,241 @@
 # Guise Reborn
 
-Guise Reborn 是 Guise 的社区维护续作。它是一个 LSPosed/Xposed 模块，可针对指定应用配置机型、系统属性、Android ID、区域、网络、Wi-Fi、定位及基站等运行环境信息。
+Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xposed 的应用运行环境伪装模块。它可针对用户明确选中的目标应用，修改设备、系统、标识符、网络、SIM、Wi-Fi、定位、基站、语言、时区、电池及隐私相关 API 的返回结果。
 
-本仓库保留了公开源码仓库的完整 Git 历史，并基于作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
+本仓库保留公开源码仓库的 Git 历史，并基于原作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
 
 - 原项目：[Houvven/Guise](https://github.com/Houvven/Guise)
 - 本仓库采用的源码上游：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
 - 上述源码仓库的 GitHub Fork 上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
 
-## 当前状态
+> 维护者：大侠阿木。当前预发布版本为 `2.0.0-beta`；README 中的维护版内容均位于原作者说明之前。
 
-当前维护线以原版 `Guise 1.1.2` 的完整功能为起点，已经转为现代化主线。应用仍保留 `1.1.3-reborn.1` 版本号（正式发布前再统一调整），当前面向 Android 17 / API 37 构建。
+## 当前技术基线
 
-本轮刷新包括：
+| 项目 | 当前状态 |
+| --- | --- |
+| 最低系统 | Android 10 / API 29 |
+| 编译与目标版本 | Android 17 / API 37 |
+| CPU 架构 | 仅 `arm64-v8a` |
+| Java/Kotlin | Java 17 字节码、Kotlin 2.4.10 |
+| 构建系统 | Gradle 9.6.1、Android Gradle Plugin 9.3.1、KSP 2.3.6 |
+| UI | Jetpack Compose BOM `2026.06.01`、Material 3、edge-to-edge |
+| Xposed | libxposed Modern API 102 与 Xposed service 102 |
+| 数据与异步 | MMKV 2.4.1、Room 2.8.4、kotlinx.coroutines 1.11.0、kotlinx.serialization 1.11.0 |
+| 发布优化 | Release 启用 R8、资源收缩及 Baseline Profile |
 
-- 使用 JDK 17、Gradle 9.6.1、Android Gradle Plugin 9.3.1、Kotlin 2.4.10、Android SDK 与 Build Tools 37。
-- UI 迁移到当前稳定版 Jetpack Compose BOM `2026.06.01` 和 Material 3，启用 edge-to-edge、系统/浅色/深色主题及 Monet 动态取色。
-- 英文、简体中文、日文和阿拉伯文资源完整对应；Android 13 及以上可通过系统的应用语言设置切换。
-- 模块入口、Hook 拦截器、Remote Preferences 和作用域管理迁移到 Modern Xposed API 102；不再使用旧版 XposedBridge/XposedHelpers、旧模块元数据和直接修改 LSPosed 数据库的实现。
-- 采用 MediaStore 与系统文件选择器导入导出，移除“所有文件访问”、旧外部存储权限和明文网络配置。
-- 升级 Room、MMKV 2、KSP、协程、序列化和 AndroidX；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及单独的通用 `lib` 模块。
-- MMKV 2 官方仅提供 64 位 Android 原生库，因此当前 APK 仅构建 `arm64-v8a`。
+MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Reborn 暂时只生成 `arm64-v8a` APK。32 位设备和仅提供 32 位用户空间的系统不能安装当前构建。
 
-现有功能包括：
+## 维护版改动总览
 
-- 已安装应用管理、搜索、过滤、排序及 LSPosed 作用域同步。
-- 按应用配置设备型号、显示大小（DPI）、系统版本、网络、SIM、Wi-Fi、唯一标识、定位和基站信息。
-- 电池电量、截图限制、窗口隐私及联系人/图片/视频/音频访问控制。
-- 内置设备数据库、配置模板、预设、导入导出、运行日志和应用设置。
+### 1. 工程与内部架构重构
 
-内置品牌与型号数据库来自 [KHwang9883/MobileModels](https://github.com/KHwang9883/MobileModels) 的[官方 CSV 导出](https://github.com/KHwang9883/MobileModels-csv)，数据库部分遵循 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)；具体来源版本与转换说明见 `app/src/main/assets/devices.NOTICE.txt`。
+- 从旧 Android/Xposed 工程迁移到 API 37、AGP 9、Kotlin 2.4 与当前 AndroidX 组件。
+- 管理界面全面迁移到 Jetpack Compose 与 Material 3，移除旧 View/过时主题实现所带来的维护包袱。
+- 模块入口、包加载回调、Hook 辅助层、日志和配置访问迁移到 Modern Xposed API 102。
+- 使用 Xposed Remote Preferences 在管理应用和目标进程之间传递配置，不再直接修改 LSPosed 数据库。
+- Hook 按设备、系统、唯一标识、网络、SIM、Wi-Fi、定位、基站、电池、截图、时区等职责拆分；单个 Hook 失败会被隔离，避免拖垮整个目标进程。
+- 数据预设从 UI 代码移入资源：Android 版本、SDK、DPI、网络、语言等集中维护在 `app/src/main/res/raw/presets.json`。
+- 升级 Room、MMKV、KSP、协程和序列化；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及原有通用 `lib` 模块。
+- 导入导出改用 MediaStore 与系统文件选择器，移除“所有文件访问”、旧外部存储权限及明文网络配置。
+- Release 和 Guise Test 均启用 R8；正式签名尚未配置，开发测试包继续使用 Android 默认调试签名。
 
-全球运营商预设来自 MIT 许可的 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，编码依据 [ITU-T E.212](https://www.itu.int/rec/T-REC-E.212/en)；具体筛选规则与来源版本见 `app/src/main/assets/carriers.NOTICE.txt`。
+### 2. Xposed 作用域与启用逻辑
 
-Android 版本、API、DPI、网络和语言等内置预设集中维护在 `app/src/main/res/raw/presets.json`，避免把数据散落在 UI 代码中。
+- 应用列表中的勾选状态现在是 Guise 的唯一启用节点，同时负责同步 LSPosed 作用域。
+- 勾选应用：写入启用状态并加入作用域；取消勾选：停止对该应用执行 Guise Hook，并从作用域移除。
+- 不再把“存在配置”误认为“已启用 Hook”；应用可保留配置但暂时取消勾选。
+- 已保存为空配置时会自动取消勾选，避免作用域中残留一个实际没有任何配置的目标。
+- 删除/清空应用配置和取消勾选已分离，降低用户对“清除配置是否会关闭 Hook”的理解成本。
+- 勾选状态变化不会立即打乱当前列表；选中的应用只在下次进入列表或主动刷新时置顶。
+- 移除旧的“模块未激活”和“不检测模块激活状态”逻辑。Xposed service 未连接只表示管理端当前不能使用对应服务能力，不再被展示成武断的“模块未激活”。
+- 隐藏桌面入口时仍保留框架模块入口，避免在 LSPosed 中也无法重新进入 Guise。
 
-## 开放源代码许可
+### 3. 设备、系统与应用版本伪装
 
-应用内可在“设置 → 开放源代码许可”查看以下项目、数据来源和许可证，并直接打开项目主页或许可证原文：
+- 支持品牌、型号、设备代号、产品、主板、硬件/CPU 代号和 Fingerprint。
+- 品牌和型号选择使用内置设备数据库，型号会联动设备代号；选择界面加入搜索并修正重复拖动手柄等交互问题。
+- Android 版本与 SDK/API 预设补齐至 Android 17 / API 37，包含 Android 12L / API 32。
+- 支持应用读取到的显示密度 `densityDpi`，范围为 72–1000；界面同时估算其对应的“最小宽度”dp，方便和开发者选项中的显示大小建立关系。
+- DPI 修改只影响目标应用进程看到的 `DisplayMetrics`/`Configuration`，不会修改系统全局显示大小。
+- 支持版本号与版本名伪装。Android 17 对面向 API 37 应用收紧了 `static final` 字段反射修改，因此版本伪装改为修改系统返回的完整 `PackageInfo`，而不是依赖逐渐失效的 `BuildConfig` 常量篡改。
+- 较旧系统和较旧目标应用仍保留设备构建字段的兼容 Hook；但面向 API 37 的应用不能再把 `static final` 反射修改视为可靠能力。
 
-- [Guise Reborn](https://github.com/daxiaamu/Guise_Reborn)：本应用代码采用 [GNU GPL v3.0 or later](LICENSE)，并保留原始 Guise 的 Git 历史和作者署名。
-- [AndroidX / Jetpack Compose / Material 3](https://github.com/androidx/androidx)：[Apache License 2.0](https://source.android.com/docs/setup/about/licenses)。
-- [Kotlin / kotlinx.coroutines / kotlinx.serialization](https://github.com/JetBrains/kotlin)：[Apache License 2.0](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt)。
-- [libxposed API / service](https://github.com/libxposed)：[Apache License 2.0](https://github.com/libxposed/api/blob/master/LICENSE)。
-- [MaterialKolor](https://github.com/jordond/MaterialKolor)：主体采用 [MIT License](https://github.com/jordond/MaterialKolor/blob/main/LICENSE)，其 Material Color Utilities 模块采用 [Apache License 2.0](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE)。
-- [MMKV](https://github.com/Tencent/MMKV)：[BSD 3-Clause License](https://github.com/Tencent/MMKV/blob/master/LICENSE.TXT)。
-- [MobileModels / MobileModels-csv](https://github.com/KHwang9883/MobileModels)：[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。
-- [mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)：[MIT License](https://github.com/pbakondy/mcc-mnc-list/blob/master/LICENSE)。
+### 4. 标识符、网络、SIM 与运营商
 
-目前主要模块：
+- 支持 Android ID/SSAID、IMEI、手机号等目标应用可读取标识的伪装。
+- 当前 IMEI 配置为单值：应用按任一卡槽读取时均返回该值，因此双卡设备上的 IMEI 1/2 会相同；界面已加入说明，避免误解为只配置第一卡槽。
+- 支持网络类型、Wi-Fi SSID、BSSID、Wi-Fi MAC 地址。
+- 支持 SIM 运营商代码、名称和国家/地区代码，并可从全球 MCC/MNC 运营商数据中搜索选择。
+- 运营商预设来自 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，编码依据 [ITU-T E.212](https://www.itu.int/rec/T-REC-E.212/en)。
+- 支持 LAC/CID 基站参数以及使 Wi-Fi 定位、基站定位失败的独立开关。
 
-- `app`：Jetpack Compose 管理界面、配置数据和完整 Xposed Hook 实现。
-- `ktx-xposed`：基于 Modern Xposed API 的 Hook 适配层和模块日志基础设施。
-- `guise-test`：独立的 API 37 测试应用，用真实 Android API 核验各项伪装结果，不依赖 Guise 的配置对象。
+### 5. 定位、语言、时区、电池与截图
+
+- 支持经纬度伪装及随机偏移。
+- 经纬度只修改目标应用读取到的 GPS 数值；应用仍可能利用 Wi-Fi 与基站推断位置。需要更完整的位置隔离时，应同时启用“使 Wi-Fi 位置信息失效”和“使基站位置信息失效”。
+- 支持目标应用读取到的语言/地区环境。
+- 新增时区伪装，可从时区库选择或单独随机，并受右上角“一键随机”控制；它只改变目标应用用于读取和格式化本地时间的时区，不修改系统时钟。
+- 电池电量可配置或在 0–100 范围随机，并受“一键随机”控制。
+- Fingerprint、时区、电池等可随机字段均提供就近的独立随机按钮，不必每次使用全局随机。
+- 原截屏文本参数改为“允许强制截图”开关，用于清除目标窗口的安全截图限制；未启用时不主动改变应用原有行为。
+
+### 6. 隐私与空白通行
+
+- 支持联系人、图片、视频、音频的“空白通行证”，使目标应用查询对应数据时得到空结果。
+- 媒体空白通行已适配现代 MediaStore 查询链路，避免只处理旧式文件路径而导致图片仍被枚举。
+- 支持窗口隐私/截图相关 Hook；权限不足、厂商私有媒体接口或应用自行维护的数据索引仍可能绕过通用 Android API，需使用 Guise Test 或目标应用实测。
+
+### 7. 应用列表与配置编辑流程
+
+- 应用列表支持搜索、系统/用户应用筛选与弱化标识、安装时间/更新时间等排序方式。
+- 系统应用/用户应用标记不再占用包名位置，列表密度在信息量和可读性之间重新调整。
+- 列表复选框的裁剪范围修正，不会在尚未进入底部导航区域前提前消失。
+- 配置项统一使用可复用的输入框、辅助说明、预设列表、随机和删除操作布局，修正不同字段右侧按钮不在同一基线的问题。
+- 随机、列表和删除按钮使用一致尺寸与间距；无数据时采用弱化色，有数据或已改动时使用主题色表达状态。
+- 保存按钮仅在配置确有变化时可用，保存成功后立即恢复为不可用。
+- 从配置页返回时：
+  - 有未保存修改会先询问是否保存；
+  - 已保存且目标应用正在运行时，再询问是否停止/重启以生效；
+  - 目标应用没有运行时不重复打扰；
+  - 用户可选择忽略，本次不执行进程操作；
+  - 清空全部配置并确认保存后自动取消该应用勾选。
+- 从配置页返回不会强制刷新应用列表，避免刚勾选的应用因排序/状态刷新突然从当前位置消失。
+
+### 8. 停止应用、重启与生效提示
+
+- 勾选或取消勾选应用时都会提示需要重启目标应用以使 Hook/作用域变化生效。
+- 进程控制采用三级回退：优先尝试 ROOT，失败后尝试 Xposed service，再失败则引导用户进入应用信息页手动停止。
+- 保留 ROOT 分支是为了兼容尚未成功 Hook、框架服务不可用或不能依赖目标进程内 Hook 的场景。
+- 不为了停止一个目标应用而 Hook 系统框架；Xposed service 能力只在框架已提供且连接成功时使用。
+- 配置页不再常驻放置容易误触的“停止/重启”按钮，而是把操作放到保存和退出的实际生效流程中。
+
+### 9. Material 3、主题与交互
+
+- 全面使用 Material 3、edge-to-edge、系统状态栏/导航栏明暗图标和原生风格底部导航。
+- 主题模式支持“跟随系统、浅色、深色”。
+- 支持 Monet 动态取色：根据系统壁纸生成配色；关闭后可使用自定义主题色，而不是强制使用 Guise 自有取色算法。
+- 壁纸取色提示、未连接 Xposed service 提示、Snackbar 和选中态均跟随当前 Material 色板。
+- 设置项补齐图标、分组标题与分割线；可进入的项目使用统一的尾部指示样式。
+- 预测性返回默认开启，支持页面随手势进度移动；从右侧返回时页面向右退出，从左侧返回时向左退出，不人为放大手势距离。
+- 修复预测性返回停在半截、配置页响应延迟及前景/背景层级混淆。Android 13 及以上还需要系统启用预测性返回；改变系统开关后通常需要重启应用。
+- 阿拉伯文继续支持 RTL，英文、简体中文、日文和阿拉伯文资源保持同步，不因界面重构回退语言覆盖。
+
+### 10. 设置、关于与开放源代码信息
+
+- “关于”中明确显示维护者“大侠阿木”和原作者“Houvven”。
+- 大侠阿木条目说明“接手维护 1.2.0 及之后版本”，不提供捐赠入口。
+- 原作者条目包含说明、支付宝/微信捐赠入口、“未成年人请勿捐赠”和捐赠昵称备注说明。
+- 邮箱、Coolapk 等旧反馈入口合并为“查看源代码”，用于在 GitHub 查看代码和提交 Issues。
+- 新增应用内“开放源代码许可”页面，列出本应用、依赖、数据来源、项目主页及许可证链接。
+- 修复许可证列表滚动到顶部时的回弹/抽搐问题。
+
+### 11. GitHub 更新机制
+
+- 支持启动后延迟检测更新和设置页手动检测更新；版本行本身不可点击，仅“检查更新”按钮执行请求。
+- 检测到新版本后显示红点；“稍后”只关闭本次提示，“忽略此版本”会在下一版本发布前不再自动提示该版本。
+- 不支持强制更新，用户始终可以稍后处理。
+- 更新说明支持可点击的 HTTPS 超链接。
+- 更新清单以 GitHub API 为权威源，并发准备 jsDelivr、Fastly、Gcore 和 GitHub Raw 回退，权威源失败时自动使用可用镜像中版本号最高的清单。
+- 发布 Guise Release 后由 GitHub Actions 下载已上传附件、计算 SHA-256，并自动提交 `latest-release.json`；Guise Test 的独立 Tag 不触发 Guise 更新清单。
+- APK 下载清单支持 `apkUrls` 候选列表，按 CDN/镜像/官方 GitHub 地址依次交给系统 `DownloadManager`；下载失败、记录丢失、返回错误文件或 SHA-256 不匹配时会自动尝试下一来源。
+- 当前发布工作流生成 10 个经 Release 附件单字节探测验证的代理/CDN 地址，并把官方 GitHub Release 地址作为最终兜底；失效候选可在工作流中集中维护，无需修改客户端代码。
+- 下载计划会持久化候选地址、当前来源和预期 SHA-256；即使 Guise 进程被系统回收，下载完成广播仍可继续校验或切换来源。
+- `apkUrl` 单地址字段继续兼容旧更新清单；新版本发布应同时提供 `apkUrls` 和 `apkSha256`。
+- 下载弹窗使用圆形进度指示和不可点击的“正在下载”，不展示百分比和文件大小；下载完成后可继续安装。
+- 有 ROOT 时可通过独立 ROOT shell 静默覆盖安装，并在安装导致旧进程退出后继续执行 `am start` 重新启动 Guise；ROOT 安装失败则回退系统安装器。
+
+### 12. 启动与列表加载性能
+
+本轮对启动链路进行了实机分段测量，并只保留可解释、可维护的优化：
+
+- Android 12+ 首帧就绪后立即移除系统 Splash 的退出动画，不添加人为延时或 KeepOnScreenCondition。
+- Room 日志数据库改为线程安全的按需初始化，避免 ContentProvider 在进程创建阶段立即构建数据库。
+- 壁纸颜色读取移到 `Dispatchers.IO`，MaterialKolor 配色计算移到 `Dispatchers.Default`；首帧先使用系统动态色或基础色板。
+- 应用包扫描延后一帧并移到 IO 调度器，不阻塞第一个 Compose 帧。
+- 完整应用扫描不再预先解码所有图标；只为屏幕上实际参与组合的项目加载图标，并使用 8 MiB LRU 缓存。
+- Release APK 加入 Guise 自身与 Xposed 适配层的 Baseline Profile，并继续合并 AndroidX 依赖提供的 Profile。
+- 主题色状态使用原生整型 Compose State，避免不必要的装箱。
+- 对没有稳定收益的“减少一层布局”等尝试已撤回，不把偶然数据当作优化成果。
+
+在测试设备 `7e49aeb9` 上，以 `am force-stop` 后执行 `am start -W` 的相同方式测得：
+
+| 构建/应用 | 冷启动 TotalTime |
+| --- | ---: |
+| 优化前 Guise Debug | 约 568–580 ms |
+| Guise Release + R8 + Profile 编译后 | 约 136–146 ms |
+| 同机 ikan Pro 对照 | 约 105–121 ms |
+
+以上数据只用于说明本轮优化方向，不代表所有设备的保证值。Debug 与 Release 不应直接比较；首次安装、刚覆盖安装、设备温度、系统调度以及 Baseline Profile 尚未完成编译时，启动耗时会明显更高。
+
+当前应用元数据仍会在首次进入列表时进行一次完整扫描，只是已移出首帧且不再批量解码图标。后续可在持久化快照基础上结合 `PackageManager.getChangedPackages(sequenceNumber)`、`PACKAGE_ADDED/REMOVED/REPLACED` 广播和周期性全量校验实现增量索引；该增量缓存目前尚未宣称为已实现功能。
+
+## 兼容性与行为变化
+
+- **系统要求提高**：管理应用最低支持 Android 10 / API 29，目标和编译版本为 API 37。
+- **框架要求变化**：主线面向支持 libxposed Modern API 102/service 102 的框架；旧 XposedBridge/XposedHelpers 入口不再作为主实现维护。
+- **ABI 限制**：只提供 `arm64-v8a`，不再包含 32 位 MMKV 原生库。
+- **作用域语义变化**：列表勾选才代表启用 Hook；仅保存配置不会隐式启用应用。
+- **版本伪装变化**：API 37 目标应用优先依赖 `PackageInfo` 返回值修改，旧式 `static final BuildConfig` 篡改不再被视为可靠实现。
+- **存储权限变化**：使用系统媒体/文件接口，不再请求所有文件访问和旧式外部存储权限。
+- **预测性返回**：Android 13+ 由系统返回框架提供能力；应用内开关控制页面预览动画，系统总开关和应用重启仍会影响最终效果。
+- **位置伪装边界**：GPS、Wi-Fi、基站是不同来源，只填经纬度不等于阻断所有定位渠道。
+- **时区伪装边界**：只影响目标进程读取/格式化时间所使用的时区，不修改设备时钟或网络时间。
+- **DPI 伪装边界**：只影响目标应用读取的显示参数，不修改系统设置里的显示大小。
+- **签名**：仓库不保存正式签名；开发 APK 使用默认调试签名，正式发布前需单独建立安全的发布签名流程。
+
+## 数据来源与预设
+
+- 品牌与型号数据库来自 [KHwang9883/MobileModels](https://github.com/KHwang9883/MobileModels) 的[官方 CSV 导出](https://github.com/KHwang9883/MobileModels-csv)，数据库部分遵循 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。来源版本与转换说明见 `app/src/main/assets/devices.NOTICE.txt`。
+- 全球运营商预设来自 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，采用 MIT License。筛选规则与来源版本见 `app/src/main/assets/carriers.NOTICE.txt`。
+- Android 版本、SDK/API、DPI、网络和语言等预设位于 `app/src/main/res/raw/presets.json`。
+- 时区列表由系统标准时区 ID 生成，并支持搜索与随机选择。
+
+## 多语言
+
+Guise Reborn 与 Guise Test 当前维护以下完整资源：
+
+- 英文
+- 简体中文
+- 日文
+- 阿拉伯文（含 RTL）
+
+Android 13 及以上可通过系统“应用语言”设置单独切换。新增功能需要同步补齐四套资源，不能只在 Kotlin/Compose 代码中硬编码中文。
 
 ## Guise Test
 
-测试应用包名为 `com.daxiaamu.guise.test`。它可检查应用版本、设备与系统字段、Android ID、IMEI、手机号、网络、Wi-Fi、SIM、基站、定位、电池、语言地区、联系人/媒体空白通行和截图限制，并完整支持英文、简体中文、日文和阿拉伯文。
+`guise-test` 是独立发布的 API 37 验证应用，当前版本为 `1.0.0`，包名为 `com.daxiaamu.guise.test`。它通过真实 Android API 读取结果，不直接依赖 Guise 的配置对象，可检查：
 
-使用时先安装测试 APK，在 Guise 中为“Guise Test”配置容易识别的值并同步作用域，然后强行停止并重新打开测试应用。测试应用直接读取系统 API；权限不足、设备无 SIM 或接口不受支持时会显示具体异常，不会把它们误判为 Hook 成功。版本值与编译值不同、或空白通行查询得到 `null` 游标时，界面会给出明确的 Hook 检测提示。
+- 应用版本、设备构建字段、Android 版本与 SDK；
+- Android ID、IMEI、手机号；
+- 网络、Wi-Fi、SIM、基站和定位；
+- 显示密度、电池、语言、时区；
+- 联系人/图片/视频/音频空白通行；
+- 截图限制。
 
-单独构建和检查测试应用：
+测试时先安装 Guise Test，在 Guise 中配置明显不同的值并勾选同步作用域，然后停止并重新启动测试应用。权限不足、设备无 SIM 或接口不受支持时会展示具体异常，不会把异常误判为 Hook 成功。
+
+单独构建：
 
 ```powershell
 .\gradlew.bat :guise-test:assembleDebug :guise-test:lintDebug
 ```
 
-产物位于 `guise-test/build/outputs/apk/debug/guise-test-debug.apk`，经过 R8 优化和资源收缩，并使用 Android 默认调试签名。
+产物位于 `guise-test/build/outputs/apk/debug/guise-test-debug.apk`，启用 R8 与资源收缩，并使用 Android 默认调试签名。
+
+## 项目模块
+
+- `app`：Compose 管理界面、配置存储、更新机制和完整 Xposed Hook。
+- `ktx-xposed`：Modern Xposed API 适配、Hook 辅助与模块日志基础设施。
+- `guise-test`：独立伪装效果验证应用。
 
 ## 构建
 
 需要：
 
-- JDK 17
-- Android SDK Platform 37
-- Android SDK Build-Tools 37.0.0
+- JDK 17 或兼容当前 Gradle/AGP 的更新 JDK；项目 Java/Kotlin 目标为 17。
+- Android SDK Platform 37。
+- Android SDK Build-Tools 37.0.0。
 
 在仓库根目录创建不纳入版本控制的 `local.properties`：
 
@@ -82,28 +243,44 @@ Android 版本、API、DPI、网络和语言等内置预设集中维护在 `app/
 sdk.dir=D\:\\AndroidSDK
 ```
 
-然后执行：
-
-```bash
-./gradlew assembleDebug lintDebug
-```
-
-Windows：
+常用命令：
 
 ```powershell
+# Debug 构建与检查
 .\gradlew.bat assembleDebug lintDebug
+
+# Release/R8 构建；当前输出未配置正式发布签名
+.\gradlew.bat :app:assembleRelease
+
+# Guise Test
+.\gradlew.bat :guise-test:assembleDebug :guise-test:lintDebug
 ```
 
-当前不配置正式发布签名，Debug APK 沿用 Android 默认调试签名。不要向仓库提交签名文件、口令或本机 SDK 路径。
+不要向仓库提交签名文件、签名口令、ROOT 产生的临时文件或本机 SDK 路径。
+
+## 开放源代码许可
+
+应用内可在“设置 → 开放源代码许可”查看项目、数据来源和许可证，并打开项目主页或许可证原文：
+
+- [Guise Reborn](https://github.com/daxiaamu/Guise_Reborn)：[GNU GPL v3.0 or later](LICENSE)。
+- [AndroidX / Jetpack Compose / Material 3](https://github.com/androidx/androidx)：[Apache License 2.0](https://source.android.com/docs/setup/about/licenses)。
+- [Kotlin / kotlinx.coroutines / kotlinx.serialization](https://github.com/JetBrains/kotlin)：[Apache License 2.0](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt)。
+- [libxposed API / service](https://github.com/libxposed)：[Apache License 2.0](https://github.com/libxposed/api/blob/master/LICENSE)。
+- [MaterialKolor](https://github.com/jordond/MaterialKolor)：主体为 [MIT License](https://github.com/jordond/MaterialKolor/blob/main/LICENSE)，Material Color Utilities 为 [Apache License 2.0](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE)。
+- [MMKV](https://github.com/Tencent/MMKV)：[BSD 3-Clause License](https://github.com/Tencent/MMKV/blob/master/LICENSE.TXT)。
+- [MobileModels / MobileModels-csv](https://github.com/KHwang9883/MobileModels)：[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。
+- [mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)：[MIT License](https://github.com/pbakondy/mcc-mnc-list/blob/master/LICENSE)。
 
 ## 开发原则
 
-1. Android 与 Modern Xposed 的正式新 API 优先；旧实现妨碍安全性、可维护性或新系统支持时直接替换。
+1. 优先使用 Android 与 Modern Xposed 的正式新 API；旧实现妨碍安全性、可维护性或新系统支持时直接替换。
 2. 保留现有用户配置和模板的数据迁移能力，但不为无效或危险的内部实现长期背负兼容层。
-3. Hook 功能按机型、系统属性、标识符、网络和定位分别隔离，单个 Hook 失败不得拖垮目标进程。
-4. 发布 APK 前必须在真实的、已安装支持 Modern Xposed API 102 框架的 Android 设备上回归。
-
-Android 17 对面向 API 37 的应用收紧了 `static final` 字段修改。设备构建字段伪装会继续兼容较旧目标应用，但不能把反射篡改视为面向 API 37 应用的可靠能力；版本信息伪装已经改为修改系统 `PackageInfo` 返回值。
+3. 启动首帧只做必须同步完成的工作；数据库、文件、PackageManager、图标和网络访问应放到合适的后台调度器或延迟执行。
+4. UI 组件、辅助说明和尾部操作使用可复用布局，不为单个字段复制一套尺寸与对齐参数。
+5. 性能改动必须通过相同设备、相同构建类型和相同启动方式验证；没有稳定收益的改动应撤回。
+6. Hook 功能按职责隔离，单个 Hook 失败不得拖垮目标进程。
+7. 新增用户可见文案必须同步维护英文、简体中文、日文和阿拉伯文。
+8. 发布 APK 前必须在真实的、已安装支持 Modern Xposed API 102 框架的 Android 设备上回归。
 
 ## 许可证
 

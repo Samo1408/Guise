@@ -130,15 +130,28 @@ fun AppUpdateHost() {
         while (true) {
             val state = updater.downloadProgress(context, id)
             if (state == null) {
-                downloadId = null
+                val nextDownloadId = updater.retryNextDownload(context, id)
+                downloadId = nextDownloadId
                 progress = null
-                error = downloadFailedMessage
+                if (nextDownloadId == null) error = downloadFailedMessage
                 return@LaunchedEffect
             }
             progress = state.fraction
             when {
                 state.active -> delay(400L)
                 state.successful -> {
+                    val verified = UpdateInstaller.isVerified(
+                        context,
+                        id,
+                        updater.expectedSha256(context),
+                    )
+                    if (!verified) {
+                        val nextDownloadId = updater.retryNextDownload(context, id)
+                        downloadId = nextDownloadId
+                        progress = null
+                        if (nextDownloadId == null) error = downloadFailedMessage
+                        return@LaunchedEffect
+                    }
                     downloadId = null
                     progress = null
                     readyDownloadId = id
@@ -156,9 +169,10 @@ fun AppUpdateHost() {
                     return@LaunchedEffect
                 }
                 else -> {
-                    downloadId = null
+                    val nextDownloadId = updater.retryNextDownload(context, id)
+                    downloadId = nextDownloadId
                     progress = null
-                    error = downloadFailedMessage
+                    if (nextDownloadId == null) error = downloadFailedMessage
                     return@LaunchedEffect
                 }
             }

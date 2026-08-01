@@ -19,10 +19,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.houvven.guise.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
@@ -35,10 +38,25 @@ class UpdateDownloadReceiver : BroadcastReceiver() {
         ).getLong(AppUpdater.KEY_DOWNLOAD_ID, -1L)
         val completed = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
         if (expected < 0L || completed != expected) return
-        if (!UpdateInstaller.isSuccessful(context, completed)) return
-
-        UpdateInstaller.markReady(context, completed)
-        UpdateInstaller.showInstallNotification(context, completed)
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                val verified = UpdateInstaller.isSuccessful(context, completed) &&
+                    UpdateInstaller.isVerified(
+                        context,
+                        completed,
+                        AppUpdater().expectedSha256(context),
+                    )
+                if (verified) {
+                    UpdateInstaller.markReady(context, completed)
+                    UpdateInstaller.showInstallNotification(context, completed)
+                } else {
+                    AppUpdater().retryNextDownload(context, completed)
+                }
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 }
 
@@ -67,6 +85,31 @@ object UpdateInstaller {
                     DownloadManager.STATUS_SUCCESSFUL &&
                     manager.getUriForDownloadedFile(downloadId) != null
             }
+        }.getOrDefault(false)
+    }
+
+    suspend fun isVerified(
+        context: Context,
+        downloadId: Long,
+        expectedSha256: String,
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (expectedSha256.isBlank()) return@withContext true
+        val manager = context.getSystemService(DownloadManager::class.java)
+        runCatching {
+            val digest = MessageDigest.getInstance("SHA-256")
+            manager.openDownloadedFile(downloadId).use { descriptor ->
+                FileInputStream(descriptor.fileDescriptor).use { input ->
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        digest.update(buffer, 0, count)
+                    }
+                }
+            }
+            digest.digest().joinToString("") { byte ->
+                "%02x".format(byte.toInt() and 0xff)
+            }.equals(expectedSha256, ignoreCase = true)
         }.getOrDefault(false)
     }
 
