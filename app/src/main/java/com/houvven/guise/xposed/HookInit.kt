@@ -17,6 +17,7 @@ import com.houvven.guise.xposed.hook.UniquelyIdHook
 import com.houvven.guise.xposed.hook.location.CellLocationHook
 import com.houvven.guise.xposed.hook.location.LocationHook
 import com.houvven.guise.xposed.hook.netowork.NetworkHook
+import com.houvven.guise.xposed.other.ApplicationListPass
 import com.houvven.guise.xposed.other.BlankPass
 import com.houvven.ktx_xposed.LoadPackageHookAdapter
 import com.houvven.ktx_xposed.hook.LoadPackageContext
@@ -77,6 +78,7 @@ class HookInit : XposedModule() {
             ScreenshotsHook(),
             UniquelyIdHook(),
             BlankPass(),
+            ApplicationListPass(),
             BuildConfigHook(),
         ).forEach { hook: LoadPackageHookAdapter ->
             runXposedCatching { hook.onHook() }

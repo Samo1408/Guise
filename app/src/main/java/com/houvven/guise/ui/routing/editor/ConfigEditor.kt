@@ -265,6 +265,11 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     ContainerSwitch(state.passPhoto, stringResource(R.string.pass_photo))
     ContainerSwitch(state.passVideo, stringResource(R.string.pass_video))
     ContainerSwitch(state.passAudio, stringResource(R.string.pass_audio))
+    ContainerSwitch(
+        state.passApplications,
+        stringResource(R.string.pass_applications),
+        supportingText = stringResource(R.string.pass_applications_summary),
+    )
 
 
     // bottom blank 底部留白

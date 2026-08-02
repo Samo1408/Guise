@@ -65,6 +65,8 @@
     <string name="pass_photo">الصور</string>
     <string name="pass_video">فيديو</string>
     <string name="pass_audio">الصوت</string>
+    <string name="pass_applications">قائمة التطبيقات</string>
+    <string name="pass_applications_summary">عند التفعيل، لن تظهر سوى تطبيقات النظام والتطبيق نفسه</string>
     <string name="title_sim">معلومات SIM</string>
 
     <string name="stop_app">إيقاف التطبيق</string>

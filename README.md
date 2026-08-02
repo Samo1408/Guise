@@ -84,6 +84,9 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 
 - 支持联系人、图片、视频、音频的“空白通行证”，使目标应用查询对应数据时得到空结果。
 - 媒体空白通行已适配现代 MediaStore 查询链路，避免只处理旧式文件路径而导致图片仍被枚举。
+- 新增“应用列表”空白通行：目标应用通过常用 `PackageManager` 列表、Intent 查询和指定包查询接口时，只能看到自身与系统应用（含更新后的系统应用）。
+- 应用列表过滤同时覆盖目标进程内的 `ApplicationPackageManager` 和 `IPackageManager` Binder 代理，但不会 Hook `system_server` 或扩大模块作用域；原生代码、应用自带 Binder 客户端及厂商私有查询接口仍可能绕过，因此设置页会明确提示这一能力边界。
+- 实现思路参考 [Hide My Applist](https://github.com/Dr-TSNG/Hide-My-Applist) 对包管理查询面的梳理，但 Guise 没有复制其代码，也没有采用其系统框架 Hook 方案，而是独立实现目标进程内过滤。
 - 支持窗口隐私/截图相关 Hook；权限不足、厂商私有媒体接口或应用自行维护的数据索引仍可能绕过通用 Android API，需使用 Guise Test 或目标应用实测。
 
 ### 7. 应用列表与配置编辑流程
@@ -138,6 +141,7 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 - 更新说明支持可点击的 HTTPS 超链接。
 - 更新清单以 GitHub API 为权威源，并发准备 jsDelivr、Fastly、Gcore 和 GitHub Raw 回退，权威源失败时自动使用可用镜像中版本号最高的清单。
 - 发布 Guise Release 后由 GitHub Actions 下载已上传附件、计算 SHA-256，并自动提交 `latest-release.json`；Guise Test 的独立 Tag 不触发 Guise 更新清单。
+- GitHub Actions 仅为正式 Release 生成更新清单；标记为 prerelease 的版本不会进入应用内更新检测。
 - 清单提交后工作流会调用 jsDelivr 官方 purge 端点请求清除 `main` 分支别名缓存，尽量缩短 CDN 继续返回旧版本的时间；客户端会比较所有成功来源并采用版本号最高的清单，GitHub API 始终作为权威来源。
 - APK 下载清单支持 `apkUrls` 候选列表，按 CDN/镜像/官方 GitHub 地址依次交给系统 `DownloadManager`；下载失败、记录丢失、返回错误文件或 SHA-256 不匹配时会自动尝试下一来源。
 - 当前发布工作流生成 10 个经 Release 附件单字节探测验证的代理/CDN 地址，并把官方 GitHub Release 地址作为最终兜底；失效候选可在工作流中集中维护，无需修改客户端代码。
@@ -211,7 +215,7 @@ Android 13 及以上可通过系统“应用语言”设置单独切换。新增
 - Android ID、IMEI、手机号；
 - 网络、Wi-Fi、SIM、基站和定位；
 - 显示密度、电池、语言、时区；
-- 联系人/图片/视频/音频空白通行；
+- 联系人/图片/视频/音频空白通行，以及“仅自身与系统应用”的应用列表可见性；
 - 截图限制。
 
 测试时先安装 Guise Test，在 Guise 中配置明显不同的值并勾选同步作用域，然后停止并重新启动测试应用。权限不足、设备无 SIM 或接口不受支持时会展示具体异常，不会把异常误判为 Hook 成功。

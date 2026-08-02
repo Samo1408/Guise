@@ -10,7 +10,7 @@
     <string name="hook_toast_hint">若启用了“Hook 成功提示”，冷启动时还应出现 Guise Toast。</string>
     <string name="permissions_explanation">电话、位置、联系人、附近设备和媒体权限只用于调用待测 Android API。权限被拒或设备不支持时会显示错误，不会崩溃。</string>
     <string name="grant_permissions">授予测试权限</string><string name="permission_required">需要位置权限</string><string name="waiting">正在等待位置更新…</string>
-    <string name="not_available">不可用</string><string name="null_value">null</string><string name="hook_detected">与编译值不同或游标为 null：已检测到 Guise Hook</string>
+    <string name="not_available">不可用</string><string name="null_value">null</string><string name="hook_detected">已检测到 Guise Hook 生效</string>
     <string name="section_version">应用版本</string><string name="section_device">设备与系统</string><string name="section_identifiers">唯一标识</string>
     <string name="section_network">网络与 Wi-Fi</string><string name="section_sim">SIM 与基站</string><string name="section_location">位置</string>
     <string name="section_battery">电池</string><string name="section_locale">语言与地区</string><string name="section_blank_pass">空白通行</string><string name="section_screenshot">截图标志</string>
@@ -25,4 +25,12 @@
     <string name="null_cursor">null 游标</string><string name="cursor_count">游标数量 = %1$d</string><string name="secure_enabled">FLAG_SECURE = 已启用</string><string name="secure_disabled">FLAG_SECURE = 未启用</string>
     <string name="screenshot_explanation">“禁止截图”应在启动后启用该标志；“允许截图”应阻止或清除该标志。还请实际尝试截屏。</string><string name="add_secure">添加标志</string><string name="clear_secure">清除标志</string>
     <string name="live_location">实时位置回调</string><string name="not_requested">尚未请求</string><string name="request_location">请求一次 GPS 更新</string>
+    <string name="section_app_visibility">应用可见性</string>
+    <string name="installed_packages">已安装软件包</string>
+    <string name="installed_applications">已安装应用</string>
+    <string name="launcher_activities">桌面应用查询</string>
+    <string name="direct_guise_lookup">直接查询 Guise</string>
+    <string name="application_list_result">总数 = %1$d，系统应用 = %2$d，自身 = %3$d，其他用户应用 = %4$d</string>
+    <string name="package_visible">可以看到 %1$s</string>
+    <string name="package_hidden">已隐藏 %1$s</string>
 </resources>

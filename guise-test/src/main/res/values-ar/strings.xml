@@ -10,7 +10,7 @@
     <string name="hook_toast_hint">إذا كان «إشعار نجاح Hook» مفعّلاً، فيفترض أن تظهر أيضاً رسالة Guise عند التشغيل البارد.</string>
     <string name="permissions_explanation">تُستخدم أذونات الهاتف والموقع وجهات الاتصال والأجهزة القريبة والوسائط فقط لاستدعاء واجهات Android قيد الاختبار. يُعرض الخطأ بدلاً من التعطل عند الرفض أو عدم الدعم.</string>
     <string name="grant_permissions">منح أذونات الاختبار</string><string name="permission_required">إذن الموقع مطلوب</string><string name="waiting">بانتظار تحديث الموقع…</string>
-    <string name="not_available">غير متاح</string><string name="null_value">null</string><string name="hook_detected">القيمة مختلفة عن قيمة البناء أو المؤشر null: تم اكتشاف Guise Hook</string>
+    <string name="not_available">غير متاح</string><string name="null_value">null</string><string name="hook_detected">تم اكتشاف تأثير Guise Hook</string>
     <string name="section_version">إصدار التطبيق</string><string name="section_device">الجهاز والنظام</string><string name="section_identifiers">المعرّفات الفريدة</string>
     <string name="section_network">الشبكة وWi-Fi</string><string name="section_sim">SIM والخلية</string><string name="section_location">الموقع</string><string name="section_battery">البطارية</string><string name="section_locale">اللغة والمنطقة</string><string name="section_blank_pass">تمرير فارغ</string><string name="section_screenshot">علامة لقطة الشاشة</string>
     <string name="package_name">اسم الحزمة</string><string name="compiled_version">إصدار BuildConfig وقت البناء</string><string name="package_manager_version">إصدار PackageManager</string>
@@ -24,4 +24,12 @@
     <string name="null_cursor">مؤشر null</string><string name="cursor_count">عدد المؤشر = %1$d</string><string name="secure_enabled">FLAG_SECURE = مفعّل</string><string name="secure_disabled">FLAG_SECURE = معطّل</string>
     <string name="screenshot_explanation">يفترض أن يفعّل «منع لقطات الشاشة» العلامة بعد التشغيل، وأن يمنعها أو يمحوها «السماح بلقطات الشاشة». جرّب أيضاً التقاط لقطة شاشة فعلية.</string><string name="add_secure">إضافة العلامة</string><string name="clear_secure">مسح العلامة</string>
     <string name="live_location">رد الموقع المباشر</string><string name="not_requested">لم يُطلب</string><string name="request_location">طلب تحديث GPS واحد</string>
+    <string name="section_app_visibility">إمكانية رؤية التطبيقات</string>
+    <string name="installed_packages">الحزم المثبتة</string>
+    <string name="installed_applications">التطبيقات المثبتة</string>
+    <string name="launcher_activities">استعلام تطبيقات المشغّل</string>
+    <string name="direct_guise_lookup">استعلام Guise مباشرة</string>
+    <string name="application_list_result">الإجمالي = %1$d، النظام = %2$d، التطبيق نفسه = %3$d، تطبيقات مستخدم أخرى = %4$d</string>
+    <string name="package_visible">%1$s ظاهر</string>
+    <string name="package_hidden">%1$s مخفي</string>
 </resources>

@@ -5,6 +5,7 @@ package com.daxiaamu.guise.test
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -113,7 +114,9 @@ private enum class TestKey(@StringRes val label: Int) {
     TIME_ZONE_JAVA(R.string.time_zone_java), TIME_ZONE_JAVA_TIME(R.string.time_zone_java_time),
     TIME_ZONE_ICU(R.string.time_zone_icu),
     CONTACTS(R.string.contacts_query), IMAGES(R.string.images_query), VIDEOS(R.string.videos_query),
-    AUDIO(R.string.audio_query)
+    AUDIO(R.string.audio_query), INSTALLED_PACKAGES(R.string.installed_packages),
+    INSTALLED_APPLICATIONS(R.string.installed_applications),
+    LAUNCHER_ACTIVITIES(R.string.launcher_activities), DIRECT_GUISE_LOOKUP(R.string.direct_guise_lookup)
 }
 
 private data class TestResult(val value: String, val detected: Boolean = false)
@@ -148,7 +151,16 @@ private val sections = listOf(
             TestKey.TIME_ZONE_ICU,
         ),
     ),
-    TestSection(R.string.section_blank_pass, listOf(TestKey.CONTACTS, TestKey.IMAGES, TestKey.VIDEOS, TestKey.AUDIO))
+    TestSection(R.string.section_blank_pass, listOf(TestKey.CONTACTS, TestKey.IMAGES, TestKey.VIDEOS, TestKey.AUDIO)),
+    TestSection(
+        R.string.section_app_visibility,
+        listOf(
+            TestKey.INSTALLED_PACKAGES,
+            TestKey.INSTALLED_APPLICATIONS,
+            TestKey.LAUNCHER_ACTIVITIES,
+            TestKey.DIRECT_GUISE_LOOKUP,
+        ),
+    ),
 )
 
 class MainActivity : ComponentActivity() {
@@ -411,7 +423,55 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putQuery(context, TestKey.IMAGES, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
     putQuery(context, TestKey.VIDEOS, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
     putQuery(context, TestKey.AUDIO, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+
+    val packageManager = context.packageManager
+    this[TestKey.INSTALLED_PACKAGES] = runCatching {
+        packageManager.getInstalledPackages(0).toVisibilityResult(context) { it.packageName to it.applicationInfo }
+    }.getOrElse { TestResult(it.userMessage()) }
+    this[TestKey.INSTALLED_APPLICATIONS] = runCatching {
+        packageManager.getInstalledApplications(0).toVisibilityResult(context) { it.packageName to it }
+    }.getOrElse { TestResult(it.userMessage()) }
+    this[TestKey.LAUNCHER_ACTIVITIES] = runCatching {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        packageManager.queryIntentActivities(intent, 0).toVisibilityResult(context) {
+            it.activityInfo.packageName to it.activityInfo.applicationInfo
+        }
+    }.getOrElse { TestResult(it.userMessage()) }
+    this[TestKey.DIRECT_GUISE_LOOKUP] = try {
+        packageManager.getApplicationInfo(GUISE_PACKAGE, 0)
+        TestResult(context.getString(R.string.package_visible, GUISE_PACKAGE))
+    } catch (_: PackageManager.NameNotFoundException) {
+        TestResult(context.getString(R.string.package_hidden, GUISE_PACKAGE), detected = true)
+    } catch (error: Throwable) {
+        TestResult(error.userMessage())
+    }
 }
+
+private fun <T> List<T>.toVisibilityResult(
+    context: Context,
+    packageInfo: (T) -> Pair<String, ApplicationInfo?>,
+): TestResult {
+    var system = 0
+    var self = 0
+    var otherUser = 0
+    forEach { item ->
+        val (packageName, applicationInfo) = packageInfo(item)
+        when {
+            packageName == context.packageName -> self++
+            applicationInfo?.isSystemApp() == true || packageName == "android" -> system++
+            else -> otherUser++
+        }
+    }
+    return TestResult(
+        context.getString(R.string.application_list_result, size, system, self, otherUser),
+        detected = self > 0 && otherUser == 0,
+    )
+}
+
+private fun ApplicationInfo.isSystemApp(): Boolean =
+    flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+
+private const val GUISE_PACKAGE = "com.houvven.guise"
 
 private fun MutableMap<TestKey, TestResult>.putQuery(context: Context, key: TestKey, uri: android.net.Uri) {
     this[key] = runCatching {

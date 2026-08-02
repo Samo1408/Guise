@@ -82,6 +82,8 @@
     <string name="pass_photo">Photo</string>
     <string name="pass_video">Video</string>
     <string name="pass_audio">Audio</string>
+    <string name="pass_applications">App list</string>
+    <string name="pass_applications_summary">When enabled, only system apps and the app itself will be visible</string>
     <string name="title_sim">SIM Info</string>
 
     <string name="stop_app">Stop App</string>

@@ -63,6 +63,8 @@
     <string name="pass_photo">照片</string>
     <string name="pass_video">视频</string>
     <string name="pass_audio">音频</string>
+    <string name="pass_applications">应用列表</string>
+    <string name="pass_applications_summary">开启后，将只能看到系统应用和自身</string>
     <string name="title_sim">SIM</string>
     <string name="template_type_all">全部</string>
     <string name="template_type_app">应用专属</string>

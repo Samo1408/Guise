@@ -66,6 +66,8 @@
     <string name="pass_photo">写真</string>
     <string name="pass_video">ビデオ</string>
     <string name="pass_audio">オーディオ</string>
+    <string name="pass_applications">アプリ一覧</string>
+    <string name="pass_applications_summary">有効にすると、システムアプリと対象アプリ自身だけが表示されます</string>
     <string name="title_sim">SIM情報</string>
 
     <string name="stop_app">アプリを停止</string>

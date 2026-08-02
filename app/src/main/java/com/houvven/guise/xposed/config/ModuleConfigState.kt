@@ -51,6 +51,7 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
     val passPhoto = mutableStateOf(moduleConfig.passPhoto)
     val passVideo = mutableStateOf(moduleConfig.passVideo)
     val passAudio = mutableStateOf(moduleConfig.passAudio)
+    val passApplications = mutableStateOf(moduleConfig.passApplications)
 
     internal fun clear() {
         stringStates.forEach { it.value = "" }
@@ -69,7 +70,7 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
     private val booleanStates: List<MutableState<Boolean>>
         get() = listOf(
             randomOffset, makeWifiLocationFail, makeCellLocationFail,
-            allowForceScreenshots, passContacts, passPhoto, passVideo, passAudio,
+            allowForceScreenshots, passContacts, passPhoto, passVideo, passAudio, passApplications,
         )
 
     companion object {

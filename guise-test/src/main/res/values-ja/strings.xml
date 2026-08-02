@@ -10,7 +10,7 @@
     <string name="hook_toast_hint">「Hook 成功通知」が有効な場合、コールドスタート時に Guise のトーストも表示されます。</string>
     <string name="permissions_explanation">電話、位置情報、連絡先、付近のデバイス、メディアの権限は、テスト対象の Android API を呼び出すためだけに使用します。拒否または非対応の場合は、クラッシュせずエラーを表示します。</string>
     <string name="grant_permissions">テスト権限を許可</string><string name="permission_required">位置情報の権限が必要です</string><string name="waiting">位置情報の更新を待機中…</string>
-    <string name="not_available">利用不可</string><string name="null_value">null</string><string name="hook_detected">コンパイル値と異なる、またはカーソルが null：Guise Hook を検出</string>
+    <string name="not_available">利用不可</string><string name="null_value">null</string><string name="hook_detected">Guise Hook の効果を検出しました</string>
     <string name="section_version">アプリのバージョン</string><string name="section_device">デバイスとシステム</string><string name="section_identifiers">固有識別子</string>
     <string name="section_network">ネットワークと Wi-Fi</string><string name="section_sim">SIM と基地局</string><string name="section_location">位置情報</string><string name="section_battery">バッテリー</string><string name="section_locale">言語と地域</string><string name="section_blank_pass">空データ化</string><string name="section_screenshot">スクリーンショットフラグ</string>
     <string name="package_name">パッケージ名</string><string name="compiled_version">コンパイル時の BuildConfig バージョン</string><string name="package_manager_version">PackageManager バージョン</string>
@@ -24,4 +24,12 @@
     <string name="null_cursor">null カーソル</string><string name="cursor_count">カーソル件数 = %1$d</string><string name="secure_enabled">FLAG_SECURE = 有効</string><string name="secure_disabled">FLAG_SECURE = 無効</string>
     <string name="screenshot_explanation">「スクリーンショットを禁止」は起動後にフラグを有効にし、「スクリーンショットを許可」はフラグを阻止または解除します。実際のスクリーンショットも試してください。</string><string name="add_secure">フラグを追加</string><string name="clear_secure">フラグを解除</string>
     <string name="live_location">リアルタイム位置コールバック</string><string name="not_requested">未要求</string><string name="request_location">GPS 更新を 1 回要求</string>
+    <string name="section_app_visibility">アプリの可視性</string>
+    <string name="installed_packages">インストール済みパッケージ</string>
+    <string name="installed_applications">インストール済みアプリ</string>
+    <string name="launcher_activities">ランチャーアプリの検索</string>
+    <string name="direct_guise_lookup">Guise の直接検索</string>
+    <string name="application_list_result">合計 = %1$d、システム = %2$d、自身 = %3$d、その他のユーザーアプリ = %4$d</string>
+    <string name="package_visible">%1$s は表示されています</string>
+    <string name="package_hidden">%1$s は非表示です</string>
 </resources>

@@ -47,6 +47,7 @@ data class ModuleConfig(
     var passPhoto: Boolean = false,
     var passVideo: Boolean = false,
     var passAudio: Boolean = false,
+    var passApplications: Boolean = false,
 ) {
     val isEnable: Boolean get() = enabled
 
