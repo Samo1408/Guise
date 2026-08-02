@@ -49,7 +49,7 @@
                 android:name=".update.UpdateInstallActivity"
                 android:excludeFromRecents="true"
                 android:exported="false"
-                android:theme="@android:style/Theme.NoDisplay" />
+                android:theme="@style/Theme.Guise.UpdateInstall" />
 
         <receiver
                 android:name=".update.UpdateDownloadReceiver"

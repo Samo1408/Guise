@@ -269,6 +269,7 @@ sdk.dir=D\:\\AndroidSDK
 - [libxposed API / service](https://github.com/libxposed)：[Apache License 2.0](https://github.com/libxposed/api/blob/master/LICENSE)。
 - [MaterialKolor](https://github.com/jordond/MaterialKolor)：主体为 [MIT License](https://github.com/jordond/MaterialKolor/blob/main/LICENSE)，Material Color Utilities 为 [Apache License 2.0](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE)。
 - [MMKV](https://github.com/Tencent/MMKV)：[BSD 3-Clause License](https://github.com/Tencent/MMKV/blob/master/LICENSE.TXT)。
+- [Multiplatform Markdown Renderer](https://github.com/mikepenz/multiplatform-markdown-renderer)：[Apache License 2.0](https://github.com/mikepenz/multiplatform-markdown-renderer/blob/develop/LICENSE)。
 - [MobileModels / MobileModels-csv](https://github.com/KHwang9883/MobileModels)：[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。
 - [mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)：[MIT License](https://github.com/pbakondy/mcc-mnc-list/blob/master/LICENSE)。
 

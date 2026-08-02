@@ -87,6 +87,13 @@ private val openSourceProjects = listOf(
         licenseUrl = "https://github.com/Tencent/MMKV/blob/master/LICENSE.TXT",
     ),
     OpenSourceProject(
+        name = "Multiplatform Markdown Renderer",
+        role = R.string.open_source_role_dependency,
+        license = "Apache License 2.0",
+        projectUrl = "https://github.com/mikepenz/multiplatform-markdown-renderer",
+        licenseUrl = "https://github.com/mikepenz/multiplatform-markdown-renderer/blob/develop/LICENSE",
+    ),
+    OpenSourceProject(
         name = "MobileModels / MobileModels-csv",
         role = R.string.open_source_role_data,
         license = "CC BY-NC-SA 4.0",

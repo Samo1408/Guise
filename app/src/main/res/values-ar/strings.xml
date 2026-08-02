@@ -114,6 +114,7 @@
     <string name="update_notes">ما الجديد</string>
     <string name="update_action">تحديث</string>
     <string name="update_install">تثبيت</string>
+    <string name="update_preparing_install">جارٍ تحضير التحديث…</string>
     <string name="update_downloading">جارٍ التنزيل</string>
     <string name="update_downloading_progress">%1$d%%</string>
     <string name="update_download_failed">فشل التنزيل. حاول مرة أخرى.</string>

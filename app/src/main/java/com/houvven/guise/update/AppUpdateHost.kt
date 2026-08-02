@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.AlertDialog
@@ -22,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -111,6 +115,7 @@ fun AppUpdateHost() {
     LaunchedEffect(Unit) { AppUpdateManager.startStartupCheck() }
     val info = AppUpdateManager.availableUpdate ?: return
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val downloadFailedMessage = stringResource(R.string.update_download_failed)
     val updater = remember { AppUpdater() }
@@ -183,8 +188,12 @@ fun AppUpdateHost() {
         icon = { Icon(Icons.Default.SystemUpdate, contentDescription = null) },
         title = { Text(stringResource(R.string.update_available_title, info.versionName)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (info.title.isNotBlank()) Text(info.title)
+            Column(
+                modifier = Modifier
+                    .heightIn(max = (configuration.screenHeightDp * 0.5f).dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 if (info.notes.isNotBlank()) {
                     Text(
                         stringResource(R.string.update_notes),

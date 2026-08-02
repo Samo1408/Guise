@@ -113,6 +113,7 @@
     <string name="update_notes">更新内容</string>
     <string name="update_action">更新</string>
     <string name="update_install">安装</string>
+    <string name="update_preparing_install">正在准备更新…</string>
     <string name="update_downloading">正在下载</string>
     <string name="update_downloading_progress">%1$d%%</string>
     <string name="update_download_failed">下载失败，请重试</string>

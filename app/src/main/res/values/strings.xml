@@ -128,6 +128,7 @@
     <string name="update_notes">What’s new</string>
     <string name="update_action">Update</string>
     <string name="update_install">Install</string>
+    <string name="update_preparing_install">Preparing update…</string>
     <string name="update_downloading">Downloading</string>
     <string name="update_downloading_progress">%1$d%%</string>
     <string name="update_download_failed">Download failed. Please try again.</string>

@@ -216,10 +216,7 @@ class AppUpdater {
             title = json.optString("title").ifBlank {
                 json.optString("name").ifBlank { tag }
             },
-            notes = json.optString("notes").lineSequence()
-                .map(String::trim)
-                .filter(String::isNotBlank)
-                .joinToString("\n") { if (it.startsWith("- ")) "• ${it.drop(2)}" else it },
+            notes = json.optString("notes").trim(),
             releaseUrl = releaseUrl,
             apkUrls = apkUrls,
             apkSha256 = apkSha256,

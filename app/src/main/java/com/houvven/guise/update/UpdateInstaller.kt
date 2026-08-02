@@ -14,10 +14,24 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.houvven.guise.R
+import com.houvven.guise.ui.theme.GuiseTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -247,15 +261,46 @@ class UpdateInstallActivity : ComponentActivity() {
             finish()
             return
         }
-        lifecycleScope.launch {
-            val installedWithRoot = UpdateInstaller.silentInstallWithRoot(
-                this@UpdateInstallActivity,
-                downloadId,
-            )
-            if (!installedWithRoot) {
-                UpdateInstaller.launchInstaller(this@UpdateInstallActivity, downloadId)
+        setContent {
+            GuiseTheme {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Surface(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        tonalElevation = 6.dp,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator()
+                            Text(
+                                text = getString(R.string.update_preparing_install),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                    }
+                }
             }
-            finish()
+        }
+        lifecycleScope.launch {
+            try {
+                runCatching {
+                    val installedWithRoot = UpdateInstaller.silentInstallWithRoot(
+                        this@UpdateInstallActivity,
+                        downloadId,
+                    )
+                    if (!installedWithRoot) {
+                        UpdateInstaller.launchInstaller(this@UpdateInstallActivity, downloadId)
+                    }
+                }
+            } finally {
+                finish()
+            }
         }
     }
 

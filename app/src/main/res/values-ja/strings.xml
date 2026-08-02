@@ -114,6 +114,7 @@
     <string name="update_notes">更新内容</string>
     <string name="update_action">更新</string>
     <string name="update_install">インストール</string>
+    <string name="update_preparing_install">アップデートを準備中…</string>
     <string name="update_downloading">ダウンロード中</string>
     <string name="update_downloading_progress">%1$d%%</string>
     <string name="update_download_failed">ダウンロードに失敗しました。もう一度お試しください。</string>

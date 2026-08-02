@@ -1,52 +1,40 @@
 package com.houvven.guise.update
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 
-/** Renders Markdown-style links such as `[project page](https://example.com)`. */
+/** Renders the GitHub Release body as Markdown using the app's Material 3 theme. */
 @Composable
 fun UpdateNotesText(notes: String, modifier: Modifier = Modifier) {
-    val linkColor = MaterialTheme.colorScheme.primary
-    val annotatedNotes = remember(notes, linkColor) {
-        updateNotesAnnotatedString(notes, linkColor)
-    }
-    Text(annotatedNotes, modifier)
+    val typography = MaterialTheme.typography
+    Markdown(
+        content = notes,
+        modifier = modifier,
+        typography = markdownTypography(
+            h1 = typography.titleLarge,
+            h2 = typography.titleLarge,
+            h3 = typography.titleMedium,
+            h4 = typography.titleMedium,
+            h5 = typography.titleSmall,
+            h6 = typography.titleSmall,
+            text = typography.bodyMedium,
+            paragraph = typography.bodyMedium,
+            ordered = typography.bodyMedium,
+            bullet = typography.bodyMedium,
+            list = typography.bodyMedium,
+            table = typography.bodyMedium,
+            textLink = TextLinkStyles(
+                style = typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline,
+                ).toSpanStyle(),
+            ),
+        ),
+    )
 }
-
-internal fun updateNotesAnnotatedString(notes: String, linkColor: Color) =
-    buildAnnotatedString {
-        var cursor = 0
-        UPDATE_NOTE_LINK.findAll(notes).forEach { match ->
-            append(notes, cursor, match.range.first)
-            withLink(
-                LinkAnnotation.Url(
-                    url = match.groupValues[2],
-                    styles = TextLinkStyles(
-                        style = SpanStyle(
-                            color = linkColor,
-                            textDecoration = TextDecoration.Underline,
-                        ),
-                    ),
-                ),
-            ) {
-                append(match.groupValues[1])
-            }
-            cursor = match.range.last + 1
-        }
-        append(notes, cursor, notes.length)
-    }
-
-private val UPDATE_NOTE_LINK = Regex(
-    pattern = """\[([^\]\r\n]+)]\((https?://[^\s)]+)\)""",
-    option = RegexOption.IGNORE_CASE,
-)
