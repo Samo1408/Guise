@@ -8,7 +8,7 @@ Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xp
 - 本仓库采用的源码上游：[AlliotTech/Guise](https://github.com/AlliotTech/Guise)
 - 上述源码仓库的 GitHub Fork 上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
 
-> 维护者：大侠阿木。当前预发布版本为 `2.0.0-beta.2`；README 中的维护版内容均位于原作者说明之前。
+> 维护者：大侠阿木。当前预发布版本为 `2.0.0-beta.3`；README 中的维护版内容均位于原作者说明之前。
 
 ## 当前技术基线
 
