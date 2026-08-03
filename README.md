@@ -55,7 +55,7 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 - 数据预设从 UI 代码移入资源：Android 版本、SDK、DPI、网络、语言等集中维护在 `app/src/main/res/raw/presets.json`。
 - 升级 Room、MMKV、KSP、协程和序列化；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及原有通用 `lib` 模块。
 - 导入导出改用 MediaStore 与系统文件选择器，移除“所有文件访问”、旧外部存储权限及明文网络配置。
-- Release 和 Guise Test 均启用 R8；正式签名尚未配置，开发测试包继续使用 Android 默认调试签名。
+- Release 和 Guise Test 均启用 R8；Guise 的正式构建会校验 Xposed 资源入口未被 R8 改名，避免出现“模块已进入作用域但实际未加载”的静默失效。仓库不保存正式签名材料。Guise 正式版使用仓库外签名，Guise Test 为兼容既有独立测试版继续使用固定调试证书。
 
 ### 2. Xposed 作用域与启用逻辑
 
@@ -226,7 +226,7 @@ Android 13 及以上可通过系统“应用语言”设置单独切换。新增
 
 ## Guise Test
 
-`guise-test` 是独立发布的 API 37 验证应用，当前版本为 `1.0.0`，包名为 `com.daxiaamu.guise.test`。它通过真实 Android API 读取结果，不直接依赖 Guise 的配置对象，可检查：
+`guise-test` 是独立发布的 API 37 验证应用，当前版本为 `1.1.0`，包名为 `com.daxiaamu.guise.test`。它通过真实 Android API 读取结果，不直接依赖 Guise 的配置对象，可检查：
 
 - 应用版本、设备构建字段、Android 版本与 SDK；
 - Android ID、IMEI、手机号；
