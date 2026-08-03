@@ -1,5 +1,12 @@
 -dontwarn com.houvven.**
 
+# Loaded by LSPosed from META-INF/xposed/java_init.list. R8 cannot infer this
+# resource-to-class reference, so the entry point and its callbacks must retain
+# both their binary name and members.
+-keep class com.houvven.guise.xposed.HookInit {
+    *;
+}
+
 -keep class com.houvven.guise.xposed.config.* {
     <fields>;
 }

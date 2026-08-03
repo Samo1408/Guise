@@ -139,6 +139,34 @@ ksp {
     arg("room.generateKotlin", "false")
 }
 
+val verifyReleaseXposedEntries = tasks.register("verifyReleaseXposedEntries") {
+    group = "verification"
+    description = "Verifies that R8 keeps every LSPosed Java entry point name."
+    dependsOn("mergeReleaseComposeMapping")
+
+    val entryList = layout.projectDirectory.file("src/main/resources/META-INF/xposed/java_init.list")
+    val mapping = layout.buildDirectory.file("outputs/mapping/release/mapping.txt")
+    inputs.file(entryList)
+    inputs.file(mapping)
+
+    doLast {
+        val mappingLines = mapping.get().asFile.readLines().toHashSet()
+        val entries = entryList.asFile.readLines()
+            .map(String::trim)
+            .filter { it.isNotEmpty() && !it.startsWith('#') }
+        check(entries.isNotEmpty()) { "META-INF/xposed/java_init.list contains no entries" }
+        entries.forEach { entry ->
+            check("$entry -> $entry:" in mappingLines) {
+                "R8 renamed or removed LSPosed entry point $entry"
+            }
+        }
+    }
+}
+
+tasks.matching { it.name == "packageRelease" }.configureEach {
+    dependsOn(verifyReleaseXposedEntries)
+}
+
 fun getVersionConfig(): Map<*, *> {
     val versionConfig = Properties()
     rootProject.file("app/version.properties").inputStream().use {
