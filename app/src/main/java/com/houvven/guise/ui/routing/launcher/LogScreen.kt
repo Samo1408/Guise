@@ -358,6 +358,7 @@ private fun LogEmptyState(hasLogs: Boolean, modifier: Modifier = Modifier) {
 @Composable
 private fun RuntimeLogCard(log: RuntimeLog) {
     var expanded by rememberSaveable(log.id) { mutableStateOf(false) }
+    val hasDetails = log.stackTrace.isNotBlank()
     val timeFormatter = remember { SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault()) }
     val levelColor = when (log.level) {
         XposedLogger.Level.ERROR -> MaterialTheme.colorScheme.error
@@ -371,9 +372,7 @@ private fun RuntimeLogCard(log: RuntimeLog) {
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(14.dp),
     ) {
@@ -396,19 +395,17 @@ private fun RuntimeLogCard(log: RuntimeLog) {
                         )
                     }
                 }
-                Text(
-                    text = levelLabel,
-                    color = levelColor,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                SimplifyIcon(
-                    imageVector = if (expanded) {
-                        Icons.Outlined.ExpandLess
-                    } else {
-                        Icons.Outlined.ExpandMore
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Surface(
+                    color = levelColor.copy(alpha = 0.12f),
+                    contentColor = levelColor,
+                    shape = RoundedCornerShape(50),
+                ) {
+                    Text(
+                        text = levelLabel,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
             Spacer(Modifier.height(6.dp))
             Text(
@@ -423,7 +420,33 @@ private fun RuntimeLogCard(log: RuntimeLog) {
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            AnimatedVisibility(visible = expanded && log.stackTrace.isNotBlank()) {
+            if (hasDetails) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expanded = !expanded }
+                        .padding(top = 6.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (expanded) R.string.log_hide_details else R.string.log_show_details
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                    SimplifyIcon(
+                        imageVector = if (expanded) {
+                            Icons.Outlined.ExpandLess
+                        } else {
+                            Icons.Outlined.ExpandMore
+                        },
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+            AnimatedVisibility(visible = expanded && hasDetails) {
                 Column {
                     Spacer(Modifier.height(8.dp))
                     SelectionContainer {

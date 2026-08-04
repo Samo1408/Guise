@@ -168,6 +168,8 @@
     <string name="log_filter_error">エラー</string>
     <string name="log_filter_info">情報</string>
     <string name="log_filter_debug">デバッグ</string>
+    <string name="log_show_details">エラーの詳細を表示</string>
+    <string name="log_hide_details">エラーの詳細を閉じる</string>
     <string name="detailed_logging">詳細ログ</string>
     <string name="detailed_logging_description">各 Hook の導入成功情報も記録します。対象アプリの再起動後に有効になります。</string>
     <string name="detailed_logging_unavailable">この設定を変更するには Xposed サービスに接続してください。</string>

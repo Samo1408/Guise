@@ -59,6 +59,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+                android:name=".log.RuntimeLogReceiver"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="com.houvven.guise.action.APPEND_RUNTIME_LOGS" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

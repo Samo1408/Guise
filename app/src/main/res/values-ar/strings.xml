@@ -173,6 +173,8 @@
     <string name="log_filter_error">خطأ</string>
     <string name="log_filter_info">معلومات</string>
     <string name="log_filter_debug">تصحيح</string>
+    <string name="log_show_details">عرض تفاصيل الخطأ</string>
+    <string name="log_hide_details">إخفاء تفاصيل الخطأ</string>
     <string name="detailed_logging">السجل التفصيلي</string>
     <string name="detailed_logging_description">يسجل تفاصيل نجاح تثبيت كل Hook، ويسري بعد إعادة تشغيل التطبيق المستهدف.</string>
     <string name="detailed_logging_unavailable">اتصل بخدمة Xposed لتغيير هذا الإعداد.</string>

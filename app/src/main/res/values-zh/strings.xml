@@ -167,6 +167,8 @@
     <string name="log_filter_error">错误</string>
     <string name="log_filter_info">信息</string>
     <string name="log_filter_debug">调试</string>
+    <string name="log_show_details">查看异常详情</string>
+    <string name="log_hide_details">收起异常详情</string>
     <string name="detailed_logging">详细日志</string>
     <string name="detailed_logging_description">记录各项 Hook 的安装成功明细，目标应用重新启动后生效。</string>
     <string name="detailed_logging_unavailable">连接 Xposed 服务后才能修改此设置。</string>

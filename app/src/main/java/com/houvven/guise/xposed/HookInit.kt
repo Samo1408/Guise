@@ -1,5 +1,8 @@
 package com.houvven.guise.xposed
 
+import android.app.Activity
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,6 +23,7 @@ import com.houvven.guise.xposed.hook.netowork.NetworkHook
 import com.houvven.guise.xposed.other.ApplicationListPass
 import com.houvven.guise.xposed.other.BlankPass
 import com.houvven.ktx_xposed.LoadPackageHookAdapter
+import com.houvven.ktx_xposed.hook.afterHookedMethod
 import com.houvven.ktx_xposed.hook.LoadPackageContext
 import com.houvven.ktx_xposed.hook.ModernXposedRuntime
 import com.houvven.ktx_xposed.logger.XposedLogger
@@ -57,31 +61,33 @@ class HookInit : XposedModule() {
             this,
             LoadPackageContext(param.packageName, processName, param.classLoader),
         )
+        initializeLogDelivery()
         ModernXposedPreferences.current = getRemotePreferences(PackageConfig.PREF_FILE_NAME)
 
         XposedLogger.i("start onPackageReady: ${param.packageName}")
         PackageConfig.doRefresh(param.packageName)
         if (!PackageConfig.current.isEnable) {
             XposedLogger.i("${param.packageName} is not enabled, skip")
+            XposedLogger.finishStartup()
             return
         }
 
-        listOf(
-            BatteryHook(),
-            LocalHook(),
-            TimeZoneHook(),
-            LocationHook(),
-            CellLocationHook(),
-            NetworkHook(),
-            OsBuildHook(),
-            DisplayDensityHook(),
-            ScreenshotsHook(),
-            UniquelyIdHook(),
-            BlankPass(),
-            ApplicationListPass(),
-            BuildConfigHook(),
-        ).forEach { hook: LoadPackageHookAdapter ->
-            val category = hook.javaClass.simpleName
+        val hooks: List<Pair<String, LoadPackageHookAdapter>> = listOf(
+            "Battery" to BatteryHook(),
+            "Locale" to LocalHook(),
+            "TimeZone" to TimeZoneHook(),
+            "Location" to LocationHook(),
+            "CellLocation" to CellLocationHook(),
+            "Network" to NetworkHook(),
+            "OSBuild" to OsBuildHook(),
+            "DisplayDensity" to DisplayDensityHook(),
+            "Screenshots" to ScreenshotsHook(),
+            "UniqueId" to UniquelyIdHook(),
+            "BlankPass" to BlankPass(),
+            "ApplicationList" to ApplicationListPass(),
+            "BuildConfig" to BuildConfigHook(),
+        )
+        hooks.forEach { (category, hook) ->
             val setupCompleted = runXposedCatching(category) {
                 XposedLogger.withCategory(category) { hook.onHook() }
                 true
@@ -90,7 +96,24 @@ class HookInit : XposedModule() {
                 XposedLogger.d("Hook setup completed", category)
             }
         }
+        XposedLogger.finishStartup()
     }
+
+    private fun initializeLogDelivery() {
+        currentApplication()?.let(XposedLogger::attachContext)
+        Application::class.java.afterHookedMethod("attach", Context::class.java) { param ->
+            (param.args.firstOrNull() as? Context)?.let(XposedLogger::attachContext)
+        }
+        Activity::class.java.afterHookedMethod("onCreate", Bundle::class.java) { param ->
+            (param.thisObject as? Activity)?.let(XposedLogger::attachContext)
+        }
+    }
+
+    private fun currentApplication(): Application? = runCatching {
+        val method = Class.forName("android.app.ActivityThread")
+            .getDeclaredMethod("currentApplication")
+        getInvoker(method).invoke(null) as? Application
+    }.getOrNull()
 
     private fun scheduleProcessExit(extras: Bundle?): Boolean {
         if (!ProcessControl.isExitRequest(extras)) return false

@@ -16,17 +16,18 @@ data class RuntimeLogEvent(
 
 object RuntimeLogProtocol {
     const val PREFERENCES_NAME = "guise_runtime_logs_v2"
-    const val INBOX_KEY_PREFIX = "inbox."
-    const val CLEARED_BEFORE_KEY = "cleared_before"
     const val DETAILED_LOGGING_KEY = "detailed_logging"
-    const val MAX_EVENTS_PER_PROCESS = 12
+    const val DELIVERY_TOKEN_KEY = "delivery_token"
+    const val DELIVERY_ACTION = "com.houvven.guise.action.APPEND_RUNTIME_LOGS"
+    const val DELIVERY_PACKAGE = "com.houvven.guise"
+    const val DELIVERY_RECEIVER = "com.houvven.guise.log.RuntimeLogReceiver"
+    const val DELIVERY_EVENTS_EXTRA = "events"
+    const val DELIVERY_TOKEN_EXTRA = "token"
+    const val MAX_PENDING_EVENTS = 32
 
     private const val FORMAT_VERSION = "2"
     private val encoder = Base64.getUrlEncoder().withoutPadding()
     private val decoder = Base64.getUrlDecoder()
-
-    fun inboxKey(packageName: String, processName: String): String =
-        INBOX_KEY_PREFIX + encodeText("$packageName\u0000$processName")
 
     fun encode(events: List<RuntimeLogEvent>): String = events.joinToString("\n") { event ->
         listOf(

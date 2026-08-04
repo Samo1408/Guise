@@ -1,5 +1,10 @@
 package com.houvven.ktx_xposed.logger
 
+import android.app.BroadcastOptions
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
@@ -23,8 +28,12 @@ object XposedLogger {
     }
 
     private val sequence = AtomicLong()
-    private val inboxFailureReported = AtomicBoolean()
+    private val deliveryFailureReported = AtomicBoolean()
     private val categoryContext = ThreadLocal<String?>()
+    private val pendingEvents = ArrayDeque<RuntimeLogEvent>()
+    private var applicationContext: Context? = null
+    private var startupCompleted = false
+    private var deliveryToken: String? = null
 
     val currentCategory: String
         get() = categoryContext.get() ?: DEFAULT_CATEGORY
@@ -56,12 +65,25 @@ object XposedLogger {
     }
 
     @Synchronized
+    fun attachContext(context: Context) {
+        applicationContext = context.applicationContext ?: context
+        flushPending()
+    }
+
+    @Synchronized
+    fun finishStartup() {
+        startupCompleted = true
+        flushPending()
+    }
+
+    @Synchronized
     private fun basicLog(level: Char, category: String, msg: String, throwable: Throwable?) {
         val module = ModernXposedRuntime.moduleOrNull ?: return
         val context = ModernXposedRuntime.packageContextOrNull ?: return
         val preferences = runCatching {
             module.getRemotePreferences(RuntimeLogProtocol.PREFERENCES_NAME)
         }.getOrNull()
+        deliveryToken = preferences?.getString(RuntimeLogProtocol.DELIVERY_TOKEN_KEY, null)
         if (level == Level.DEBUG &&
             preferences?.getBoolean(RuntimeLogProtocol.DETAILED_LOGGING_KEY, false) != true
         ) {
@@ -80,33 +102,58 @@ object XposedLogger {
             }
         }
 
+        val now = System.currentTimeMillis()
+        pendingEvents += RuntimeLogEvent(
+            id = "$now-${Process.myPid()}-${SystemClock.elapsedRealtimeNanos()}-${sequence.incrementAndGet()}",
+            timestamp = now,
+            level = level,
+            packageName = context.packageName,
+            processName = context.processName,
+            category = category.take(MAX_MESSAGE_LENGTH),
+            message = msg.take(MAX_MESSAGE_LENGTH),
+            stackTrace = throwable?.fullStackTrace().orEmpty().take(MAX_STACK_TRACE_LENGTH),
+        )
+        while (pendingEvents.size > RuntimeLogProtocol.MAX_PENDING_EVENTS) {
+            pendingEvents.removeFirst()
+        }
+        if (startupCompleted) flushPending()
+    }
+
+    private fun flushPending() {
+        val context = applicationContext ?: return
+        if (pendingEvents.isEmpty()) return
+        val snapshot = pendingEvents.toList()
         runCatching {
-            checkNotNull(preferences) { "Runtime log preferences are unavailable" }
-            val key = RuntimeLogProtocol.inboxKey(context.packageName, context.processName)
-            val clearedBefore = preferences.getLong(RuntimeLogProtocol.CLEARED_BEFORE_KEY, 0L)
-            val now = System.currentTimeMillis()
-            val event = RuntimeLogEvent(
-                id = "$now-${Process.myPid()}-${SystemClock.elapsedRealtimeNanos()}-${sequence.incrementAndGet()}",
-                timestamp = now,
-                level = level,
-                packageName = context.packageName,
-                processName = context.processName,
-                category = category.take(MAX_MESSAGE_LENGTH),
-                message = msg.take(MAX_MESSAGE_LENGTH),
-                stackTrace = throwable?.fullStackTrace().orEmpty().take(MAX_STACK_TRACE_LENGTH),
-            )
-            val events = (RuntimeLogProtocol.decode(preferences.getString(key, null)) + event)
-                .filter { it.timestamp > clearedBefore }
-                .takeLast(RuntimeLogProtocol.MAX_EVENTS_PER_PROCESS)
-            check(
-                preferences.edit()
-                    .putString(key, RuntimeLogProtocol.encode(events))
-                    .commit()
-            ) { "Runtime log preferences commit failed" }
+            val intent = Intent(RuntimeLogProtocol.DELIVERY_ACTION)
+                .setComponent(
+                    ComponentName(
+                        RuntimeLogProtocol.DELIVERY_PACKAGE,
+                        RuntimeLogProtocol.DELIVERY_RECEIVER,
+                    )
+                )
+                .putExtra(
+                    RuntimeLogProtocol.DELIVERY_EVENTS_EXTRA,
+                    RuntimeLogProtocol.encode(snapshot),
+                )
+                .putExtra(RuntimeLogProtocol.DELIVERY_TOKEN_EXTRA, deliveryToken)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val options = BroadcastOptions.makeBasic()
+                    .setShareIdentityEnabled(true)
+                    .toBundle()
+                context.sendBroadcast(intent, null, options)
+            } else {
+                context.sendBroadcast(intent)
+            }
+        }.onSuccess {
+            repeat(snapshot.size.coerceAtMost(pendingEvents.size)) {
+                pendingEvents.removeFirst()
+            }
+            deliveryFailureReported.set(false)
         }.onFailure { error ->
-            if (inboxFailureReported.compareAndSet(false, true)) {
+            val module = ModernXposedRuntime.moduleOrNull
+            if (module != null && deliveryFailureReported.compareAndSet(false, true)) {
                 runCatching {
-                    module.log(Log.WARN, "$TAG_PREFIX/Logger", "Unable to persist runtime log inbox", error)
+                    module.log(Log.WARN, "$TAG_PREFIX/Logger", "Unable to deliver runtime logs", error)
                 }
             }
         }

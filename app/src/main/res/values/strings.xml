@@ -183,6 +183,8 @@
     <string name="log_filter_error">Error</string>
     <string name="log_filter_info">Info</string>
     <string name="log_filter_debug">Debug</string>
+    <string name="log_show_details">View error details</string>
+    <string name="log_hide_details">Hide error details</string>
     <string name="detailed_logging">Detailed logging</string>
     <string name="detailed_logging_description">Record successful hook installation details. Takes effect after the target app restarts.</string>
     <string name="detailed_logging_unavailable">Connect to the Xposed service to change this setting.</string>
