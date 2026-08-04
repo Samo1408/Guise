@@ -74,7 +74,7 @@
         <item quantity="other">%1$d 个应用</item>
     </plurals>
     <string name="template_replace_title">更换模板？</string>
-    <string name="template_replace_message">%1$s当前正在使用“%2$s”，是否改为使用当前模板？</string>
+    <string name="template_replace_message">%1$s先前已使用“%2$s”，是否改为使用当前模板？</string>
     <string name="template_custom_configuration">单独配置</string>
     <string name="stop_app">停止应用</string>
     <string name="restart_app">重启应用</string>

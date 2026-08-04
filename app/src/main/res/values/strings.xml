@@ -16,7 +16,7 @@
         <item quantity="other">%1$d apps</item>
     </plurals>
     <string name="template_replace_title">Change template?</string>
-    <string name="template_replace_message">%1$s is currently using “%2$s”. Switch it to the current template?</string>
+    <string name="template_replace_message">%1$s was previously using “%2$s”. Switch it to the current template?</string>
     <string name="template_custom_configuration">a custom configuration</string>
     <string name="add_template">New Template</string>
     <string name="save_template">Save Template</string>

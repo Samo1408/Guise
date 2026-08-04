@@ -13,7 +13,7 @@
         <item quantity="other">%1$d個のアプリ</item>
     </plurals>
     <string name="template_replace_title">テンプレートを変更しますか？</string>
-    <string name="template_replace_message">%1$s は現在「%2$s」を使用しています。現在のテンプレートに変更しますか？</string>
+    <string name="template_replace_message">%1$s は以前「%2$s」を使用していました。現在のテンプレートに変更しますか？</string>
     <string name="template_custom_configuration">個別設定</string>
     <string name="add_template">新しいテンプレート</string>
 

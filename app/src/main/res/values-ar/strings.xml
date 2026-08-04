@@ -18,7 +18,7 @@
         <item quantity="other">%1$d تطبيق</item>
     </plurals>
     <string name="template_replace_title">تغيير القالب؟</string>
-    <string name="template_replace_message">يستخدم %1$s حاليًا «%2$s». هل تريد تغييره إلى القالب الحالي؟</string>
+    <string name="template_replace_message">كان %1$s يستخدم سابقًا «%2$s». هل تريد تغييره إلى القالب الحالي؟</string>
     <string name="template_custom_configuration">إعدادًا مخصصًا</string>
     <string name="add_template">قالب جديد</string>
 
