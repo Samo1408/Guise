@@ -213,7 +213,6 @@ Guise Reborn 并非只为原版更换界面。维护版保留按应用伪装的�
 | --- | ---: |
 | 优化前 Guise Debug | 约 568–580 ms |
 | Guise Release + R8 + Profile 编译后 | 约 136–146 ms |
-| 同机 ikan Pro 对照 | 约 105–121 ms |
 
 以上数据只用于说明本轮优化方向，不代表所有设备的保证值。Debug 与 Release 不应直接比较；首次安装、刚覆盖安装、设备温度、系统调度以及 Baseline Profile 尚未完成编译时，启动耗时会明显更高。
 
