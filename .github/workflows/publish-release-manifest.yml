@@ -40,8 +40,9 @@ jobs:
           version_name="$(sed -n 's/^versionName=//p' app/version.properties | tr -d '\r')"
           expected_tag="v${version_name}"
           if [[ "${RELEASE_TAG}" != "${expected_tag}" ]]; then
-            echo "Release tag ${RELEASE_TAG} does not match ${expected_tag}" >&2
-            exit 1
+            echo "Skipping historical release ${RELEASE_TAG}; current manifest tag is ${expected_tag}"
+            echo "SKIP_MANIFEST=true" >> "${GITHUB_ENV}"
+            exit 0
           fi
 
           asset_name="Guise-${version_name}.apk"
@@ -121,6 +122,7 @@ jobs:
           echo "MANIFEST_PATHS=${manifest_paths}" >> "${GITHUB_ENV}"
 
       - name: Commit manifest to main
+        if: env.SKIP_MANIFEST != 'true'
         env:
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
         shell: bash
@@ -139,6 +141,7 @@ jobs:
           git push origin HEAD:main
 
       - name: Purge mutable jsDelivr cache
+        if: env.SKIP_MANIFEST != 'true'
         shell: bash
         run: |
           read -ra manifest_paths <<< "${MANIFEST_PATHS}"
