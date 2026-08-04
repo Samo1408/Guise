@@ -198,4 +198,10 @@
     <string name="open_source_project_homepage">Project</string>
     <string name="open_source_view_license">License</string>
     <string name="close">Close</string>
+    <string name="bundled_template_blank_passport">Blank passport</string>
+    <string name="bundled_template_blank_passport_summary">Hide contacts, media, and installed apps from the target app</string>
+    <string name="bundled_template_force_screenshots">Allow forced screenshots</string>
+    <string name="bundled_template_force_screenshots_summary">Allow screenshots even when the target app prohibits them</string>
+    <string name="bundled_template_disable_network_location">Disable network location</string>
+    <string name="bundled_template_disable_network_location_summary">Make Wi-Fi and cell location unavailable to the target app</string>
 </resources>

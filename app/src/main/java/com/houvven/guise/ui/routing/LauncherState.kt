@@ -4,17 +4,21 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.*
 import com.houvven.guise.db.Template
 import com.houvven.guise.db.TemplateDBHelper
+import com.houvven.guise.db.defaults.BundledTemplateManager
+import com.houvven.guise.ContextAmbient
 import com.houvven.guise.module.apps.AppInfo
 import com.houvven.guise.module.apps.AppInfoProvider
 
 @SuppressLint("MutableCollectionMutableState")
 object LauncherState {
 
-    private val templateDao = TemplateDBHelper.templateDao
+    private val templateDao by lazy { TemplateDBHelper.templateDao }
 
     val apps = mutableStateOf<List<AppInfo>>(emptyList())
 
-    val templates by lazy { mutableStateOf(templateDao.getAll()) }
+    val templates by lazy {
+        mutableStateOf(BundledTemplateManager.synchronize(ContextAmbient.current))
+    }
 
     fun refreshApps() {
         apps.value = AppInfoProvider.getList()
@@ -51,7 +55,7 @@ object LauncherState {
     }
 
     fun deleteTemplate(template: Template) {
-        templateDao.delete(template)
+        BundledTemplateManager.delete(template)
         refreshTemplates()
     }
 

@@ -13,6 +13,9 @@ interface TemplateDao {
     @Query("SELECT * FROM Template")
     fun getAll(): List<Template>
 
+    @Query("SELECT * FROM Template WHERE id = :id LIMIT 1")
+    fun getById(id: String): Template?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insert(template: Template)
 
@@ -30,4 +33,13 @@ interface TemplateDao {
 
     @Delete
     fun deleteMany(vararg templates: Template)
+
+    @Query("SELECT * FROM BundledTemplateState")
+    fun getBundledTemplateStates(): List<BundledTemplateState>
+
+    @Query("SELECT * FROM BundledTemplateState WHERE templateId = :templateId LIMIT 1")
+    fun getBundledTemplateStateByTemplateId(templateId: String): BundledTemplateState?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertBundledTemplateState(state: BundledTemplateState)
 }
