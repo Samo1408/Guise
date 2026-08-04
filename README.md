@@ -1,5 +1,29 @@
 # Guise Reborn
 
+[![Release](https://img.shields.io/github/v/release/daxiaamu/Guise_Reborn?include_prereleases&sort=semver&display_name=tag&style=flat-square&label=Release)](https://github.com/daxiaamu/Guise_Reborn/releases)
+[![Release downloads](https://img.shields.io/github/downloads/daxiaamu/Guise_Reborn/total?style=flat-square&label=Downloads&color=2ea44f)](https://github.com/daxiaamu/Guise_Reborn/releases)
+[![Android CI](https://github.com/daxiaamu/Guise_Reborn/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/daxiaamu/Guise_Reborn/actions/workflows/android.yml)
+[![License](https://img.shields.io/github/license/daxiaamu/Guise_Reborn?style=flat-square&label=License)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/daxiaamu/Guise_Reborn?style=flat-square&label=Last%20commit)](https://github.com/daxiaamu/Guise_Reborn/commits/main)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/daxiaamu/Guise_Reborn?style=flat-square&label=Commits)](https://github.com/daxiaamu/Guise_Reborn/commits/main)
+
+[![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white)](https://developer.android.com/about/versions/10)
+[![minSdk 29](https://img.shields.io/badge/minSdk-29-3DDC84?style=flat-square)](https://developer.android.com/tools/releases/platforms#10)
+[![targetSdk 37](https://img.shields.io/badge/targetSdk-37-3DDC84?style=flat-square)](https://developer.android.com/about/versions/17)
+[![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-6f42c1?style=flat-square)](#当前技术基线)
+[![Modern Xposed API 102](https://img.shields.io/badge/Modern%20Xposed-API%20102-8b5cf6?style=flat-square)](https://github.com/libxposed)
+[![Kotlin](https://img.shields.io/github/languages/top/daxiaamu/Guise_Reborn?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
+[![Material 3](https://img.shields.io/badge/Design-Material%203-6750A4?style=flat-square&logo=materialdesign&logoColor=white)](https://m3.material.io/)
+
+[![Stars](https://img.shields.io/github/stars/daxiaamu/Guise_Reborn?style=flat-square&logo=github&label=Stars)](https://github.com/daxiaamu/Guise_Reborn/stargazers)
+[![Forks](https://img.shields.io/github/forks/daxiaamu/Guise_Reborn?style=flat-square&logo=github&label=Forks)](https://github.com/daxiaamu/Guise_Reborn/forks)
+[![Watchers](https://img.shields.io/github/watchers/daxiaamu/Guise_Reborn?style=flat-square&logo=github&label=Watchers)](https://github.com/daxiaamu/Guise_Reborn/watchers)
+[![Contributors](https://img.shields.io/github/contributors/daxiaamu/Guise_Reborn?style=flat-square&label=Contributors)](https://github.com/daxiaamu/Guise_Reborn/graphs/contributors)
+[![Open issues](https://img.shields.io/github/issues/daxiaamu/Guise_Reborn?style=flat-square&label=Issues)](https://github.com/daxiaamu/Guise_Reborn/issues)
+[![Code size](https://img.shields.io/github/languages/code-size/daxiaamu/Guise_Reborn?style=flat-square&label=Code%20size)](https://github.com/daxiaamu/Guise_Reborn)
+[![Repository size](https://img.shields.io/github/repo-size/daxiaamu/Guise_Reborn?style=flat-square&label=Repo%20size)](https://github.com/daxiaamu/Guise_Reborn)
+
 Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xposed 的应用运行环境伪装模块。它可针对用户明确选中的目标应用，修改设备、系统、标识符、网络、SIM、Wi-Fi、定位、基站、语言、时区、电池及隐私相关 API 的返回结果。
 
 本仓库保留公开源码仓库的 Git 历史，并基于原作者公开表示“感兴趣的可以接手继续开发”的版本继续维护：
@@ -9,18 +33,6 @@ Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xp
 - 上述源码仓库的 GitHub Fork 上游：[shenghuang147/Guise](https://github.com/shenghuang147/Guise)
 
 > 维护者：大侠阿木。当前预发布版本为 `2.0.0-beta.5`；README 中的维护版内容均位于原作者说明之前。
-
-## 下载统计
-
-<!-- download-stats:start -->
-| 下载项目 | 累计下载量 |
-| --- | ---: |
-| Guise Reborn APK | **175** |
-| Guise Test APK | **13** |
-| 仓库 APK 合计 | **188** |
-
-> 数据由 GitHub Actions 根据当前全部 Release 附件自动累计，正式版与 Pre-release 不作区分；已删除 Release 的历史下载量无法由 GitHub API 恢复。
-<!-- download-stats:end -->
 
 ## 当前技术基线
 
