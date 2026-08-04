@@ -310,7 +310,6 @@ fun EnableTemplateScreen(template: Template) {
                                 R.string.template_replace_message,
                                 appInfo.label,
                                 currentSource,
-                                template.name,
                             )
                         )
                     },
@@ -320,7 +319,7 @@ fun EnableTemplateScreen(template: Template) {
                             selects[appInfo.packageName] = Unit
                             pendingReplacement = null
                         }) {
-                            Text(stringResource(R.string.replace))
+                            Text(stringResource(R.string.confirm))
                         }
                     },
                     dismissButton = {

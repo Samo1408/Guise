@@ -17,10 +17,9 @@
         <item quantity="many">%1$d تطبيقًا</item>
         <item quantity="other">%1$d تطبيق</item>
     </plurals>
-    <string name="template_replace_title">استبدال الإعداد الحالي؟</string>
-    <string name="template_replace_message">يستخدم %1$s حاليًا %2$s. سيؤدي تطبيق %3$s إلى استبدال إعداده الحالي.</string>
+    <string name="template_replace_title">تغيير القالب؟</string>
+    <string name="template_replace_message">يستخدم %1$s حاليًا «%2$s». هل تريد تغييره إلى القالب الحالي؟</string>
     <string name="template_custom_configuration">إعدادًا مخصصًا</string>
-    <string name="replace">استبدال</string>
     <string name="add_template">قالب جديد</string>
 
     <string name="search_placeholder">بحث..</string>
