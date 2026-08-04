@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -231,50 +231,45 @@ fun EnableTemplateScreen(template: Template) {
         }
 
         OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 116.dp),
+            modifier = Modifier.fillMaxWidth(),
             onClick = { toggleSelection(appInfo) },
             colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
         ) {
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AppIcon(
-                        packageName = appInfo.packageName,
-                        modifier = Modifier.size(36.dp),
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = { toggleSelection(appInfo) },
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    packageName = appInfo.packageName,
+                    modifier = Modifier.size(32.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
                         text = appInfo.label,
-                        modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (appInfo.isSystemApp) {
-                        Text(
-                            text = stringResource(R.string.app_type_system),
-                            modifier = Modifier.padding(start = 6.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-                        )
+                    val details = if (appInfo.isSystemApp) {
+                        "${appInfo.packageName} · ${stringResource(R.string.app_type_system)}"
+                    } else {
+                        appInfo.packageName
                     }
+                    Text(
+                        text = details,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
-                Text(
-                    text = appInfo.packageName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                Checkbox(
+                    checked = selected,
+                    onCheckedChange = { toggleSelection(appInfo) },
+                    modifier = Modifier.size(36.dp),
                 )
             }
         }
