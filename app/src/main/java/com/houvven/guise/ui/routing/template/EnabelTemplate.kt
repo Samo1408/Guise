@@ -80,7 +80,6 @@ fun EnableTemplateScreen(template: Template) {
 
     // 系统与用户APP过滤
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val cachedApps = LauncherState.apps.value
     val availableTemplates = LauncherState.templates.value
     var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
     var refreshing by remember { mutableStateOf(true) }
@@ -108,11 +107,28 @@ fun EnableTemplateScreen(template: Template) {
     }
     var changesApplied by remember(template.configuration) { mutableStateOf(false) }
 
+    suspend fun loadInstalledApps(): List<AppInfo> = withContext(Dispatchers.IO) {
+        val collator = Collator.getInstance(Locale.CHINA)
+        AppInfoProvider.getList().sortedBy { collator.getCollationKey(it.label) }
+    }
+
+    fun refreshInstalledApps() {
+        if (refreshing) return
+        coroutineScope.launch {
+            refreshing = true
+            try {
+                apps = loadInstalledApps()
+                LauncherState.apps.value = apps
+                prioritizedPackages = selects.keys.toSet()
+            } finally {
+                refreshing = false
+            }
+        }
+    }
+
     LaunchedEffect(template.configuration) {
         val snapshot = withContext(Dispatchers.IO) {
-            val installedApps = cachedApps.ifEmpty { AppInfoProvider.getList() }
-            val collator = Collator.getInstance(Locale.CHINA)
-            val sortedApps = installedApps.sortedBy { collator.getCollationKey(it.label) }
+            val sortedApps = loadInstalledApps()
             val templateSignature = templateConfig.parameterSignature()
             val configs = ModuleConfig.getAllSaved()
             val configuredPackages = configs
@@ -270,19 +286,7 @@ fun EnableTemplateScreen(template: Template) {
 
             PullToRefreshBox(
                 isRefreshing = refreshing,
-                onRefresh = {
-                    coroutineScope.launch {
-                        refreshing = true
-                        apps = withContext(Dispatchers.IO) {
-                            val collator = Collator.getInstance(Locale.CHINA)
-                            AppInfoProvider.getList()
-                                .sortedBy { collator.getCollationKey(it.label) }
-                        }
-                        LauncherState.apps.value = apps
-                        prioritizedPackages = selects.keys.toSet()
-                        refreshing = false
-                    }
-                },
+                onRefresh = ::refreshInstalledApps,
                 modifier = Modifier.fillMaxSize(),
             ) {
                 LazyVerticalStaggeredGrid(
