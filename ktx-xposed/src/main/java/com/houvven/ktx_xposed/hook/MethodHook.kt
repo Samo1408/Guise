@@ -12,6 +12,12 @@ object ModernXposedRuntime {
     lateinit var module: XposedModule
     lateinit var packageContext: LoadPackageContext
 
+    val moduleOrNull: XposedModule?
+        get() = if (::module.isInitialized) module else null
+
+    val packageContextOrNull: LoadPackageContext?
+        get() = if (::packageContext.isInitialized) packageContext else null
+
     fun initialize(module: XposedModule, context: LoadPackageContext) {
         this.module = module
         packageContext = context

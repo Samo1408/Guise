@@ -81,9 +81,15 @@ class HookInit : XposedModule() {
             ApplicationListPass(),
             BuildConfigHook(),
         ).forEach { hook: LoadPackageHookAdapter ->
-            runXposedCatching { hook.onHook() }
+            val category = hook.javaClass.simpleName
+            val setupCompleted = runXposedCatching(category) {
+                XposedLogger.withCategory(category) { hook.onHook() }
+                true
+            } == true
+            if (setupCompleted) {
+                XposedLogger.d("Hook setup completed", category)
+            }
         }
-        XposedLogger.doHookModuleLog()
     }
 
     private fun scheduleProcessExit(extras: Bundle?): Boolean {

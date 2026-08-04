@@ -63,6 +63,9 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 - 管理界面全面迁移到 Jetpack Compose 与 Material 3，移除旧 View/过时主题实现所带来的维护包袱。
 - 模块入口、包加载回调、Hook 辅助层、日志和配置访问迁移到 Modern Xposed API 102。
 - 使用 Xposed Remote Preferences 在管理应用和目标进程之间传递配置，不再直接修改 LSPosed 数据库。
+- 日志链路重新设计为“Xposed 官方日志 + Remote Preferences 有界收件箱 + 管理端 Room 归档”：移除原来导出的日志 `ContentProvider`、目标进程逐条写管理端数据库以及依赖 Activity 生命周期批量落盘的实现。目标进程只保留每进程最近 12 条待同步记录，管理端去重后最多保存 2,000 条，避免日志无限增长。
+- 日志页会随 Remote Preferences 变化自动同步，不再需要含义模糊的手动刷新按钮；支持错误/信息/调试级别筛选、包名/进程/Hook 类别/正文/堆栈搜索、完整异常展开与诊断信息导出。“详细日志”默认关闭，只控制成功安装 Hook 的调试明细，错误和必要状态始终记录。
+- 运行时日志包含时间、级别、目标包名、进程名、Hook 类别、消息和完整异常堆栈，不采集页面内容、账号、输入、照片、位置、网络内容或系统全量 Logcat。日志数据库不参与系统备份；本次重构不迁移旧日志数据库。
 - Hook 按设备、系统、唯一标识、网络、SIM、Wi-Fi、定位、基站、电池、截图、时区等职责拆分；单个 Hook 失败会被隔离，避免拖垮整个目标进程。
 - 数据预设从 UI 代码移入资源：Android 版本、SDK、DPI、网络、语言等集中维护在 `app/src/main/res/raw/presets.json`。
 - 升级 Room、MMKV、KSP、协程和序列化；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及原有通用 `lib` 模块。
@@ -72,6 +75,7 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 ### 2. Xposed 作用域与启用逻辑
 
 - 应用列表中的勾选状态现在是 Guise 的唯一启用节点，同时负责同步 LSPosed 作用域。
+- 配置以应用私有存储作为持久化源，并镜像到 Xposed Remote Preferences 供目标进程读取；首次升级会先保留既有远程配置。框架服务重新连接时会按勾选状态校准实际作用域，避免框架远程存储重建或设备重启后出现“界面已勾选、实际未加载”的分叉。
 - 勾选应用：写入启用状态并加入作用域；取消勾选：停止对该应用执行 Guise Hook，并从作用域移除。
 - 不再把“存在配置”误认为“已启用 Hook”；应用可保留配置但暂时取消勾选。
 - 已保存为空配置时会自动取消勾选，避免作用域中残留一个实际没有任何配置的目标。
@@ -189,7 +193,7 @@ MMKV 2 官方 Android 原生库当前仅提供 64 位构建，因此 Guise Rebor
 本轮对启动链路进行了实机分段测量，并只保留可解释、可维护的优化：
 
 - Android 12+ 首帧就绪后立即移除系统 Splash 的退出动画，不添加人为延时或 KeepOnScreenCondition。
-- Room 日志数据库改为线程安全的按需初始化，避免 ContentProvider 在进程创建阶段立即构建数据库。
+- Room 日志数据库只在 Application 初始化时取得惰性数据库句柄，旧日志库清理和实际 I/O 均进入后台调度器；不再由 ContentProvider 抢在 Application 之前启动数据库。
 - 壁纸颜色读取移到 `Dispatchers.IO`，MaterialKolor 配色计算移到 `Dispatchers.Default`；首帧先使用系统动态色或基础色板。
 - 应用包扫描延后一帧并移到 IO 调度器，不阻塞第一个 Compose 帧。
 - 完整应用扫描不再预先解码所有图标；只为屏幕上实际参与组合的项目加载图标，并使用 8 MiB LRU 缓存。

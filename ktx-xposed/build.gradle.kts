@@ -1,6 +1,5 @@
 plugins {
     id("com.android.library")
-    id("com.google.devtools.ksp")
 }
 
 android {
@@ -33,13 +32,5 @@ android {
 dependencies {
     compileOnly("io.github.libxposed:api:102.0.0")
     implementation("androidx.core:core-ktx:1.19.0")
-    val roomVersion = "2.8.4"
-    compileOnly("androidx.room:room-runtime:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    compileOnly("androidx.room:room-ktx:$roomVersion")
-}
-
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-    arg("room.generateKotlin", "false")
+    testImplementation("junit:junit:4.13.2")
 }

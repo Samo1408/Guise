@@ -271,6 +271,28 @@ private constructor(
 
         fun empty() = of(ModuleConfig())
 
+        fun reconcileScope(service: XposedService) {
+            val desiredScope = ModuleConfig.getAllSaved()
+                .asSequence()
+                .filter { it.enabled }
+                .mapTo(mutableSetOf()) { it.packageName }
+            val currentScope = runCatching { service.getScope().toSet() }.getOrNull() ?: return
+            val removedPackages = currentScope - desiredScope
+            val addedPackages = desiredScope - currentScope
+            if (removedPackages.isNotEmpty()) {
+                runCatching { service.removeScope(removedPackages.toList()) }
+            }
+            if (addedPackages.isNotEmpty()) {
+                service.requestScope(
+                    addedPackages.toList(),
+                    object : XposedService.OnScopeEventListener {
+                        override fun onScopeRequestApproved(approved: List<String>) = Unit
+                        override fun onScopeRequestFailed(message: String) = Unit
+                    },
+                )
+            }
+        }
+
         fun applyTemplateSelection(
             templateConfig: ModuleConfig,
             initiallySelected: Set<String>,
