@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,9 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -58,6 +60,7 @@ import com.houvven.guise.ui.routing.NavRoutingTypes
 import com.houvven.guise.ui.routing.navigateWithTemplate
 import com.houvven.guise.ui.routing.template.EnableTemplateDialog
 import com.houvven.guise.ui.utils.saveFileToDownloadDir
+import com.houvven.guise.xposed.config.ModuleConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -76,7 +79,7 @@ private val requestEnableTemplate = mutableStateOf<Template?>(null)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TemplateCard(template: Template) {
+private fun TemplateCard(template: Template, appliedAppCount: Int) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val installed = remember { mutableStateOf(true) }
@@ -104,32 +107,50 @@ private fun TemplateCard(template: Template) {
     }
 
     val content = @Composable {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(10.dp)
                 .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             headIcon()
-            Text(
-                text = template.name,
-                style = MaterialTheme.typography.titleMedium
-            )
             if (template.type == Template.Type.EXCLUSIVE) {
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = template.packageName!!,
-                    style = MaterialTheme.typography.titleSmall
+                    text = template.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
+                if (!template.description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = template.description!!,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
-            if (template.description.isNullOrBlank().not()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = template.description!!, style = MaterialTheme.typography.labelMedium)
-            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.template_applied_app_count, appliedAppCount),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (appliedAppCount > 0) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                maxLines = 1,
+            )
         }
     }
 
     Card(
         modifier = Modifier
-            .padding(horizontal = 6.dp, vertical = 5.dp)
             .fillMaxWidth()
             .combinedClickable(
                 onClick = {
@@ -185,6 +206,20 @@ internal fun TemplateScreen() {
     val context = LocalContext.current
     val resources = LocalResources.current
     val navController = LocalNavController.current
+    val templates = LauncherState.templates.value
+    val apps = LauncherState.apps.value
+    val appliedCounts = remember(templates, apps) {
+        val enabledConfigs = apps
+            .asSequence()
+            .filter { it.isEnable }
+            .map { ModuleConfig.get(it.packageName) }
+            .filter { it.enabled }
+            .toList()
+        templates.associate { template ->
+            val templateConfig = ModuleConfig.fromJson(template.configuration)
+            template.id to enabledConfigs.count { it.hasSameParameters(templateConfig) }
+        }
+    }
 
     val topBar = @Composable {
         var topBarMenuExpanded by remember { mutableStateOf(false) }
@@ -259,7 +294,6 @@ internal fun TemplateScreen() {
 
     @Composable
     fun TypeFilter() {
-        val templates = LauncherState.templates.value
         val commonCount = templates.count { it.type == Template.Type.COMMON }
         val exclusiveCount = templates.count { it.type == Template.Type.EXCLUSIVE }
 
@@ -307,16 +341,21 @@ internal fun TemplateScreen() {
             )
         ) {
             TypeFilter()
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 10.dp),
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val items = if (typeFilter.intValue != TemplateTypeFilter.ALL)
-                    LauncherState.templates.value.filter { it.type == typeFilter.intValue }
+                    templates.filter { it.type == typeFilter.intValue }
                 else
-                    LauncherState.templates.value
+                    templates
 
-                items(items) { template -> TemplateCard(template) }
+                items(items, key = { it.id }) { template ->
+                    TemplateCard(
+                        template = template,
+                        appliedAppCount = appliedCounts[template.id] ?: 0,
+                    )
+                }
 
             }
 

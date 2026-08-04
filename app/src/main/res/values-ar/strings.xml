@@ -8,6 +8,7 @@
     <string name="template_type_all">الكل</string>
     <string name="template_type_app">خاص بالتطبيق</string>
     <string name="template_type_common">عام</string>
+    <string name="template_applied_app_count">%1$d تطبيقات</string>
     <string name="add_template">قالب جديد</string>
 
     <string name="search_placeholder">بحث..</string>

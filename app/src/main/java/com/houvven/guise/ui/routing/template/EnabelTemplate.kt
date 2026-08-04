@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.module.apps.AppInfo
+import com.houvven.guise.module.apps.AppInfoProvider
 import com.houvven.guise.ui.components.AppIcon
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
 import com.houvven.guise.ui.routing.LauncherState
@@ -49,6 +53,9 @@ import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.guise.xposed.config.ModuleConfigManager
 import java.text.Collator
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class
@@ -62,7 +69,9 @@ fun EnableTemplateScreen(template: Template) {
 
     // 系统与用户APP过滤
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val apps by remember { mutableStateOf(LauncherState.apps.value) }
+    var apps by remember { mutableStateOf(LauncherState.apps.value) }
+    var refreshing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val initiallySelected = remember(template.configuration) {
         apps
@@ -74,6 +83,9 @@ fun EnableTemplateScreen(template: Template) {
     }
     val selects = remember(template.configuration) {
         mutableStateListOf(*initiallySelected.toTypedArray())
+    }
+    var prioritizedPackages by remember(template.configuration) {
+        mutableStateOf(initiallySelected.toSet())
     }
     var changesApplied by remember(template.configuration) { mutableStateOf(false) }
 
@@ -98,8 +110,8 @@ fun EnableTemplateScreen(template: Template) {
             .filter { if (selectedTabIndex == 0) !it.isSystemApp else it.isSystemApp }
             .sortedBy { Collator.getInstance(Locale.CHINA).getCollationKey(it.label) }
             .sortedWith { o1, o2 ->
-                if (selects.contains(o1.packageName) == selects.contains(o2.packageName)) 0
-                else if (selects.contains(o1.packageName)) -1
+                if (prioritizedPackages.contains(o1.packageName) == prioritizedPackages.contains(o2.packageName)) 0
+                else if (prioritizedPackages.contains(o1.packageName)) -1
                 else 1
             }
 
@@ -193,11 +205,25 @@ fun EnableTemplateScreen(template: Template) {
                 )
             }
 
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(3),
-                contentPadding = PaddingValues(4.dp)
+            PullToRefreshBox(
+                isRefreshing = refreshing,
+                onRefresh = {
+                    coroutineScope.launch {
+                        refreshing = true
+                        apps = withContext(Dispatchers.IO) { AppInfoProvider.getList() }
+                        LauncherState.apps.value = apps
+                        prioritizedPackages = selects.toSet()
+                        refreshing = false
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
             ) {
-                items(filterApps()) { appInfo -> ItemCard(appInfo) }
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(3),
+                    contentPadding = PaddingValues(4.dp)
+                ) {
+                    items(filterApps()) { appInfo -> ItemCard(appInfo) }
+                }
             }
         }
     }

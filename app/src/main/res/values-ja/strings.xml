@@ -8,6 +8,7 @@
     <string name="template_type_all">ALL</string>
     <string name="template_type_app">APP</string>
     <string name="template_type_common">COMMON</string>
+    <string name="template_applied_app_count">%1$d個のアプリ</string>
     <string name="add_template">新しいテンプレート</string>
 
     <string name="search_placeholder">探す..</string>
