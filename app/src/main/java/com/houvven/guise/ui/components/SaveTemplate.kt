@@ -41,10 +41,26 @@ private fun TemplateTypeSelector(
     )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         options.forEachIndexed { index, (value, label) ->
+            val isExclusive = value == Template.Type.EXCLUSIVE
+            val activeContainerColor = if (isExclusive) {
+                MaterialTheme.colorScheme.tertiary
+            } else {
+                MaterialTheme.colorScheme.primary
+            }
+            val activeContentColor = if (isExclusive) {
+                MaterialTheme.colorScheme.onTertiary
+            } else {
+                MaterialTheme.colorScheme.onPrimary
+            }
             SegmentedButton(
                 selected = type == value,
                 onClick = { onTypeChanged(value) },
                 shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = activeContainerColor,
+                    activeContentColor = activeContentColor,
+                    activeBorderColor = activeContainerColor,
+                ),
                 icon = {},
                 label = { Text(label) },
             )
