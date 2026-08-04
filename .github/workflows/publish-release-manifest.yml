@@ -3,6 +3,12 @@ name: Publish release manifest
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Guise release tag to publish (for example v2.0.0-beta.4)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -13,7 +19,7 @@ concurrency:
 
 jobs:
   publish:
-    if: startsWith(github.event.release.tag_name, 'v') && github.event.release.prerelease == false
+    if: startsWith(github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
     steps:
       - name: Check out main
@@ -25,7 +31,7 @@ jobs:
       - name: Generate verified manifest
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
         shell: bash
         run: |
           set -euo pipefail
@@ -96,7 +102,7 @@ jobs:
 
       - name: Commit manifest to main
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
         shell: bash
         run: |
           set -euo pipefail
