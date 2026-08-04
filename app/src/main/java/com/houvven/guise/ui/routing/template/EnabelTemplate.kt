@@ -1,32 +1,37 @@
 package com.houvven.guise.ui.routing.template
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,14 +41,19 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
@@ -68,9 +78,7 @@ private data class TemplateSelectionSnapshot(
     val templateNamesBySignature: Map<String, String>,
 )
 
-@OptIn(
-    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnableTemplateScreen(template: Template) {
 
@@ -78,12 +86,15 @@ fun EnableTemplateScreen(template: Template) {
         ModuleConfig.fromJson(template.configuration)
     }
 
-    // 系统与用户APP过滤
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
     val availableTemplates = LauncherState.templates.value
     var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
     var refreshing by remember { mutableStateOf(true) }
     var selectionLoaded by remember { mutableStateOf(false) }
+    var searching by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var displayMenu by rememberSaveable { mutableStateOf(false) }
+    var displaySystemApps by rememberSaveable { mutableStateOf(false) }
+    var searchByPackageName by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     var initiallySelected by remember(template.configuration) {
@@ -174,62 +185,96 @@ fun EnableTemplateScreen(template: Template) {
 
     val filteredApps by remember {
         derivedStateOf {
-            val tabApps = apps.filter {
-                if (selectedTabIndex == 0) !it.isSystemApp else it.isSystemApp
+            var result = if (displaySystemApps) apps else apps.filterNot(AppInfo::isSystemApp)
+            if (searchQuery.isNotBlank()) {
+                result = result.filter { appInfo ->
+                    appInfo.label.contains(searchQuery, ignoreCase = true) ||
+                        searchByPackageName && appInfo.packageName.contains(
+                            searchQuery,
+                            ignoreCase = true,
+                        )
+                }
             }
-            val (prioritized, remaining) = tabApps.partition {
+            val (prioritized, remaining) = result.partition {
                 it.packageName in prioritizedPackages
             }
             prioritized + remaining
         }
     }
 
-    @Composable
-    fun ItemCard(appInfo: AppInfo) {
+    fun toggleSelection(appInfo: AppInfo) {
         val selected = selects.containsKey(appInfo.packageName)
-        val colors =
-            if (selected) CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
-            else CardDefaults.outlinedCardColors()
-        val onclick =
-            fun() {
-                if (selected) {
-                    selects.remove(appInfo.packageName)
-                } else {
-                    val existingConfig = configsByPackage[appInfo.packageName]
-                    val replacesExistingConfiguration = existingConfig?.enabled == true &&
-                        !existingConfig.hasSameParameters(templateConfig)
-                    if (
-                        replacesExistingConfiguration &&
-                        !approvedReplacements.containsKey(appInfo.packageName)
-                    ) {
-                        pendingReplacement = appInfo
-                    } else {
-                        selects[appInfo.packageName] = Unit
-                    }
-                }
+        if (selected) {
+            selects.remove(appInfo.packageName)
+        } else {
+            val existingConfig = configsByPackage[appInfo.packageName]
+            val replacesExistingConfiguration = existingConfig?.enabled == true &&
+                !existingConfig.hasSameParameters(templateConfig)
+            if (
+                replacesExistingConfiguration &&
+                !approvedReplacements.containsKey(appInfo.packageName)
+            ) {
+                pendingReplacement = appInfo
+            } else {
+                selects[appInfo.packageName] = Unit
             }
+        }
+    }
+
+    @Composable
+    fun AppCard(appInfo: AppInfo) {
+        val selected = selects.containsKey(appInfo.packageName)
+        val containerColor = if (selected) {
+            MaterialTheme.colorScheme.surfaceVariant
+        } else {
+            Color.Transparent
+        }
 
         OutlinedCard(
-            modifier = Modifier.padding(5.dp),
-            colors = colors,
-            onClick = onclick,
-            shape = RoundedCornerShape(10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 116.dp),
+            onClick = { toggleSelection(appInfo) },
+            colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(7.dp)
-                    .padding(start = 5.dp),
-                // horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AppIcon(
-                    packageName = appInfo.packageName,
-                    modifier = Modifier.size(30.dp),
-                )
-                Spacer(modifier = Modifier.width(3.dp))
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppIcon(
+                        packageName = appInfo.packageName,
+                        modifier = Modifier.size(36.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = { toggleSelection(appInfo) },
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = appInfo.label,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (appInfo.isSystemApp) {
+                        Text(
+                            text = stringResource(R.string.app_type_system),
+                            modifier = Modifier.padding(start = 6.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                        )
+                    }
+                }
                 Text(
-                    text = appInfo.label,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = appInfo.packageName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -239,10 +284,32 @@ fun EnableTemplateScreen(template: Template) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = template.name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    if (searching) {
+                        val focusRequester = remember { FocusRequester() }
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text(stringResource(R.string.search_placeholder)) },
+                            leadingIcon = { SimplifyIcon(Icons.Default.Search) },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
+                            textStyle = MaterialTheme.typography.bodyLarge,
+                        )
+                        LaunchedEffect(searching) { focusRequester.requestFocus() }
+                    } else {
+                        Text(
+                            text = template.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -253,89 +320,111 @@ fun EnableTemplateScreen(template: Template) {
                         SimplifyIcon(Icons.AutoMirrored.Filled.ArrowBack)
                     }
                 },
+                actions = {
+                    IconButton(onClick = {
+                        if (searching) {
+                            searching = false
+                            searchQuery = ""
+                        } else {
+                            searching = true
+                        }
+                    }) {
+                        SimplifyIcon(if (searching) Icons.Default.Close else Icons.Default.Search)
+                    }
+                    Box {
+                        IconButton(onClick = { displayMenu = true }) {
+                            SimplifyIcon(Icons.Default.Menu)
+                        }
+                        DropdownMenu(
+                            expanded = displayMenu,
+                            onDismissRequest = { displayMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.display_system_apps)) },
+                                onClick = { displaySystemApps = !displaySystemApps },
+                                leadingIcon = {
+                                    Checkbox(
+                                        checked = displaySystemApps,
+                                        onCheckedChange = null,
+                                    )
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.also_search_for_package)) },
+                                onClick = { searchByPackageName = !searchByPackageName },
+                                leadingIcon = {
+                                    Checkbox(
+                                        checked = searchByPackageName,
+                                        onCheckedChange = null,
+                                    )
+                                },
+                            )
+                        }
+                    }
+                },
             )
         }
     ) {
-        Column(
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = ::refreshInstalledApps,
             modifier = Modifier
                 .padding(top = it.calculateTopPadding())
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        // 判断滑动方向
-                        if (delta > 0) {
-                            if (selectedTabIndex == 1) selectedTabIndex = 0
-                        } else {
-                            if (selectedTabIndex == 0) selectedTabIndex = 1
-                        }
-                    }
-                )
+                .fillMaxSize(),
         ) {
-            PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
-                Tab(
-                    text = { Text(text = stringResource(R.string.user_apps)) },
-                    selected = selectedTabIndex == 0,
-                    onClick = { selectedTabIndex = 0 }
-                )
-                Tab(
-                    text = { Text(text = stringResource(R.string.system_apps)) },
-                    selected = selectedTabIndex == 1,
-                    onClick = { selectedTabIndex = 1 }
-                )
-            }
-
-            PullToRefreshBox(
-                isRefreshing = refreshing,
-                onRefresh = ::refreshInstalledApps,
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 160.dp),
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(3),
-                    contentPadding = PaddingValues(4.dp)
-                ) {
-                    items(filteredApps, key = { it.packageName }) { appInfo ->
-                        ItemCard(appInfo)
-                    }
+                items(filteredApps, key = AppInfo::packageName) { appInfo ->
+                    AppCard(appInfo)
                 }
             }
+        }
 
-            pendingReplacement?.let { appInfo ->
-                val currentConfiguration = configsByPackage[appInfo.packageName]
-                val currentSource = currentConfiguration
-                    ?.parameterSignature()
-                    ?.let(templateNamesBySignature::get)
-                    ?: stringResource(R.string.template_custom_configuration)
-                AlertDialog(
-                    onDismissRequest = { pendingReplacement = null },
-                    title = { Text(stringResource(R.string.template_replace_title)) },
-                    text = {
-                        Text(
-                            stringResource(
-                                R.string.template_replace_message,
-                                appInfo.label,
-                                currentSource,
-                            )
+        pendingReplacement?.let { appInfo ->
+            val currentConfiguration = configsByPackage[appInfo.packageName]
+            val currentSource = currentConfiguration
+                ?.parameterSignature()
+                ?.let(templateNamesBySignature::get)
+                ?: stringResource(R.string.template_custom_configuration)
+            AlertDialog(
+                onDismissRequest = { pendingReplacement = null },
+                title = { Text(stringResource(R.string.template_replace_title)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.template_replace_message,
+                            appInfo.label,
+                            currentSource,
                         )
-                    },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            approvedReplacements[appInfo.packageName] = Unit
-                            selects[appInfo.packageName] = Unit
-                            pendingReplacement = null
-                        }) {
-                            Text(stringResource(R.string.confirm))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { pendingReplacement = null }) {
-                            Text(stringResource(R.string.cancel))
-                        }
-                    },
-                )
-            }
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        approvedReplacements[appInfo.packageName] = Unit
+                        selects[appInfo.packageName] = Unit
+                        pendingReplacement = null
+                    }) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingReplacement = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+            )
         }
     }
 
+    BackHandler(enabled = searching) {
+        searching = false
+        searchQuery = ""
+    }
 
     DisposableEffect(template.configuration) {
         onDispose(::applySelectionChanges)
