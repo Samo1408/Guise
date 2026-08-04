@@ -78,6 +78,7 @@
     <string name="other_time_zone">Time zone</string>
     <string name="other_time_zone_summary">Changes the target app’s local time and formatting only; the system clock is not changed</string>
     <string name="other_allow_force_screenshots">Allow forced screenshots</string>
+    <string name="other_allow_force_screenshots_summary">DRM-protected content may still prevent screenshots</string>
     <string name="config_reset_pending_save">Parameters reset. Save to apply.</string>
     <string name="unsaved_config_title">Save changes?</string>
     <string name="unsaved_config_message">The configuration for “%1$s” has unsaved changes.</string>

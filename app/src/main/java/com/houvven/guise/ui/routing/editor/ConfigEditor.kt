@@ -257,6 +257,7 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     ContainerSwitch(
         state.allowForceScreenshots,
         stringResource(R.string.other_allow_force_screenshots),
+        supportingText = stringResource(R.string.other_allow_force_screenshots_summary),
     )
 
 
