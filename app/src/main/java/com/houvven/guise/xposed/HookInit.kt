@@ -1,8 +1,6 @@
 package com.houvven.guise.xposed
 
-import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,13 +21,11 @@ import com.houvven.guise.xposed.hook.netowork.NetworkHook
 import com.houvven.guise.xposed.other.ApplicationListPass
 import com.houvven.guise.xposed.other.BlankPass
 import com.houvven.ktx_xposed.LoadPackageHookAdapter
-import com.houvven.ktx_xposed.hook.afterHookedMethod
 import com.houvven.ktx_xposed.hook.LoadPackageContext
 import com.houvven.ktx_xposed.hook.ModernXposedRuntime
 import com.houvven.ktx_xposed.logger.XposedLogger
 import com.houvven.ktx_xposed.utils.runXposedCatching
 import io.github.libxposed.api.XposedModule
-import io.github.libxposed.api.XposedModuleInterface.HotReloadedParam
 import io.github.libxposed.api.XposedModuleInterface.HotReloadingParam
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
@@ -42,16 +38,11 @@ class HookInit : XposedModule() {
 
     override fun onModuleLoaded(param: ModuleLoadedParam) {
         processName = param.processName
-        log(Log.INFO, TAG, "Loaded in ${param.processName}; API $apiVersion")
     }
 
     override fun onHotReloading(param: HotReloadingParam): Boolean {
         if (scheduleProcessExit(param.extras)) return false
         return super.onHotReloading(param)
-    }
-
-    override fun onHotReloaded(param: HotReloadedParam) {
-        super.onHotReloaded(param)
     }
 
     override fun onPackageReady(param: PackageReadyParam) {
@@ -61,32 +52,18 @@ class HookInit : XposedModule() {
             this,
             LoadPackageContext(param.packageName, processName, param.classLoader),
         )
-        initializeLogDelivery()
+        attachLogContextWhenReady()
         ModernXposedPreferences.current = getRemotePreferences(PackageConfig.PREF_FILE_NAME)
 
-        XposedLogger.i("start onPackageReady: ${param.packageName}")
+        XposedLogger.d("Package ready")
         PackageConfig.doRefresh(param.packageName)
         if (!PackageConfig.current.isEnable) {
-            XposedLogger.i("${param.packageName} is not enabled, skip")
+            XposedLogger.d("Configuration disabled; skip")
             XposedLogger.finishStartup()
             return
         }
 
-        val hooks: List<Pair<String, LoadPackageHookAdapter>> = listOf(
-            "Battery" to BatteryHook(),
-            "Locale" to LocalHook(),
-            "TimeZone" to TimeZoneHook(),
-            "Location" to LocationHook(),
-            "CellLocation" to CellLocationHook(),
-            "Network" to NetworkHook(),
-            "OSBuild" to OsBuildHook(),
-            "DisplayDensity" to DisplayDensityHook(),
-            "Screenshots" to ScreenshotsHook(),
-            "UniqueId" to UniquelyIdHook(),
-            "BlankPass" to BlankPass(),
-            "ApplicationList" to ApplicationListPass(),
-            "BuildConfig" to BuildConfigHook(),
-        )
+        val hooks = PackageConfig.current.activeHookFeatures().map(::createHook)
         hooks.forEach { (category, hook) ->
             val setupCompleted = runXposedCatching(category) {
                 XposedLogger.withCategory(category) { hook.onHook() }
@@ -99,14 +76,34 @@ class HookInit : XposedModule() {
         XposedLogger.finishStartup()
     }
 
-    private fun initializeLogDelivery() {
-        currentApplication()?.let(XposedLogger::attachContext)
-        Application::class.java.afterHookedMethod("attach", Context::class.java) { param ->
-            (param.args.firstOrNull() as? Context)?.let(XposedLogger::attachContext)
+    private fun createHook(feature: HookFeature): Pair<String, LoadPackageHookAdapter> =
+        when (feature) {
+            HookFeature.BATTERY -> "Battery" to BatteryHook()
+            HookFeature.LOCALE -> "Locale" to LocalHook()
+            HookFeature.TIME_ZONE -> "TimeZone" to TimeZoneHook()
+            HookFeature.LOCATION -> "Location" to LocationHook()
+            HookFeature.CELL_LOCATION -> "CellLocation" to CellLocationHook()
+            HookFeature.NETWORK -> "Network" to NetworkHook()
+            HookFeature.OS_BUILD -> "OSBuild" to OsBuildHook()
+            HookFeature.DISPLAY_DENSITY -> "DisplayDensity" to DisplayDensityHook()
+            HookFeature.SCREENSHOTS -> "Screenshots" to ScreenshotsHook()
+            HookFeature.UNIQUE_ID -> "UniqueId" to UniquelyIdHook()
+            HookFeature.BLANK_PASS -> "BlankPass" to BlankPass()
+            HookFeature.APPLICATION_LIST -> "ApplicationList" to ApplicationListPass()
+            HookFeature.APP_VERSION -> "AppVersion" to BuildConfigHook()
         }
-        Activity::class.java.afterHookedMethod("onCreate", Bundle::class.java) { param ->
-            (param.thisObject as? Activity)?.let(XposedLogger::attachContext)
+
+    /** Obtains an application context without modifying Application or Activity lifecycle methods. */
+    private fun attachLogContextWhenReady(attempt: Int = 0) {
+        currentApplication()?.let {
+            XposedLogger.attachContext(it)
+            return
         }
+        if (attempt >= LOG_CONTEXT_MAX_ATTEMPTS) return
+        Handler(Looper.getMainLooper()).postDelayed(
+            { attachLogContextWhenReady(attempt + 1) },
+            LOG_CONTEXT_RETRY_DELAY_MS,
+        )
     }
 
     private fun currentApplication(): Application? = runCatching {
@@ -128,5 +125,7 @@ class HookInit : XposedModule() {
     companion object {
         private const val TAG = "Guise"
         private const val PROCESS_EXIT_DELAY_MS = 150L
+        private const val LOG_CONTEXT_RETRY_DELAY_MS = 50L
+        private const val LOG_CONTEXT_MAX_ATTEMPTS = 20
     }
 }

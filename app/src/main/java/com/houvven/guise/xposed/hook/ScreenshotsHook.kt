@@ -2,12 +2,14 @@ package com.houvven.guise.xposed.hook
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import com.houvven.guise.xposed.LoadPackageHandler
 import com.houvven.guise.xposed.config.HooksValue
 import com.houvven.ktx_xposed.hook.afterHookedMethod
-import com.houvven.ktx_xposed.hook.beforeHookAllMethods
+import com.houvven.ktx_xposed.hook.beforeHookedMethod
 import com.houvven.ktx_xposed.hook.findClassIfExists
 
 class ScreenshotsHook : LoadPackageHandler {
@@ -39,28 +41,42 @@ class ScreenshotsHook : LoadPackageHandler {
      * the complete flags value with FLAG_SECURE, so combined flags slipped through unchanged.
      */
     private fun interceptWindowFlags() {
-        Window::class.java.beforeHookAllMethods("setFlags") { param ->
-            val flags = param.args.getOrNull(0) as? Int ?: return@beforeHookAllMethods
-            val mask = param.args.getOrNull(1) as? Int ?: return@beforeHookAllMethods
+        Window::class.java.beforeHookedMethod(
+            "setFlags",
+            Int::class.javaPrimitiveType!!,
+            Int::class.javaPrimitiveType!!,
+        ) { param ->
+            val flags = param.args.getOrNull(0) as? Int ?: return@beforeHookedMethod
+            val mask = param.args.getOrNull(1) as? Int ?: return@beforeHookedMethod
             if (mask containsFlag FLAG_SECURE) {
                 param.args[0] = flags withoutFlag FLAG_SECURE
             }
         }
-        Window::class.java.beforeHookAllMethods("addFlags") { param ->
-            val flags = param.args.getOrNull(0) as? Int ?: return@beforeHookAllMethods
+        Window::class.java.beforeHookedMethod(
+            "addFlags",
+            Int::class.javaPrimitiveType!!,
+        ) { param ->
+            val flags = param.args.getOrNull(0) as? Int ?: return@beforeHookedMethod
             param.args[0] = flags withoutFlag FLAG_SECURE
         }
     }
 
     /** Covers Window#setAttributes and direct WindowManager add/update calls. */
     private fun interceptWindowLayoutParams() {
-        Window::class.java.beforeHookAllMethods("setAttributes") { param ->
+        Window::class.java.beforeHookedMethod(
+            "setAttributes",
+            WindowManager.LayoutParams::class.java,
+        ) { param ->
             param.args.firstOrNull().clearSecureFlag()
         }
 
         findClassIfExists("android.view.WindowManagerImpl")?.let { windowManagerImpl ->
             listOf("addView", "updateViewLayout").forEach { methodName ->
-                windowManagerImpl.beforeHookAllMethods(methodName) { param ->
+                windowManagerImpl.beforeHookedMethod(
+                    methodName,
+                    View::class.java,
+                    ViewGroup.LayoutParams::class.java,
+                ) { param ->
                     param.args.forEach { argument -> argument.clearSecureFlag() }
                 }
             }

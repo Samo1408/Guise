@@ -8,7 +8,7 @@ import android.content.res.Resources
 import android.util.DisplayMetrics
 import android.view.Display
 import com.houvven.guise.xposed.LoadPackageHandler
-import com.houvven.ktx_xposed.hook.afterHookAllMethods
+import com.houvven.ktx_xposed.hook.afterHookedMethod
 import kotlin.math.roundToInt
 
 class DisplayDensityHook : LoadPackageHandler {
@@ -46,16 +46,16 @@ class DisplayDensityHook : LoadPackageHandler {
             applyDensity(configuration)
         }
 
-        Resources::class.java.afterHookAllMethods("getDisplayMetrics") { param ->
+        Resources::class.java.afterHookedMethod("getDisplayMetrics") { param ->
             (param.result as? DisplayMetrics)?.let(::applyDensity)
         }
-        Resources::class.java.afterHookAllMethods("getConfiguration") { param ->
+        Resources::class.java.afterHookedMethod("getConfiguration") { param ->
             (param.result as? Configuration)?.let(::applyDensity)
         }
-        Display::class.java.afterHookAllMethods("getMetrics") { param ->
+        Display::class.java.afterHookedMethod("getMetrics", DisplayMetrics::class.java) { param ->
             (param.args.firstOrNull() as? DisplayMetrics)?.let(::applyDensity)
         }
-        Display::class.java.afterHookAllMethods("getRealMetrics") { param ->
+        Display::class.java.afterHookedMethod("getRealMetrics", DisplayMetrics::class.java) { param ->
             (param.args.firstOrNull() as? DisplayMetrics)?.let(::applyDensity)
         }
     }

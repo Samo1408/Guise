@@ -2,7 +2,7 @@ package com.houvven.guise.xposed.hook
 
 import android.icu.util.TimeZone as IcuTimeZone
 import com.houvven.guise.xposed.LoadPackageHandler
-import com.houvven.ktx_xposed.hook.beforeHookAllMethods
+import com.houvven.ktx_xposed.hook.beforeHookedMethod
 import java.time.ZoneId
 import java.util.TimeZone as JavaTimeZone
 
@@ -19,16 +19,16 @@ class TimeZoneHook : LoadPackageHandler {
         // Set process defaults for APIs that cache the zone during initialization.
         JavaTimeZone.setDefault(javaTimeZone)
 
-        JavaTimeZone::class.java.beforeHookAllMethods("getDefault") { param ->
+        JavaTimeZone::class.java.beforeHookedMethod("getDefault") { param ->
             param.result = javaTimeZone.clone()
         }
-        JavaTimeZone::class.java.beforeHookAllMethods("getDefaultRef") { param ->
+        JavaTimeZone::class.java.beforeHookedMethod("getDefaultRef") { param ->
             param.result = javaTimeZone.clone()
         }
-        IcuTimeZone::class.java.beforeHookAllMethods("getDefault") { param ->
+        IcuTimeZone::class.java.beforeHookedMethod("getDefault") { param ->
             param.result = icuTimeZone.cloneAsThawed()
         }
-        ZoneId::class.java.beforeHookAllMethods("systemDefault") { param ->
+        ZoneId::class.java.beforeHookedMethod("systemDefault") { param ->
             param.result = zoneId
         }
     }
