@@ -2,6 +2,7 @@ package com.houvven.guise.ui.routing.launcher
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -27,14 +28,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
+import com.houvven.guise.ui.routing.PREDICTIVE_BACK_BACKGROUND_MIN_SCALE
+import com.houvven.guise.ui.routing.PREDICTIVE_BACK_BACKGROUND_OFFSET_DIVISOR
 import com.houvven.guise.ui.routing.editor.DeployConfigEditScreen
 
 
@@ -73,6 +79,8 @@ private val currentPage by derivedStateOf { mutableStateOf(LauncherScreenType.DE
 fun LauncherRoute() {
     var editorName by rememberSaveable { mutableStateOf<String?>(null) }
     var editorPackageName by rememberSaveable { mutableStateOf<String?>(null) }
+    var editorBackProgress by remember { mutableFloatStateOf(0f) }
+    var editorBackFromRight by remember { mutableStateOf(false) }
 
     @Composable
     fun RowScope.LauncherNavBarItem(
@@ -88,8 +96,26 @@ fun LauncherRoute() {
         )
     }
 
-    Box(Modifier.fillMaxSize()) {
+    val editorOpen = editorName != null && editorPackageName != null
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface),
+    ) {
         Scaffold(
+            modifier = Modifier.graphicsLayer {
+                if (editorOpen) {
+                    val progress = editorBackProgress.coerceIn(0f, 1f)
+                    val backgroundScale = PREDICTIVE_BACK_BACKGROUND_MIN_SCALE +
+                        ((1f - PREDICTIVE_BACK_BACKGROUND_MIN_SCALE) * progress)
+                    scaleX = backgroundScale
+                    scaleY = backgroundScale
+                    translationX = size.width *
+                        (1f - progress) /
+                        PREDICTIVE_BACK_BACKGROUND_OFFSET_DIVISOR *
+                        if (editorBackFromRight) -1f else 1f
+                }
+            },
             contentWindowInsets = WindowInsets(0),
             bottomBar = {
                 NavigationBar {
@@ -111,6 +137,7 @@ fun LauncherRoute() {
                     )) { screen ->
                         when (screen) {
                             LauncherScreenType.DEPLOY -> DeployScreen { appInfo ->
+                                editorBackProgress = 0f
                                 editorName = appInfo.label
                                 editorPackageName = appInfo.packageName
                             }
@@ -132,6 +159,11 @@ fun LauncherRoute() {
                 onExit = {
                     editorName = null
                     editorPackageName = null
+                    editorBackProgress = 0f
+                },
+                onBackProgressChanged = { progress, fromRight ->
+                    editorBackProgress = progress
+                    editorBackFromRight = fromRight
                 },
             )
         }

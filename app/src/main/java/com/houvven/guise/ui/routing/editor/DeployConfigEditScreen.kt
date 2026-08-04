@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.components.SaveTemplate
 import com.houvven.guise.ui.components.simplify.SimplifyDropdownMenuItem
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
+import com.houvven.guise.ui.routing.PREDICTIVE_BACK_BACKGROUND_MIN_ALPHA
 import com.houvven.guise.ui.theme.predictiveBack
 import com.houvven.guise.ui.utils.oneClickRandom
 import com.houvven.guise.xposed.config.ModuleConfig
@@ -70,6 +72,7 @@ fun DeployConfigEditScreen(
     name: String,
     packageName: String,
     onExit: () -> Unit,
+    onBackProgressChanged: (progress: Float, fromRight: Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val moduleConfigManager = remember(packageName) {
@@ -191,6 +194,9 @@ fun DeployConfigEditScreen(
     } else {
         0f
     }
+    SideEffect {
+        onBackProgressChanged(backProgress, backFromRight)
+    }
     val scrimColor = MaterialTheme.colorScheme.scrim
     Box(
         Modifier
@@ -200,7 +206,12 @@ fun DeployConfigEditScreen(
         Box(
             Modifier
                 .fillMaxSize()
-                .background(scrimColor.copy(alpha = 0.12f * (1f - backProgress))),
+                .background(
+                    scrimColor.copy(
+                        alpha = (1f - PREDICTIVE_BACK_BACKGROUND_MIN_ALPHA) *
+                            (1f - backProgress),
+                    ),
+                ),
         )
         Surface(
             modifier = Modifier

@@ -8,8 +8,10 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -49,7 +51,7 @@ fun NavigationRoute() {
             if (predictiveBackEnabled) {
                 slideIntoContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(durationMillis = 220),
+                    animationSpec = tween(durationMillis = PREDICTIVE_BACK_DURATION_MILLIS),
                 )
             } else {
                 EnterTransition.None
@@ -57,19 +59,76 @@ fun NavigationRoute() {
         },
         exitTransition = { ExitTransition.None },
         popEnterTransition = {
-            EnterTransition.None
+            if (predictiveBackEnabled) {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                    initialOffset = { fullWidth ->
+                        fullWidth / PREDICTIVE_BACK_BACKGROUND_OFFSET_DIVISOR
+                    },
+                ) + scaleIn(
+                    initialScale = PREDICTIVE_BACK_BACKGROUND_MIN_SCALE,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                ) + fadeIn(
+                    initialAlpha = PREDICTIVE_BACK_BACKGROUND_MIN_ALPHA,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                )
+            } else {
+                EnterTransition.None
+            }
         },
         popExitTransition = {
             if (predictiveBackEnabled) {
                 slideOutOfContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(durationMillis = 220),
+                    animationSpec = tween(durationMillis = PREDICTIVE_BACK_DURATION_MILLIS),
                 )
             } else {
                 ExitTransition.None
             }
         },
-        predictivePopEnterTransition = { EnterTransition.None },
+        predictivePopEnterTransition = { swipeEdge ->
+            if (predictiveBackEnabled) {
+                val direction = if (swipeEdge == BackEventCompat.EDGE_RIGHT) {
+                    AnimatedContentTransitionScope.SlideDirection.Right
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                }
+                slideIntoContainer(
+                    towards = direction,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                    initialOffset = { fullWidth ->
+                        fullWidth / PREDICTIVE_BACK_BACKGROUND_OFFSET_DIVISOR
+                    },
+                ) + scaleIn(
+                    initialScale = PREDICTIVE_BACK_BACKGROUND_MIN_SCALE,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                ) + fadeIn(
+                    initialAlpha = PREDICTIVE_BACK_BACKGROUND_MIN_ALPHA,
+                    animationSpec = tween(
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
+                )
+            } else {
+                EnterTransition.None
+            }
+        },
         predictivePopExitTransition = { swipeEdge ->
             if (predictiveBackEnabled) {
                 slideOutOfContainer(
@@ -79,7 +138,7 @@ fun NavigationRoute() {
                         AnimatedContentTransitionScope.SlideDirection.Left
                     },
                     animationSpec = tween(
-                        durationMillis = 220,
+                        durationMillis = PREDICTIVE_BACK_DURATION_MILLIS,
                         // Keep page displacement proportional to predictive-back progress.
                         easing = LinearEasing,
                     ),
