@@ -268,6 +268,7 @@ class MainActivity : ComponentActivity() {
 private fun IntroCard() {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.app_description))
             Text(stringResource(R.string.test_instructions_title), fontWeight = FontWeight.Bold)
             Text(stringResource(R.string.test_instructions))
             Text(stringResource(R.string.hook_toast_hint), style = MaterialTheme.typography.bodySmall)

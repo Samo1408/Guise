@@ -10,6 +10,18 @@ Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xp
 
 > 维护者：大侠阿木。当前预发布版本为 `2.0.0-beta.4`；README 中的维护版内容均位于原作者说明之前。
 
+## 下载统计
+
+<!-- download-stats:start -->
+| 下载项目 | 累计下载量 |
+| --- | ---: |
+| Guise Reborn APK | **73** |
+| Guise Test APK | **12** |
+| 仓库 APK 合计 | **85** |
+
+> 数据由 GitHub Actions 根据当前全部 Release 附件自动累计，正式版与 Pre-release 不作区分；已删除 Release 的历史下载量无法由 GitHub API 恢复。
+<!-- download-stats:end -->
+
 ## 当前技术基线
 
 | 项目 | 当前状态 |
@@ -231,7 +243,7 @@ Android 13 及以上可通过系统“应用语言”设置单独切换。新增
 
 ## Guise Test
 
-`guise-test` 是独立发布的 API 37 验证应用，当前版本为 `1.1.0`，包名为 `com.daxiaamu.guise.test`。它通过真实 Android API 读取结果，不直接依赖 Guise 的配置对象，可检查：
+`guise-test` 是用于检测 Guise 伪装效果是否生效的独立“靶应用”，当前版本为 `1.1.0`，包名为 `com.daxiaamu.guise.test`。它面向 API 37，通过真实 Android API 读取结果，不直接依赖 Guise 的配置对象，可检查：
 
 - 应用版本、设备构建字段、Android 版本与 SDK；
 - Android ID、IMEI、手机号；
@@ -254,7 +266,7 @@ Android 13 及以上可通过系统“应用语言”设置单独切换。新增
 
 - `app`：Compose 管理界面、配置存储、更新机制和完整 Xposed Hook。
 - `ktx-xposed`：Modern Xposed API 适配、Hook 辅助与模块日志基础设施。
-- `guise-test`：独立伪装效果验证应用。
+- `guise-test`：用于检测 Guise 伪装效果是否生效的独立靶应用。
 
 ## 构建
 

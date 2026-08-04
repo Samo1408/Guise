@@ -4,7 +4,9 @@
     <string name="time_zone_java">タイムゾーン（java.util）</string>
     <string name="time_zone_java_time">タイムゾーン（java.time）</string>
     <string name="time_zone_icu">タイムゾーン（Android ICU）</string>
-    <string name="app_name">Guise テスト</string><string name="refresh">更新</string>
+    <string name="app_name">Guise テスト</string>
+    <string name="app_description">Guise の偽装効果が有効かを確認するための「ターゲットアプリ」です。</string>
+    <string name="refresh">更新</string>
     <string name="test_instructions_title">テスト方法</string>
     <string name="test_instructions">このアプリ（com.daxiaamu.guise.test）を Guise に追加し、判別しやすい偽装値を設定してスコープを同期します。その後、アプリを強制停止して再度開き、以下の値を Guise の設定と比較してください。</string>
     <string name="hook_toast_hint">「Hook 成功通知」が有効な場合、コールドスタート時に Guise のトーストも表示されます。</string>

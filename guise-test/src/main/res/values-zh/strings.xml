@@ -4,7 +4,9 @@
     <string name="time_zone_java">时区（java.util）</string>
     <string name="time_zone_java_time">时区（java.time）</string>
     <string name="time_zone_icu">时区（Android ICU）</string>
-    <string name="app_name">Guise 测试</string><string name="refresh">刷新</string>
+    <string name="app_name">Guise 测试</string>
+    <string name="app_description">用于检测 Guise 伪装效果是否生效的“靶应用”。</string>
+    <string name="refresh">刷新</string>
     <string name="test_instructions_title">测试方法</string>
     <string name="test_instructions">将本应用（com.daxiaamu.guise.test）加入 Guise，配置容易识别的伪装值并同步作用域，然后强行停止并重新打开本应用。请将下列结果与 Guise 配置对照。</string>
     <string name="hook_toast_hint">若启用了“Hook 成功提示”，冷启动时还应出现 Guise Toast。</string>
