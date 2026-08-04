@@ -124,7 +124,6 @@ Guise Reborn 并非只为原版更换界面。维护版保留按应用伪装的�
 - **改进联系人/媒体空白通行**：原版只比较少数固定 URI 并返回 `null`；维护版同时拦截 `ContentResolver` 和 `ContentProviderClient` 查询，按 authority/path 识别联系人、图片、视频和音频，并返回保留请求列结构的空 `Cursor`，适配现代 MediaStore 查询链路。
 - **新增“应用列表”空白通行**：目标应用通过常用 `PackageManager` 列表、Intent 查询、UID 包名数组和指定包信息接口时，只能看到自身与系统应用（含更新后的系统应用）。
 - 应用列表过滤同时覆盖目标进程内的 `ApplicationPackageManager` 和 `IPackageManager` Binder 代理，但不会 Hook `system_server` 或扩大模块作用域；原生代码、应用自带 Binder 客户端及厂商私有查询接口仍可能绕过，因此设置页会明确提示这一能力边界。
-- 实现思路参考 [Hide My Applist](https://github.com/Dr-TSNG/Hide-My-Applist) 对包管理查询面的梳理，但 Guise 没有复制其代码，也没有采用其系统框架 Hook 方案，而是独立实现目标进程内过滤。
 - 支持窗口隐私/截图相关 Hook；权限不足、厂商私有媒体接口或应用自行维护的数据索引仍可能绕过通用 Android API，需使用 Guise Test 或目标应用实测。
 
 ### 7. 应用列表、配置与模板交互
