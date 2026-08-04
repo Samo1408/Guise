@@ -23,7 +23,7 @@ import com.houvven.guise.xposed.config.ModuleConfigManager
 @Composable
 fun AddTemplateScreen() {
     val navHostController = LocalNavController.current
-    val moduleConfigManager = ModuleConfigManager.empty()
+    val moduleConfigManager = remember { ModuleConfigManager.empty() }
     val isSaveRequest = remember { mutableStateOf(false) }
 
     SaveTemplate(

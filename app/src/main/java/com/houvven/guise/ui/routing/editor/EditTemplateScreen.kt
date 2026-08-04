@@ -22,13 +22,15 @@ import com.houvven.guise.xposed.config.ModuleConfigManager
 @Composable
 fun EditTemplateScreen(template: Template) {
     val navHostController = LocalNavController.current
-    val moduleConfigManager = ModuleConfigManager.of(ModuleConfig.fromJson(template.configuration))
+    val moduleConfigManager = remember(template.id, template.configuration) {
+        ModuleConfigManager.of(ModuleConfig.fromJson(template.configuration))
+    }
     val isSaveRequest = remember { mutableStateOf(false) }
     val hasParameterChanges = moduleConfigManager.hasUnsavedChanges()
 
     SaveEditTemplate(
         dialogState = isSaveRequest,
-        template = template.apply { updateTime = System.currentTimeMillis() },
+        template = template,
         moduleConfig = moduleConfigManager.config,
         prepareConfigForSave = moduleConfigManager::updateConfigFromState,
         onSaved = { navHostController.popBackStack() },

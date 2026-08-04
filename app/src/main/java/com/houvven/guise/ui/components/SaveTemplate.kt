@@ -245,6 +245,7 @@ fun SaveEditTemplate(
                     it.type = type
                     if (packageName.isNotBlank()) it.packageName = packageName
                     it.configuration = moduleConfig.toJson()
+                    it.updateTime = System.currentTimeMillis()
                 })
 
                 dialogState.value = false
