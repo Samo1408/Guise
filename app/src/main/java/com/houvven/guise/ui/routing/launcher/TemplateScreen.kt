@@ -207,18 +207,10 @@ internal fun TemplateScreen() {
     val resources = LocalResources.current
     val navController = LocalNavController.current
     val templates = LauncherState.templates.value
-    val apps = LauncherState.apps.value
-    val appliedCounts = remember(templates, apps) {
-        val enabledConfigs = apps
-            .asSequence()
-            .filter { it.isEnable }
-            .map { ModuleConfig.get(it.packageName) }
-            .filter { it.enabled }
-            .toList()
-        templates.associate { template ->
-            val templateConfig = ModuleConfig.fromJson(template.configuration)
-            template.id to enabledConfigs.count { it.hasSameParameters(templateConfig) }
-        }
+    val enabledConfigs = ModuleConfig.getAllSaved().filter { it.enabled }
+    val appliedCounts = templates.associate { template ->
+        val templateConfig = ModuleConfig.fromJson(template.configuration)
+        template.id to enabledConfigs.count { it.hasSameParameters(templateConfig) }
     }
 
     val topBar = @Composable {

@@ -68,5 +68,13 @@ data class ModuleConfig(
             config?.packageName = packageName
             return config ?: ModuleConfig(packageName = packageName, enabled = false)
         }
+
+        fun getAllSaved(): List<ModuleConfig> =
+            PackageConfig.safePrefs.all.mapNotNull { (packageName, value) ->
+                val json = value as? String ?: return@mapNotNull null
+                runCatching { fromJson(json) }.getOrNull()?.apply {
+                    this.packageName = packageName
+                }
+            }
     }
 }
