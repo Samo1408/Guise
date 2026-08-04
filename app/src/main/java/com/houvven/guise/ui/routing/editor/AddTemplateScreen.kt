@@ -26,7 +26,11 @@ fun AddTemplateScreen() {
     val moduleConfigManager = ModuleConfigManager.empty()
     val isSaveRequest = remember { mutableStateOf(false) }
 
-    SaveTemplate(dialogState = isSaveRequest, moduleConfig = moduleConfigManager.config)
+    SaveTemplate(
+        dialogState = isSaveRequest,
+        moduleConfig = moduleConfigManager.config,
+        onSaved = { navHostController.popBackStack() },
+    )
 
     ConfigEditorView(moduleConfigManager.state) {
         TopAppBar(

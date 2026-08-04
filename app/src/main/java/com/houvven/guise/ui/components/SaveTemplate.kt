@@ -32,7 +32,11 @@ import com.houvven.guise.xposed.config.ModuleConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SaveTemplate(dialogState: MutableState<Boolean>, moduleConfig: ModuleConfig) {
+fun SaveTemplate(
+    dialogState: MutableState<Boolean>,
+    moduleConfig: ModuleConfig,
+    onSaved: () -> Unit = {},
+) {
 
     if (dialogState.value.not()) return
 
@@ -131,6 +135,7 @@ fun SaveTemplate(dialogState: MutableState<Boolean>, moduleConfig: ModuleConfig)
                 }
 
                 dialogState.value = false
+                onSaved()
             }) {
                 Text(stringResource(R.string.confirm))
             }
