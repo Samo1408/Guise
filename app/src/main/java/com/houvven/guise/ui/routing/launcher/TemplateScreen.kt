@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,6 +51,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.ui.GlobalSnackbarHost
@@ -217,8 +221,17 @@ internal fun TemplateScreen() {
     val templates = LauncherState.templates.value
     val configurationRevision = PackageConfig.configurationRevision.intValue
     val templateSignatures = templates.map { it.id to it.configuration }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var resumeGeneration by remember { mutableIntStateOf(0) }
     var appliedCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-    LaunchedEffect(templateSignatures, configurationRevision) {
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) resumeGeneration++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(templateSignatures, configurationRevision, resumeGeneration) {
         appliedCounts = withContext(Dispatchers.IO) {
             val usageBySignature = ModuleConfig.getAllSaved()
                 .asSequence()
