@@ -24,10 +24,15 @@ fun EditTemplateScreen(template: Template) {
     val navHostController = LocalNavController.current
     val moduleConfigManager = ModuleConfigManager.of(ModuleConfig.fromJson(template.configuration))
     val isSaveRequest = remember { mutableStateOf(false) }
+    val hasParameterChanges = moduleConfigManager.hasUnsavedChanges()
 
-    SaveEditTemplate(dialogState = isSaveRequest, template = template.apply {
-        updateTime = System.currentTimeMillis()
-    }, moduleConfig = moduleConfigManager.config)
+    SaveEditTemplate(
+        dialogState = isSaveRequest,
+        template = template.apply { updateTime = System.currentTimeMillis() },
+        moduleConfig = moduleConfigManager.config,
+        prepareConfigForSave = moduleConfigManager::updateConfigFromState,
+        onSaved = { navHostController.popBackStack() },
+    )
 
     ConfigEditorView(moduleConfigManager.state) {
         TopAppBar(
@@ -46,10 +51,10 @@ fun EditTemplateScreen(template: Template) {
                 androidx.compose.material3.IconButton(onClick = { moduleConfigManager.clear() }) {
                     SimplifyIcon(Icons.Default.Delete)
                 }
-                androidx.compose.material3.IconButton(onClick = {
-                    moduleConfigManager.updateConfigFromState()
-                    isSaveRequest.value = true
-                }) {
+                androidx.compose.material3.IconButton(
+                    enabled = hasParameterChanges,
+                    onClick = { isSaveRequest.value = true },
+                ) {
                     SimplifyIcon(Icons.Default.Save)
                 }
             }

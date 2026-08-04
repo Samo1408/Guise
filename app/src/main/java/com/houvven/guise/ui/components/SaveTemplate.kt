@@ -154,7 +154,9 @@ fun SaveTemplate(
 fun SaveEditTemplate(
     dialogState: MutableState<Boolean>,
     template: Template,
-    moduleConfig: ModuleConfig
+    moduleConfig: ModuleConfig,
+    prepareConfigForSave: () -> Unit = {},
+    onSaved: () -> Unit = {},
 ) {
 
     if (dialogState.value.not()) return
@@ -242,6 +244,7 @@ fun SaveEditTemplate(
                     nameError = true
                     return@TextButton
                 }
+                prepareConfigForSave()
                 LauncherState.updateTemplate(template.also {
                     it.name = name
                     it.description = description
@@ -252,6 +255,7 @@ fun SaveEditTemplate(
 
                 dialogState.value = false
                 GlobalSnackbarHost.showSuccess()
+                onSaved()
             }) {
                 Text(stringResource(R.string.confirm))
             }
