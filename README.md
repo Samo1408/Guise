@@ -15,9 +15,9 @@ Guise Reborn 是 Guise 的社区维护续作，是一个面向 LSPosed/Modern Xp
 <!-- download-stats:start -->
 | 下载项目 | 累计下载量 |
 | --- | ---: |
-| Guise Reborn APK | **73** |
+| Guise Reborn APK | **74** |
 | Guise Test APK | **12** |
-| 仓库 APK 合计 | **85** |
+| 仓库 APK 合计 | **86** |
 
 > 数据由 GitHub Actions 根据当前全部 Release 附件自动累计，正式版与 Pre-release 不作区分；已删除 Release 的历史下载量无法由 GitHub API 恢复。
 <!-- download-stats:end -->
