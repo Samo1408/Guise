@@ -31,32 +31,73 @@ data class UpdateDownloadProgress(
     val successful: Boolean,
 )
 
+private const val RELEASE_MANIFEST = "latest-release.json"
+private const val PRERELEASE_MANIFEST = "latest-prerelease.json"
+
+internal fun updateManifestNames(versionName: String): List<String> =
+    if ('-' in versionName) {
+        listOf(PRERELEASE_MANIFEST, RELEASE_MANIFEST)
+    } else {
+        listOf(RELEASE_MANIFEST)
+    }
+
+private class UpdateChannelException(message: String) : IllegalStateException(message)
+
+internal fun validateUpdateChannel(actualPrerelease: Boolean?, expectedPrerelease: Boolean) {
+    if (actualPrerelease == null) {
+        throw UpdateChannelException("Missing update channel")
+    }
+    if (actualPrerelease != expectedPrerelease) {
+        throw UpdateChannelException("Mismatched update channel")
+    }
+}
+
 class AppUpdater {
     suspend fun check(): UpdateInfo = withContext(Dispatchers.IO) {
         coroutineScope {
-            val attempts = UPDATE_SOURCES.map { source ->
-                async { runCatching { fetch(source) } }
+            val attempts = updateManifestNames(BuildConfig.VERSION_NAME).map { manifestName ->
+                async { runCatching { fetchManifest(manifestName) } }
             }
-
-            // GitHub is authoritative. Mirrors are started at the same time so a GitHub failure
-            // can immediately fall back without making the user wait through serial timeouts.
-            val authoritative = attempts.first().await()
-            authoritative.getOrNull()?.let { info ->
-                attempts.drop(1).forEach { it.cancel() }
-                return@coroutineScope info
-            }
-
-            val fallbacks = attempts.drop(1).awaitAll()
-            fallbacks.mapNotNull(Result<UpdateInfo>::getOrNull)
+            val results = attempts.awaitAll()
+            results.mapNotNull(Result<UpdateInfo>::getOrNull)
                 .maxByOrNull(UpdateInfo::versionCode)
-                ?.let { return@coroutineScope it }
-
-            throw IllegalStateException(
-                fallbacks.mapNotNull(Result<UpdateInfo>::exceptionOrNull)
-                    .lastOrNull()?.message
-                    ?: authoritative.exceptionOrNull()?.message,
-            )
+                ?: throw IllegalStateException(
+                    results.mapNotNull(Result<UpdateInfo>::exceptionOrNull)
+                        .lastOrNull()?.message,
+                )
         }
+    }
+
+    private suspend fun fetchManifest(manifestName: String): UpdateInfo = coroutineScope {
+        val expectedPrerelease = manifestName == PRERELEASE_MANIFEST
+        val attempts = updateSources(manifestName).map { source ->
+            async { runCatching { fetch(source, expectedPrerelease) } }
+        }
+
+        // GitHub is authoritative for each channel. Mirrors are started at the same time so a
+        // GitHub failure can immediately fall back without making the user wait serially.
+        val authoritative = attempts.first().await()
+        authoritative.getOrNull()?.let { info ->
+            attempts.drop(1).forEach { it.cancel() }
+            return@coroutineScope info
+        }
+        authoritative.exceptionOrNull()
+            ?.takeIf { it is UpdateChannelException }
+            ?.let { error ->
+                attempts.drop(1).forEach { it.cancel() }
+                throw error
+            }
+
+        val fallbacks = attempts.drop(1).awaitAll()
+        fallbacks.mapNotNull(Result<UpdateInfo>::getOrNull)
+            .maxByOrNull(UpdateInfo::versionCode)
+            ?.let { return@coroutineScope it }
+
+        throw IllegalStateException(
+            fallbacks.mapNotNull(Result<UpdateInfo>::exceptionOrNull)
+                .lastOrNull()?.message
+                ?: authoritative.exceptionOrNull()?.message,
+        )
     }
 
     fun isNewer(info: UpdateInfo): Boolean = info.versionCode > BuildConfig.VERSION_CODE
@@ -161,7 +202,7 @@ class AppUpdater {
             }.getOrNull()
         }
 
-    private fun fetch(source: String): UpdateInfo {
+    private fun fetch(source: String, expectedPrerelease: Boolean): UpdateInfo {
         val separator = if ('?' in source) '&' else '?'
         val connection = URL("$source${separator}t=${System.currentTimeMillis()}")
             .openConnection() as HttpURLConnection
@@ -180,13 +221,17 @@ class AppUpdater {
                 val decoded = Base64.decode(json.getString("content"), Base64.DEFAULT)
                 json = JSONObject(decoded.toString(Charsets.UTF_8))
             }
-            parse(json)
+            parse(json, expectedPrerelease)
         } finally {
             connection.disconnect()
         }
     }
 
-    private fun parse(json: JSONObject): UpdateInfo {
+    private fun parse(json: JSONObject, expectedPrerelease: Boolean): UpdateInfo {
+        validateUpdateChannel(
+            actualPrerelease = json.takeIf { it.has("prerelease") }?.getBoolean("prerelease"),
+            expectedPrerelease = expectedPrerelease,
+        )
         val tag = json.optString("tag")
         val versionName = json.optString("versionName")
             .ifBlank { json.optString("version") }
@@ -237,7 +282,7 @@ class AppUpdater {
 
     companion object {
         const val RELEASES_URL = "https://github.com/daxiaamu/Guise_Reborn/releases"
-        private const val MANIFEST_PATH = "daxiaamu/Guise_Reborn@main/latest-release.json"
+        private const val MANIFEST_REPOSITORY_PATH = "daxiaamu/Guise_Reborn@main"
         private const val CONNECT_TIMEOUT_MS = 6_000
         private const val READ_TIMEOUT_MS = 8_000
         const val UPDATE_PREFERENCES = "app_update"
@@ -249,12 +294,12 @@ class AppUpdater {
         const val APK_MIME = "application/vnd.android.package-archive"
         private val DOWNLOAD_PLAN_LOCK = Any()
         private val SHA256_PATTERN = Regex("[0-9a-f]{64}")
-        private val UPDATE_SOURCES = listOf(
-            "https://api.github.com/repos/daxiaamu/Guise_Reborn/contents/latest-release.json?ref=main",
-            "https://cdn.jsdelivr.net/gh/$MANIFEST_PATH",
-            "https://fastly.jsdelivr.net/gh/$MANIFEST_PATH",
-            "https://gcore.jsdelivr.net/gh/$MANIFEST_PATH",
-            "https://raw.githubusercontent.com/daxiaamu/Guise_Reborn/main/latest-release.json",
+        private fun updateSources(manifestName: String) = listOf(
+            "https://api.github.com/repos/daxiaamu/Guise_Reborn/contents/$manifestName?ref=main",
+            "https://cdn.jsdelivr.net/gh/$MANIFEST_REPOSITORY_PATH/$manifestName",
+            "https://fastly.jsdelivr.net/gh/$MANIFEST_REPOSITORY_PATH/$manifestName",
+            "https://gcore.jsdelivr.net/gh/$MANIFEST_REPOSITORY_PATH/$manifestName",
+            "https://raw.githubusercontent.com/daxiaamu/Guise_Reborn/main/$manifestName",
         )
     }
 }

@@ -57,10 +57,18 @@ jobs:
           xget_url="https://xget.xi-xu.me/gh/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/${asset_name}"
           release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
           release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
+          is_prerelease="$(jq -r '.prerelease' <<<"${release_json}")"
+          if [[ "${is_prerelease}" == "true" ]]; then
+            manifest_name="latest-prerelease.json"
+          else
+            manifest_name="latest-release.json"
+          fi
+          echo "MANIFEST_NAME=${manifest_name}" >> "${GITHUB_ENV}"
           release_title="$(jq -r '.name // empty' <<<"${release_json}")"
           release_notes="$(jq -r '.body // empty' <<<"${release_json}")"
           jq -n \
             --argjson versionCode "${version_code}" \
+            --argjson prerelease "${is_prerelease}" \
             --arg versionName "${version_name}" \
             --arg title "${release_title:-Guise Reborn ${version_name}}" \
             --arg notes "${release_notes}" \
@@ -80,6 +88,7 @@ jobs:
             '{
               versionCode: $versionCode,
               versionName: $versionName,
+              prerelease: $prerelease,
               title: $title,
               notes: $notes,
               releaseUrl: $releaseUrl,
@@ -98,7 +107,18 @@ jobs:
               ],
               apkUrl: $apkUrl,
               apkSha256: $apkSha256
-            }' > latest-release.json
+            }' > "${manifest_name}"
+
+          manifest_paths="${manifest_name}"
+          # Clients published before the split only know latest-release.json. Keep that upgrade
+          # path alive until a real stable manifest exists. New stable clients validate the
+          # prerelease field and therefore reject this compatibility alias.
+          if [[ "${is_prerelease}" == "true" ]] && \
+             { [[ ! -f latest-release.json ]] || jq -e '.prerelease == true' latest-release.json >/dev/null; }; then
+            cp "${manifest_name}" latest-release.json
+            manifest_paths="${manifest_paths} latest-release.json"
+          fi
+          echo "MANIFEST_PATHS=${manifest_paths}" >> "${GITHUB_ENV}"
 
       - name: Commit manifest to main
         env:
@@ -106,13 +126,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- latest-release.json; then
-            echo "latest-release.json is already current"
+          read -ra manifest_paths <<< "${MANIFEST_PATHS}"
+          if [[ -z "$(git status --porcelain -- "${manifest_paths[@]}")" ]]; then
+            echo "${MANIFEST_PATHS} is already current"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest-release.json
+          git add "${manifest_paths[@]}"
           git commit -m "Publish ${RELEASE_TAG} update manifest"
           git pull --rebase origin main
           git push origin HEAD:main
@@ -120,7 +141,10 @@ jobs:
       - name: Purge mutable jsDelivr cache
         shell: bash
         run: |
-          purge_url="https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/latest-release.json"
-          if ! curl --fail --silent --show-error --retry 3 "${purge_url}"; then
-            echo "::warning::Could not purge jsDelivr manifest cache; GitHub API remains authoritative"
-          fi
+          read -ra manifest_paths <<< "${MANIFEST_PATHS}"
+          for manifest_path in "${manifest_paths[@]}"; do
+            purge_url="https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/${manifest_path}"
+            if ! curl --fail --silent --show-error --retry 3 "${purge_url}"; then
+              echo "::warning::Could not purge ${manifest_path} from jsDelivr; GitHub API remains authoritative"
+            fi
+          done
