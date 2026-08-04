@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -126,12 +127,43 @@ private fun TemplateCard(template: Template, appliedAppCount: Int) {
                 Spacer(modifier = Modifier.width(10.dp))
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = template.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = template.name,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val isExclusive = template.type == Template.Type.EXCLUSIVE
+                    Surface(
+                        color = if (isExclusive) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                        contentColor = if (isExclusive) {
+                            MaterialTheme.colorScheme.onTertiary
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        },
+                        shape = RoundedCornerShape(4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isExclusive) {
+                                    R.string.template_badge_exclusive
+                                } else {
+                                    R.string.template_badge_common
+                                }
+                            ),
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                        )
+                    }
+                }
                 if (!template.description.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(

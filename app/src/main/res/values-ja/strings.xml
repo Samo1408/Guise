@@ -187,6 +187,6 @@
     <string name="bundled_template_blank_passport_summary">連絡先、メディア、インストール済みアプリを対象アプリから隠します</string>
     <string name="bundled_template_force_screenshots">スクリーンショットを強制許可</string>
     <string name="bundled_template_force_screenshots_summary">対象アプリが禁止していてもスクリーンショットを許可します</string>
-    <string name="bundled_template_disable_network_location">ネットワーク測位を無効化</string>
-    <string name="bundled_template_disable_network_location_summary">対象アプリで Wi-Fi と基地局による測位を利用不可にします</string>
+    <string name="template_badge_common">共通</string>
+    <string name="template_badge_exclusive">専用</string>
 </resources>

@@ -186,6 +186,6 @@
     <string name="bundled_template_blank_passport_summary">向目标应用隐藏联系人、媒体和已安装应用</string>
     <string name="bundled_template_force_screenshots">允许强制截图</string>
     <string name="bundled_template_force_screenshots_summary">即使目标应用禁止截图，也允许截取屏幕</string>
-    <string name="bundled_template_disable_network_location">禁用网络定位</string>
-    <string name="bundled_template_disable_network_location_summary">使目标应用无法使用 Wi-Fi 和基站定位</string>
+    <string name="template_badge_common">通用</string>
+    <string name="template_badge_exclusive">专属</string>
 </resources>

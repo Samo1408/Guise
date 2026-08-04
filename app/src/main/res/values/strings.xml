@@ -202,6 +202,6 @@
     <string name="bundled_template_blank_passport_summary">Hide contacts, media, and installed apps from the target app</string>
     <string name="bundled_template_force_screenshots">Allow forced screenshots</string>
     <string name="bundled_template_force_screenshots_summary">Allow screenshots even when the target app prohibits them</string>
-    <string name="bundled_template_disable_network_location">Disable network location</string>
-    <string name="bundled_template_disable_network_location_summary">Make Wi-Fi and cell location unavailable to the target app</string>
+    <string name="template_badge_common">Common</string>
+    <string name="template_badge_exclusive">Exclusive</string>
 </resources>

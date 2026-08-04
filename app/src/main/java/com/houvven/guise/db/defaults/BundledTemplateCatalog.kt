@@ -42,17 +42,5 @@ internal object BundledTemplateCatalog {
                 ModuleConfig(screenshotsFlag = HooksValue.SCREENSHOTS_ENABLE)
             },
         ),
-        BundledTemplateSpec(
-            seedId = "disable-network-location",
-            version = 1,
-            nameRes = R.string.bundled_template_disable_network_location,
-            descriptionRes = R.string.bundled_template_disable_network_location_summary,
-            configuration = {
-                ModuleConfig(
-                    makeWifiLocationFail = true,
-                    makeCellLocationFail = true,
-                )
-            },
-        ),
     )
 }

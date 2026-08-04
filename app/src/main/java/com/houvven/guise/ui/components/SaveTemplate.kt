@@ -1,17 +1,16 @@
 package com.houvven.guise.ui.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,6 +28,29 @@ import com.houvven.guise.db.Template
 import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.config.ModuleConfig
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TemplateTypeSelector(
+    type: Int,
+    onTypeChanged: (Int) -> Unit,
+) {
+    val options = listOf(
+        Template.Type.COMMON to stringResource(R.string.template_type_common),
+        Template.Type.EXCLUSIVE to stringResource(R.string.template_type_app),
+    )
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        options.forEachIndexed { index, (value, label) ->
+            SegmentedButton(
+                selected = type == value,
+                onClick = { onTypeChanged(value) },
+                shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                icon = {},
+                label = { Text(label) },
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,29 +78,7 @@ fun SaveTemplate(
         },
         text = {
             Column {
-                Row {
-                    ElevatedFilterChip(
-                        selected = type == Template.Type.COMMON,
-                        onClick = { type = Template.Type.COMMON },
-                        label = { Text(stringResource(R.string.template_type_common)) },
-                        colors = FilterChipDefaults.elevatedFilterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                    Spacer(Modifier.width(5.dp))
-                    ElevatedFilterChip(
-                        selected = type == Template.Type.EXCLUSIVE,
-                        onClick = { type = Template.Type.EXCLUSIVE },
-                        label = { Text(stringResource(R.string.template_type_app)) },
-                        colors = FilterChipDefaults.elevatedFilterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
+                TemplateTypeSelector(type = type, onTypeChanged = { type = it })
                 if (type == Template.Type.EXCLUSIVE && moduleConfig.packageName.isBlank()) {
                     OutlinedTextField(
                         value = packageName,
@@ -177,29 +177,7 @@ fun SaveEditTemplate(
         },
         text = {
             Column {
-                Row {
-                    ElevatedFilterChip(
-                        selected = type == Template.Type.COMMON,
-                        onClick = { type = Template.Type.COMMON },
-                        label = { Text(stringResource(R.string.template_type_common)) },
-                        colors = FilterChipDefaults.elevatedFilterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                    Spacer(Modifier.width(5.dp))
-                    ElevatedFilterChip(
-                        selected = type == Template.Type.EXCLUSIVE,
-                        onClick = { type = Template.Type.EXCLUSIVE },
-                        label = { Text(stringResource(R.string.template_type_app)) },
-                        colors = FilterChipDefaults.elevatedFilterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
+                TemplateTypeSelector(type = type, onTypeChanged = { type = it })
                 if (type == Template.Type.EXCLUSIVE && template.packageName.isNullOrBlank()) {
                     OutlinedTextField(
                         value = packageName,

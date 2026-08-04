@@ -192,6 +192,6 @@
     <string name="bundled_template_blank_passport_summary">إخفاء جهات الاتصال والوسائط والتطبيقات المثبتة عن التطبيق المستهدف</string>
     <string name="bundled_template_force_screenshots">السماح الإجباري بلقطات الشاشة</string>
     <string name="bundled_template_force_screenshots_summary">السماح بلقطات الشاشة حتى عندما يمنعها التطبيق المستهدف</string>
-    <string name="bundled_template_disable_network_location">تعطيل تحديد الموقع عبر الشبكة</string>
-    <string name="bundled_template_disable_network_location_summary">منع التطبيق المستهدف من استخدام Wi-Fi والأبراج لتحديد الموقع</string>
+    <string name="template_badge_common">عام</string>
+    <string name="template_badge_exclusive">مخصص</string>
 </resources>
