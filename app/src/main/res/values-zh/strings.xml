@@ -69,7 +69,14 @@
     <string name="template_type_all">全部</string>
     <string name="template_type_app">应用专属</string>
     <string name="template_type_common">通用</string>
-    <string name="template_applied_app_count">%1$d 个应用</string>
+    <string name="template_type_with_count">%1$s (%2$d)</string>
+    <plurals name="template_applied_app_count">
+        <item quantity="other">%1$d 个应用</item>
+    </plurals>
+    <string name="template_replace_title">替换现有配置？</string>
+    <string name="template_replace_message">%1$s 当前正在使用“%2$s”。应用“%3$s”将替换其现有配置。</string>
+    <string name="template_custom_configuration">单独配置</string>
+    <string name="replace">替换</string>
     <string name="stop_app">停止应用</string>
     <string name="restart_app">重启应用</string>
     <string name="restart_app_to_apply_configuration">请重启“%1$s”以使配置生效</string>

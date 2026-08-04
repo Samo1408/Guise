@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,12 +29,15 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,6 +61,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private data class TemplateSelectionSnapshot(
+    val apps: List<AppInfo>,
+    val selectedPackages: Set<String>,
+    val configsByPackage: Map<String, ModuleConfig>,
+    val templateNamesBySignature: Map<String, String>,
+)
+
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class
 )
@@ -69,55 +80,97 @@ fun EnableTemplateScreen(template: Template) {
 
     // 系统与用户APP过滤
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var apps by remember { mutableStateOf(LauncherState.apps.value) }
-    var refreshing by remember { mutableStateOf(false) }
+    val cachedApps = LauncherState.apps.value
+    val availableTemplates = LauncherState.templates.value
+    var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
+    var refreshing by remember { mutableStateOf(true) }
+    var selectionLoaded by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    val initiallySelected = remember(template.configuration) {
-        apps
-            .filter {
-                val config = ModuleConfig.get(it.packageName)
-                config.enabled && config.hasSameParameters(templateConfig)
-            }
-            .mapTo(mutableSetOf()) { it.packageName }
+    var initiallySelected by remember(template.configuration) {
+        mutableStateOf<Set<String>>(emptySet())
     }
-    val selects = remember(template.configuration) {
-        mutableStateListOf(*initiallySelected.toTypedArray())
+    val selects = remember(template.configuration) { mutableStateMapOf<String, Unit>() }
+    val approvedReplacements = remember(template.configuration) {
+        mutableStateMapOf<String, Unit>()
+    }
+    var configsByPackage by remember(template.configuration) {
+        mutableStateOf<Map<String, ModuleConfig>>(emptyMap())
+    }
+    var templateNamesBySignature by remember(template.configuration) {
+        mutableStateOf<Map<String, String>>(emptyMap())
+    }
+    var pendingReplacement by remember(template.configuration) {
+        mutableStateOf<AppInfo?>(null)
     }
     var prioritizedPackages by remember(template.configuration) {
-        mutableStateOf(initiallySelected.toSet())
+        mutableStateOf<Set<String>>(emptySet())
     }
     var changesApplied by remember(template.configuration) { mutableStateOf(false) }
 
+    LaunchedEffect(template.configuration) {
+        val snapshot = withContext(Dispatchers.IO) {
+            val installedApps = cachedApps.ifEmpty { AppInfoProvider.getList() }
+            val collator = Collator.getInstance(Locale.CHINA)
+            val sortedApps = installedApps.sortedBy { collator.getCollationKey(it.label) }
+            val templateSignature = templateConfig.parameterSignature()
+            val configs = ModuleConfig.getAllSaved()
+            val configuredPackages = configs
+                .asSequence()
+                .filter { it.enabled && it.parameterSignature() == templateSignature }
+                .mapTo(mutableSetOf()) { it.packageName }
+            val selectedPackages = sortedApps
+                .asSequence()
+                .map { it.packageName }
+                .filterTo(mutableSetOf()) { it in configuredPackages }
+            TemplateSelectionSnapshot(
+                apps = sortedApps,
+                selectedPackages = selectedPackages,
+                configsByPackage = configs.associateBy { it.packageName },
+                templateNamesBySignature = availableTemplates.associate {
+                    ModuleConfig.fromJson(it.configuration).parameterSignature() to it.name
+                },
+            )
+        }
+        apps = snapshot.apps
+        LauncherState.apps.value = snapshot.apps
+        initiallySelected = snapshot.selectedPackages
+        configsByPackage = snapshot.configsByPackage
+        templateNamesBySignature = snapshot.templateNamesBySignature
+        selects.clear()
+        snapshot.selectedPackages.forEach { selects[it] = Unit }
+        prioritizedPackages = snapshot.selectedPackages
+        selectionLoaded = true
+        refreshing = false
+    }
+
     fun applySelectionChanges() {
-        if (changesApplied) return
+        if (changesApplied || !selectionLoaded) return
         changesApplied = true
 
-        val selectedNow = selects.toSet()
-        (initiallySelected - selectedNow).forEach { packageName ->
-            ModuleConfigManager.of(ModuleConfig.get(packageName))
-                .setEnabled(false, notifyOnScopeError = false)
-        }
-        (selectedNow - initiallySelected).forEach { packageName ->
-            ModuleConfigManager.of(
-                templateConfig.copy(packageName = packageName, enabled = true)
-            ).setEnabled(true, notifyOnScopeError = false)
+        ModuleConfigManager.applyTemplateSelection(
+            templateConfig = templateConfig,
+            initiallySelected = initiallySelected,
+            selectedNow = selects.keys.toSet(),
+            notifyOnScopeError = false,
+        )
+    }
+
+    val filteredApps by remember {
+        derivedStateOf {
+            val tabApps = apps.filter {
+                if (selectedTabIndex == 0) !it.isSystemApp else it.isSystemApp
+            }
+            val (prioritized, remaining) = tabApps.partition {
+                it.packageName in prioritizedPackages
+            }
+            prioritized + remaining
         }
     }
 
-    fun filterApps() =
-        apps.toList()
-            .filter { if (selectedTabIndex == 0) !it.isSystemApp else it.isSystemApp }
-            .sortedBy { Collator.getInstance(Locale.CHINA).getCollationKey(it.label) }
-            .sortedWith { o1, o2 ->
-                if (prioritizedPackages.contains(o1.packageName) == prioritizedPackages.contains(o2.packageName)) 0
-                else if (prioritizedPackages.contains(o1.packageName)) -1
-                else 1
-            }
-
     @Composable
     fun ItemCard(appInfo: AppInfo) {
-        val selected = selects.contains(appInfo.packageName)
+        val selected = selects.containsKey(appInfo.packageName)
         val colors =
             if (selected) CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
             else CardDefaults.outlinedCardColors()
@@ -126,7 +179,17 @@ fun EnableTemplateScreen(template: Template) {
                 if (selected) {
                     selects.remove(appInfo.packageName)
                 } else {
-                    selects.add(appInfo.packageName)
+                    val existingConfig = configsByPackage[appInfo.packageName]
+                    val replacesExistingConfiguration = existingConfig?.enabled == true &&
+                        !existingConfig.hasSameParameters(templateConfig)
+                    if (
+                        replacesExistingConfiguration &&
+                        !approvedReplacements.containsKey(appInfo.packageName)
+                    ) {
+                        pendingReplacement = appInfo
+                    } else {
+                        selects[appInfo.packageName] = Unit
+                    }
                 }
             }
 
@@ -210,9 +273,13 @@ fun EnableTemplateScreen(template: Template) {
                 onRefresh = {
                     coroutineScope.launch {
                         refreshing = true
-                        apps = withContext(Dispatchers.IO) { AppInfoProvider.getList() }
+                        apps = withContext(Dispatchers.IO) {
+                            val collator = Collator.getInstance(Locale.CHINA)
+                            AppInfoProvider.getList()
+                                .sortedBy { collator.getCollationKey(it.label) }
+                        }
                         LauncherState.apps.value = apps
-                        prioritizedPackages = selects.toSet()
+                        prioritizedPackages = selects.keys.toSet()
                         refreshing = false
                     }
                 },
@@ -222,8 +289,46 @@ fun EnableTemplateScreen(template: Template) {
                     columns = StaggeredGridCells.Fixed(3),
                     contentPadding = PaddingValues(4.dp)
                 ) {
-                    items(filterApps()) { appInfo -> ItemCard(appInfo) }
+                    items(filteredApps, key = { it.packageName }) { appInfo ->
+                        ItemCard(appInfo)
+                    }
                 }
+            }
+
+            pendingReplacement?.let { appInfo ->
+                val currentConfiguration = configsByPackage[appInfo.packageName]
+                val currentSource = currentConfiguration
+                    ?.parameterSignature()
+                    ?.let(templateNamesBySignature::get)
+                    ?: stringResource(R.string.template_custom_configuration)
+                AlertDialog(
+                    onDismissRequest = { pendingReplacement = null },
+                    title = { Text(stringResource(R.string.template_replace_title)) },
+                    text = {
+                        Text(
+                            stringResource(
+                                R.string.template_replace_message,
+                                appInfo.label,
+                                currentSource,
+                                template.name,
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            approvedReplacements[appInfo.packageName] = Unit
+                            selects[appInfo.packageName] = Unit
+                            pendingReplacement = null
+                        }) {
+                            Text(stringResource(R.string.replace))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { pendingReplacement = null }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    },
+                )
             }
         }
     }

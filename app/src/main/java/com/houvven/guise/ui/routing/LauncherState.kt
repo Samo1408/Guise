@@ -26,6 +26,16 @@ object LauncherState {
         }
     }
 
+    fun setAppsEnabled(enabledPackages: Set<String>, disabledPackages: Set<String>) {
+        apps.value = apps.value.map { app ->
+            when (app.packageName) {
+                in enabledPackages -> app.copy(isEnable = true)
+                in disabledPackages -> app.copy(isEnable = false)
+                else -> app
+            }
+        }
+    }
+
     private fun refreshTemplates() {
         templates.value = templateDao.getAll()
     }

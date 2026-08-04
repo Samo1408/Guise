@@ -35,9 +35,13 @@ class ContextAmbient : Application(), XposedServiceHelper.OnServiceListener {
     override fun onServiceBind(service: XposedService) {
         xposedService = service
         PackageConfig.migrateToRemotePreferences(service)
+        PackageConfig.notifyConfigurationsChanged()
     }
 
     override fun onServiceDied(service: XposedService) {
-        if (xposedService === service) xposedService = null
+        if (xposedService === service) {
+            xposedService = null
+            PackageConfig.notifyConfigurationsChanged()
+        }
     }
 }

@@ -64,6 +64,7 @@ private constructor(
     private fun persist() {
         safePrefs.edit(commit = true) { putString(config.packageName, config.toJson()) }
         LauncherState.setAppEnabled(config.packageName, config.enabled)
+        PackageConfig.notifyConfigurationsChanged()
     }
 
     private fun syncLsposedScope(enable: Boolean, notifyOnError: Boolean) {
@@ -269,6 +270,93 @@ private constructor(
         }
 
         fun empty() = of(ModuleConfig())
+
+        fun applyTemplateSelection(
+            templateConfig: ModuleConfig,
+            initiallySelected: Set<String>,
+            selectedNow: Set<String>,
+            notifyOnScopeError: Boolean = false,
+        ) {
+            val enabledPackages = selectedNow - initiallySelected
+            val disabledPackages = initiallySelected - selectedNow
+            if (enabledPackages.isEmpty() && disabledPackages.isEmpty()) return
+
+            val prefs = PackageConfig.safePrefs
+            val editor = prefs.edit()
+            fun getSavedConfig(packageName: String): ModuleConfig {
+                val config = prefs.getString(packageName, null)
+                    ?.let { runCatching { ModuleConfig.fromJson(it) }.getOrNull() }
+                    ?: ModuleConfig(packageName = packageName, enabled = false)
+                config.packageName = packageName
+                return config
+            }
+
+            disabledPackages.forEach { packageName ->
+                val config = getSavedConfig(packageName)
+                config.enabled = false
+                editor.putString(packageName, config.toJson())
+            }
+            val scopeEnablePackages = enabledPackages.filterTo(mutableSetOf()) { packageName ->
+                !getSavedConfig(packageName).enabled
+            }
+            enabledPackages.forEach { packageName ->
+                val config = templateConfig.copy(packageName = packageName, enabled = true)
+                editor.putString(packageName, config.toJson())
+            }
+            if (!editor.commit()) {
+                if (notifyOnScopeError) {
+                    GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                        ContextAmbient.current.getString(R.string.save_failed, "")
+                    )
+                }
+                return
+            }
+
+            LauncherState.setAppsEnabled(enabledPackages, disabledPackages)
+            PackageConfig.notifyConfigurationsChanged()
+
+            val service = ContextAmbient.xposedService ?: run {
+                if (notifyOnScopeError) {
+                    GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                        ContextAmbient.current.getString(R.string.xposed_service_not_connected)
+                    )
+                }
+                return
+            }
+            if (disabledPackages.isNotEmpty()) {
+                runCatching { service.removeScope(disabledPackages.toList()) }
+                    .onFailure {
+                        if (notifyOnScopeError) {
+                            GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                                ContextAmbient.current.getString(
+                                    R.string.xposed_scope_sync_failed,
+                                    it.message ?: it.toString(),
+                                )
+                            )
+                        }
+                    }
+            }
+            if (scopeEnablePackages.isNotEmpty()) {
+                service.requestScope(
+                    scopeEnablePackages.toList(),
+                    object : XposedService.OnScopeEventListener {
+                        override fun onScopeRequestApproved(approved: List<String>) = Unit
+
+                        override fun onScopeRequestFailed(message: String) {
+                            if (notifyOnScopeError) {
+                                reportBatchScopeError(message)
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
+        private fun reportBatchScopeError(message: String) {
+            GlobalSnackbarHost.showOnErrorByDismissPrevious(
+                ContextAmbient.current.getString(R.string.xposed_scope_sync_failed, message)
+            )
+        }
     }
 
 

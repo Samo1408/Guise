@@ -1,6 +1,7 @@
 package com.houvven.guise.xposed
 
 import android.content.SharedPreferences
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.core.content.edit
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.xposed.config.ModuleConfig
@@ -11,6 +12,8 @@ object PackageConfig {
     lateinit var current: ModuleConfig
 
     const val PREF_FILE_NAME = "XposedDeployInfo"
+
+    val configurationRevision = mutableIntStateOf(0)
 
     val safePrefs: SharedPreferences
         get() = ContextAmbient.xposedService?.getRemotePreferences(PREF_FILE_NAME)
@@ -33,6 +36,10 @@ object PackageConfig {
                 }
             }
         }
+    }
+
+    fun notifyConfigurationsChanged() {
+        configurationRevision.intValue++
     }
 
     fun doRefresh(packageName: String) {

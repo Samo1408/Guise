@@ -56,6 +56,9 @@ data class ModuleConfig(
     fun hasSameParameters(other: ModuleConfig): Boolean =
         copy(packageName = "", enabled = false) == other.copy(packageName = "", enabled = false)
 
+    fun parameterSignature(): String =
+        json.encodeToString(serializer(), copy(packageName = "", enabled = false))
+
     fun toModuleConfigState() = ModuleConfigState.of(this)
 
     companion object {

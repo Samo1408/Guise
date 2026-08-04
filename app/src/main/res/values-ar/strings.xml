@@ -8,7 +8,19 @@
     <string name="template_type_all">الكل</string>
     <string name="template_type_app">خاص بالتطبيق</string>
     <string name="template_type_common">عام</string>
-    <string name="template_applied_app_count">%1$d تطبيقات</string>
+    <string name="template_type_with_count">%1$s (%2$d)</string>
+    <plurals name="template_applied_app_count">
+        <item quantity="zero">0 تطبيقات</item>
+        <item quantity="one">تطبيق واحد</item>
+        <item quantity="two">تطبيقان</item>
+        <item quantity="few">%1$d تطبيقات</item>
+        <item quantity="many">%1$d تطبيقًا</item>
+        <item quantity="other">%1$d تطبيق</item>
+    </plurals>
+    <string name="template_replace_title">استبدال الإعداد الحالي؟</string>
+    <string name="template_replace_message">يستخدم %1$s حاليًا %2$s. سيؤدي تطبيق %3$s إلى استبدال إعداده الحالي.</string>
+    <string name="template_custom_configuration">إعدادًا مخصصًا</string>
+    <string name="replace">استبدال</string>
     <string name="add_template">قالب جديد</string>
 
     <string name="search_placeholder">بحث..</string>

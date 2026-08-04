@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpOffset
@@ -61,7 +63,9 @@ import com.houvven.guise.ui.routing.navigateWithTemplate
 import com.houvven.guise.ui.routing.template.EnableTemplateDialog
 import com.houvven.guise.ui.utils.saveFileToDownloadDir
 import com.houvven.guise.xposed.config.ModuleConfig
-import kotlinx.coroutines.runBlocking
+import com.houvven.guise.xposed.PackageConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -137,7 +141,11 @@ private fun TemplateCard(template: Template, appliedAppCount: Int) {
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = stringResource(R.string.template_applied_app_count, appliedAppCount),
+                text = pluralStringResource(
+                    R.plurals.template_applied_app_count,
+                    appliedAppCount,
+                    appliedAppCount,
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (appliedAppCount > 0) {
                     MaterialTheme.colorScheme.primary
@@ -207,10 +215,21 @@ internal fun TemplateScreen() {
     val resources = LocalResources.current
     val navController = LocalNavController.current
     val templates = LauncherState.templates.value
-    val enabledConfigs = ModuleConfig.getAllSaved().filter { it.enabled }
-    val appliedCounts = templates.associate { template ->
-        val templateConfig = ModuleConfig.fromJson(template.configuration)
-        template.id to enabledConfigs.count { it.hasSameParameters(templateConfig) }
+    val configurationRevision = PackageConfig.configurationRevision.intValue
+    val templateSignatures = templates.map { it.id to it.configuration }
+    var appliedCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+    LaunchedEffect(templateSignatures, configurationRevision) {
+        appliedCounts = withContext(Dispatchers.IO) {
+            val usageBySignature = ModuleConfig.getAllSaved()
+                .asSequence()
+                .filter { it.enabled }
+                .groupingBy(ModuleConfig::parameterSignature)
+                .eachCount()
+            templateSignatures.associate { (templateId, configuration) ->
+                val signature = ModuleConfig.fromJson(configuration).parameterSignature()
+                templateId to (usageBySignature[signature] ?: 0)
+            }
+        }
     }
 
     val topBar = @Composable {
