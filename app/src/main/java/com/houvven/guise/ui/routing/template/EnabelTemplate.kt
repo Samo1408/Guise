@@ -36,12 +36,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.houvven.guise.R
 import com.houvven.guise.db.Template
 import com.houvven.guise.module.apps.AppInfo
@@ -68,18 +64,34 @@ fun EnableTemplateScreen(template: Template) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val apps by remember { mutableStateOf(LauncherState.apps.value) }
 
-    val selects = remember {
-        mutableStateListOf(
-            *apps
-                .filter {
-                    val config = ModuleConfig.get(it.packageName)
-                    config.enabled && config.hasSameParameters(templateConfig)
-                }
-                .map { it.packageName }.toTypedArray()
-        )
+    val initiallySelected = remember(template.configuration) {
+        apps
+            .filter {
+                val config = ModuleConfig.get(it.packageName)
+                config.enabled && config.hasSameParameters(templateConfig)
+            }
+            .mapTo(mutableSetOf()) { it.packageName }
     }
+    val selects = remember(template.configuration) {
+        mutableStateListOf(*initiallySelected.toTypedArray())
+    }
+    var changesApplied by remember(template.configuration) { mutableStateOf(false) }
 
-    val unselects = remember { mutableStateListOf<String>() }
+    fun applySelectionChanges() {
+        if (changesApplied) return
+        changesApplied = true
+
+        val selectedNow = selects.toSet()
+        (initiallySelected - selectedNow).forEach { packageName ->
+            ModuleConfigManager.of(ModuleConfig.get(packageName))
+                .setEnabled(false, notifyOnScopeError = false)
+        }
+        (selectedNow - initiallySelected).forEach { packageName ->
+            ModuleConfigManager.of(
+                templateConfig.copy(packageName = packageName, enabled = true)
+            ).setEnabled(true, notifyOnScopeError = false)
+        }
+    }
 
     fun filterApps() =
         apps.toList()
@@ -101,10 +113,8 @@ fun EnableTemplateScreen(template: Template) {
             fun() {
                 if (selected) {
                     selects.remove(appInfo.packageName)
-                    unselects.add(appInfo.packageName)
                 } else {
                     selects.add(appInfo.packageName)
-                    unselects.remove(appInfo.packageName)
                 }
             }
 
@@ -145,6 +155,7 @@ fun EnableTemplateScreen(template: Template) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
+                        applySelectionChanges()
                         // 模拟系统返回键
                         LocalNavController.current.popBackStack()
                     }) {
@@ -192,27 +203,8 @@ fun EnableTemplateScreen(template: Template) {
     }
 
 
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-    val lifecycleObserver = remember {
-        LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY) {
-                unselects.forEach {
-                    ModuleConfigManager.of(ModuleConfig.get(it))
-                        .setEnabled(false, notifyOnScopeError = false)
-                }
-                selects.forEach {
-                    ModuleConfigManager.of(
-                        templateConfig.copy(packageName = it, enabled = true)
-                    ).setEnabled(true, notifyOnScopeError = false)
-                }
-            }
-        }
-    }
-
-    DisposableEffect(lifecycle, lifecycleObserver) {
-        lifecycle.addObserver(lifecycleObserver)
-        onDispose { lifecycle.removeObserver(lifecycleObserver) }
+    DisposableEffect(template.configuration) {
+        onDispose(::applySelectionChanges)
     }
 
 }
