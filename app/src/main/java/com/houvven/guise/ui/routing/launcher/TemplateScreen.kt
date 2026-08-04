@@ -259,27 +259,36 @@ internal fun TemplateScreen() {
 
     @Composable
     fun TypeFilter() {
+        val templates = LauncherState.templates.value
+        val commonCount = templates.count { it.type == Template.Type.COMMON }
+        val exclusiveCount = templates.count { it.type == Template.Type.EXCLUSIVE }
+
         @Composable
-        fun TypeFilterChip(label: String, value: Int) {
+        fun TypeFilterChip(label: String, count: Int, value: Int) {
             FilterChip(
                 selected = typeFilter.intValue == value,
                 onClick = { typeFilter.intValue = value },
-                label = { Text(label) }
+                label = {
+                    Text(stringResource(R.string.template_type_with_count, label, count))
+                }
             )
         }
         Row(modifier = Modifier.padding(start = 15.dp)) {
             TypeFilterChip(
                 label = stringResource(R.string.template_type_all),
+                count = templates.size,
                 value = TemplateTypeFilter.ALL
             )
             Spacer(modifier = Modifier.width(5.dp))
             TypeFilterChip(
                 label = stringResource(R.string.template_type_common),
+                count = commonCount,
                 value = TemplateTypeFilter.COMMON
             )
             Spacer(modifier = Modifier.width(5.dp))
             TypeFilterChip(
                 label = stringResource(R.string.template_type_app),
+                count = exclusiveCount,
                 value = TemplateTypeFilter.EXCLUSIVE
             )
         }
