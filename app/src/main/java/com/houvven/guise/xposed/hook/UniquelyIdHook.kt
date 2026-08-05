@@ -7,17 +7,9 @@ import android.provider.Settings
 import android.provider.Settings.Secure
 import android.telephony.TelephonyManager
 import com.houvven.guise.xposed.LoadPackageHandler
-import com.houvven.guise.xposed.PackageConfig
-import com.houvven.guise.xposed.ModernXposedPreferences
-import com.houvven.guise.xposed.config.ModuleConfig
 import com.houvven.ktx_xposed.hook.afterHookedMethod
 import com.houvven.ktx_xposed.hook.beforeHookedMethod
-import com.houvven.ktx_xposed.hook.findClass
-import com.houvven.ktx_xposed.hook.findClassIfExists
-import com.houvven.ktx_xposed.hook.lppram
-import com.houvven.ktx_xposed.hook.setAllMethodResult
-import com.houvven.ktx_xposed.hook.setSomeSameNameMethodResult
-import com.houvven.ktx_xposed.logger.XposedLogger
+import com.houvven.ktx_xposed.hook.setMethodResult
 
 class UniquelyIdHook : LoadPackageHandler {
 
@@ -33,18 +25,7 @@ class UniquelyIdHook : LoadPackageHandler {
             ContentResolver::class.java, String::class.java, Int::class.java
         ) { param ->
             if (param.args[1] == Secure.ANDROID_ID) {
-                if (config.androidId.isBlank()) {
-                    XposedLogger.i("androidId is blank")
-                    XposedLogger.i("Web view processName: ${lppram.processName}")
-                    ModernXposedPreferences.current.getString(lppram.processName, "")!!.let { json ->
-                        if (json.isNotBlank()) {
-                            val moduleConfig = ModuleConfig.fromJson(json)
-                            param.result = moduleConfig.androidId
-                        }
-                    }
-                } else {
-                    param.result = config.androidId
-                }
+                param.result = config.androidId
             }
         }
 
@@ -54,18 +35,7 @@ class UniquelyIdHook : LoadPackageHandler {
             ContentResolver::class.java, String::class.java, Int::class.java
         ) { param ->
             if (param.args[1] == Settings.System.ANDROID_ID) {
-                if (config.androidId.isBlank()) {
-                    XposedLogger.i("androidId is blank")
-                    XposedLogger.i("Web view processName: ${lppram.processName}")
-                    ModernXposedPreferences.current.getString(lppram.processName, "")!!.let { json ->
-                        if (json.isNotBlank()) {
-                            val moduleConfig = ModuleConfig.fromJson(json)
-                            param.result = moduleConfig.androidId
-                        }
-                    }
-                } else {
-                    param.result = config.androidId
-                }
+                param.result = config.androidId
             }
         }
 
@@ -74,15 +44,25 @@ class UniquelyIdHook : LoadPackageHandler {
     private fun hookImei() {
         TelephonyManager::class.java.run {
             // Use one configured identity consistently for default, primary, and indexed slots.
-            setAllMethodResult("getImei", config.imei)
-            setAllMethodResult("getPrimaryImei", config.imei)
-            setAllMethodResult("getDeviceId", config.imei)
-            setAllMethodResult("getTypeAllocationCode", config.imei.take(8))
+            setMethodResult("getImei", config.imei)
+            setMethodResult(
+                "getImei",
+                config.imei,
+                parameterTypes = arrayOf(Int::class.javaPrimitiveType!!),
+            )
+            setMethodResult("getPrimaryImei", config.imei)
+            setMethodResult("getDeviceId", config.imei)
+            setMethodResult(
+                "getDeviceId",
+                config.imei,
+                parameterTypes = arrayOf(Int::class.javaPrimitiveType!!),
+            )
+            setMethodResult("getTypeAllocationCode", config.imei.take(8))
         }
     }
 
     private fun hookPhoneNum() {
-        TelephonyManager::class.java.setAllMethodResult("getLine1Number", config.phoneNum)
+        TelephonyManager::class.java.setMethodResult("getLine1Number", config.phoneNum)
     }
 
 }

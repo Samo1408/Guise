@@ -43,4 +43,41 @@ class HookPlanTest {
             ModuleConfig(networkType = HooksValue.NET_WIFI).activeHookFeatures(),
         )
     }
+
+    @Test
+    fun locationSourceBlockingCanBeEnabledWithoutCoordinates() {
+        assertEquals(
+            listOf(HookFeature.LOCATION),
+            ModuleConfig(makeWifiLocationFail = true).activeHookFeatures(),
+        )
+        assertEquals(
+            listOf(HookFeature.LOCATION),
+            ModuleConfig(makeCellLocationFail = true).activeHookFeatures(),
+        )
+    }
+
+    @Test
+    fun blockingCellLocationTakesPrecedenceOverCellSpoofing() {
+        assertEquals(
+            listOf(HookFeature.LOCATION),
+            ModuleConfig(
+                lac = 460,
+                cid = 10_001,
+                makeCellLocationFail = true,
+            ).activeHookFeatures(),
+        )
+    }
+
+    @Test
+    fun coordinatesAndCellIdentityInstallOnlyTheirOwnGroups() {
+        assertEquals(
+            listOf(HookFeature.LOCATION, HookFeature.CELL_LOCATION),
+            ModuleConfig(
+                latitude = 39.9042,
+                longitude = 116.4074,
+                lac = 460,
+                cid = 10_001,
+            ).activeHookFeatures(),
+        )
+    }
 }

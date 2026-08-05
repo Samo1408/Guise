@@ -3,7 +3,6 @@ package com.houvven.guise.xposed.config
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.compose.runtime.MutableState
 import androidx.core.content.edit
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.R
@@ -28,7 +27,8 @@ private constructor(
     private val safePrefs
         get() = PackageConfig.safePrefs
 
-    private val context = ContextAmbient.current
+    private val context
+        get() = ContextAmbient.current
 
     fun clear() {
         state.clear()
@@ -203,57 +203,49 @@ private constructor(
     private fun configFromState(): ModuleConfig =
         config.copy().also(::updateConfigFromState)
 
-    private fun updateConfigFromState(target: ModuleConfig) {
-        val empty = ModuleConfig()
-        val configFields = target.javaClass.declaredFields.toMutableList()
-        val stateFields =
-            state.javaClass.declaredFields.filter { it.type == MutableState::class.java }
-        for (stateFiled in stateFields) {
-            val configField = configFields.find { it.name == stateFiled.name } ?: continue
-            stateFiled.isAccessible = true
-            val value = (stateFiled.get(state) as MutableState<*>).value
-            configField.isAccessible = true
-            // if (configField.get(empty) == value) continue
-
-            if (configField.type == Boolean::class.java) {
-                configField.setBoolean(target, value as Boolean)
-                continue
-            } else if (configField.type == String::class.java) {
-                configField.set(target, value as String)
-                continue
-            }
-
-            value as String
-            when (configField.type) {
-                Int::class.java -> (value.toIntOrNull() ?: configField.getInt(empty))
-                    .let { configField.setInt(target, it) }
-
-                Long::class.java -> (value.toLongOrNull() ?: configField.getLong(empty))
-                    .let { configField.setLong(target, it) }
-
-                Short::class.java -> (value.toShortOrNull() ?: configField.getShort(empty))
-                    .let { configField.setShort(target, it) }
-
-                Byte::class.java -> (value.toByteOrNull() ?: configField.getByte(empty))
-                    .let { configField.setByte(target, it) }
-
-                Double::class.java -> (value.toDoubleOrNull() ?: configField.getDouble(empty))
-                    .let { configField.setDouble(target, it) }
-
-                Float::class.java -> (value.toFloatOrNull() ?: configField.getFloat(empty))
-                    .let { configField.setFloat(target, it) }
-
-                Char::class.java -> (value.singleOrNull() ?: configField.getChar(empty))
-                    .let { configField.setChar(target, it) }
-
-                else -> Unit
-            }
-        }
-        target.screenshotsFlag = if (state.allowForceScreenshots.value) {
+    private fun updateConfigFromState(target: ModuleConfig) = with(target) {
+        brand = state.brand.value
+        model = state.model.value
+        product = state.product.value
+        device = state.device.value
+        board = state.board.value
+        hardware = state.hardware.value
+        androidVersion = state.androidVersion.value
+        sdkInt = state.sdkInt.value.toIntOrNull() ?: -1
+        densityDpi = state.densityDpi.value.toIntOrNull() ?: -1
+        networkType = state.networkType.value.toIntOrNull() ?: HooksValue.NET_UNHOOK
+        fingerPrint = state.fingerPrint.value
+        wifiSSID = state.wifiSSID.value
+        wifiBSSID = state.wifiBSSID.value
+        wifiMacAddress = state.wifiMacAddress.value
+        simOperator = state.simOperator.value
+        simOperatorName = state.simOperatorName.value
+        simCountry = state.simCountry.value
+        imei = state.imei.value
+        phoneNum = state.phoneNum.value
+        androidId = state.androidId.value
+        lac = state.lac.value.toIntOrNull() ?: -1
+        cid = state.cid.value.toIntOrNull() ?: -1
+        language = state.language.value
+        timeZone = state.timeZone.value
+        longitude = state.longitude.value.toDoubleOrNull() ?: -1.0
+        latitude = state.latitude.value.toDoubleOrNull() ?: -1.0
+        randomOffset = state.randomOffset.value
+        makeWifiLocationFail = state.makeWifiLocationFail.value
+        makeCellLocationFail = state.makeCellLocationFail.value
+        versionCode = state.versionCode.value.toIntOrNull() ?: -1
+        versionName = state.versionName.value
+        batteryLevel = state.batteryLevel.value.toIntOrNull() ?: -1
+        screenshotsFlag = if (state.allowForceScreenshots.value) {
             HooksValue.SCREENSHOTS_ENABLE
         } else {
             HooksValue.SCREENSHOTS_UNHOOK
         }
+        passContacts = state.passContacts.value
+        passPhoto = state.passPhoto.value
+        passVideo = state.passVideo.value
+        passAudio = state.passAudio.value
+        passApplications = state.passApplications.value
     }
 
     companion object {

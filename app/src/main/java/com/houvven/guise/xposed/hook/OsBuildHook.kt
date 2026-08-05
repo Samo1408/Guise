@@ -25,7 +25,6 @@ class OsBuildHook : LoadPackageHandler {
             mapOf(
                 arrayOf("SDK_INT") to sdkInt,
                 arrayOf("RELEASE") to androidVersion,
-                arrayOf("BASE_OS") to fingerPrint,
             ).forEach { (fields, value) ->
                 if (value.toString().isNotBlank() && value.toString() != "-1") {
                     fields.forEach { field ->

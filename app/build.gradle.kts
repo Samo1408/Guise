@@ -142,7 +142,7 @@ ksp {
 
 val verifyReleaseXposedEntries = tasks.register("verifyReleaseXposedEntries") {
     group = "verification"
-    description = "Verifies that R8 keeps every LSPosed Java entry point name."
+    description = "Verifies LSPosed entry points while allowing private runtime details to be obfuscated."
     dependsOn("mergeReleaseComposeMapping")
 
     val entryList = layout.projectDirectory.file("src/main/resources/META-INF/xposed/java_init.list")
@@ -151,14 +151,39 @@ val verifyReleaseXposedEntries = tasks.register("verifyReleaseXposedEntries") {
     inputs.file(mapping)
 
     doLast {
-        val mappingLines = mapping.get().asFile.readLines().toHashSet()
+        val mappingLines = mapping.get().asFile.readLines()
+        val mappingLineSet = mappingLines.toHashSet()
         val entries = entryList.asFile.readLines()
             .map(String::trim)
             .filter { it.isNotEmpty() && !it.startsWith('#') }
         check(entries.isNotEmpty()) { "META-INF/xposed/java_init.list contains no entries" }
         entries.forEach { entry ->
-            check("$entry -> $entry:" in mappingLines) {
+            check("$entry -> $entry:" in mappingLineSet) {
                 "R8 renamed or removed LSPosed entry point $entry"
+            }
+        }
+
+
+        val privateEntryMethods = listOf(
+            "attachLogContextWhenReady",
+            "createHook",
+            "currentApplication",
+            "scheduleProcessExit",
+        )
+        privateEntryMethods.forEach { methodName ->
+            check(mappingLines.none { it.trimEnd().endsWith(" -> $methodName") }) {
+                "R8 unexpectedly retained private LSPosed implementation name $methodName"
+            }
+        }
+
+        listOf(
+            "com.houvven.guise.xposed.config.ModuleConfig",
+            "com.houvven.guise.xposed.config.ModuleConfigState",
+            "com.houvven.guise.xposed.config.ModuleConfigManager",
+            "com.houvven.guise.xposed.config.HooksValue",
+        ).forEach { className ->
+            check("$className -> $className:" !in mappingLineSet) {
+                "R8 unexpectedly retained target-visible config class name $className"
             }
         }
     }

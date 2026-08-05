@@ -1,14 +1,12 @@
 -dontwarn com.houvven.**
 
-# Loaded by LSPosed from META-INF/xposed/java_init.list. R8 cannot infer this
-# resource-to-class reference, so the entry point and its callbacks must retain
-# both their binary name and members.
--keep class com.houvven.guise.xposed.HookInit {
-    *;
-}
-
--keep class com.houvven.guise.xposed.config.* {
-    <fields>;
+# Loaded by LSPosed from META-INF/xposed/java_init.list. Keep only the binary entry name,
+# constructor and framework callbacks; private implementation details remain eligible for R8.
+-keep,allowoptimization class com.houvven.guise.xposed.HookInit {
+    public <init>();
+    public void onModuleLoaded(io.github.libxposed.api.XposedModuleInterface$ModuleLoadedParam);
+    public boolean onHotReloading(io.github.libxposed.api.XposedModuleInterface$HotReloadingParam);
+    public void onPackageReady(io.github.libxposed.api.XposedModuleInterface$PackageReadyParam);
 }
 
 -if @kotlinx.serialization.Serializable class **

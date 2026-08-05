@@ -52,16 +52,12 @@ class HookInit : XposedModule() {
             this,
             LoadPackageContext(param.packageName, processName, param.classLoader),
         )
-        attachLogContextWhenReady()
         ModernXposedPreferences.current = getRemotePreferences(PackageConfig.PREF_FILE_NAME)
-
-        XposedLogger.d("Package ready")
         PackageConfig.doRefresh(param.packageName)
-        if (!PackageConfig.current.isEnable) {
-            XposedLogger.d("Configuration disabled; skip")
-            XposedLogger.finishStartup()
-            return
-        }
+        if (!PackageConfig.current.isEnable) return
+
+        XposedLogger.initialize(::currentApplication)
+        XposedLogger.d("Package ready")
 
         val hooks = PackageConfig.current.activeHookFeatures().map(::createHook)
         hooks.forEach { (category, hook) ->
@@ -74,6 +70,7 @@ class HookInit : XposedModule() {
             }
         }
         XposedLogger.finishStartup()
+        if (XposedLogger.needsDeliveryContext()) attachLogContextWhenReady()
     }
 
     private fun createHook(feature: HookFeature): Pair<String, LoadPackageHookAdapter> =
@@ -95,11 +92,8 @@ class HookInit : XposedModule() {
 
     /** Obtains an application context without modifying Application or Activity lifecycle methods. */
     private fun attachLogContextWhenReady(attempt: Int = 0) {
-        currentApplication()?.let {
-            XposedLogger.attachContext(it)
-            return
-        }
-        if (attempt >= LOG_CONTEXT_MAX_ATTEMPTS) return
+        if (XposedLogger.tryAttachContext()) return
+        if (!XposedLogger.needsDeliveryContext() || attempt >= LOG_CONTEXT_MAX_ATTEMPTS) return
         Handler(Looper.getMainLooper()).postDelayed(
             { attachLogContextWhenReady(attempt + 1) },
             LOG_CONTEXT_RETRY_DELAY_MS,

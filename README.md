@@ -81,13 +81,13 @@ Guise Reborn 并非只为原版更换界面。维护版保留按应用伪装的�
 - 目标进程的日志会通过显式组件批量投递至 Guise 的本地数据库，不再错误地向 Hook 进程中的只读 Xposed Remote Preferences 写入；接收端校验发送 UID，在绕过目标应用包可见性限制的同时避免其他应用伪造日志。日志页无需手动刷新，支持错误/信息/调试级别筛选、包名/进程/Hook 类别/正文/堆栈搜索、完整异常展开与诊断信息导出。“详细日志”默认关闭，只控制成功安装 Hook 的调试明细，错误和必要状态始终记录。
 - 运行时日志包含时间、级别、目标包名、进程名、Hook 类别、消息和完整异常堆栈，不采集页面内容、账号、输入、照片、位置、网络内容或系统全量 Logcat。日志数据库不参与系统备份；本次重构不迁移旧日志数据库。
 - Hook 按设备、系统、唯一标识、网络、SIM、Wi-Fi、定位、基站、电池、截图、时区等职责拆分；单个 Hook 失败会被隔离，避免拖垮整个目标进程。
-- 目标进程会先把非默认配置编译成最小 Hook 计划，只构造真正启用的 Hook 组；未配置版本伪装时不再无条件修改 `PackageManager.getPackageInfo()`。显示密度、时区、应用版本和窗口标志等固定 API 使用精确方法签名，减少无关方法被修改的范围。
-- 日志投递不再为了取得目标应用 `Context` 而 Hook `Application.attach` 或 `Activity.onCreate`，改为在主线程启动阶段短时获取当前 `Application`，避免日志功能额外留下常驻生命周期 Hook。
+- 目标进程会先把非默认配置编译成最小 Hook 计划，只构造真正启用的 Hook 组；未配置版本伪装时不再无条件修改 `PackageManager.getPackageInfo()`。显示密度、应用版本、唯一标识和窗口标志等固定 API 使用精确方法签名，减少无关重载被修改的范围。
+- 日志投递不再为了取得目标应用 `Context` 而 Hook `Application.attach` 或 `Activity.onCreate`。关闭详细日志且没有需要投递的事件时，不查找目标应用 `Context`、不排队重试也不发送广播；有事件时才短时获取当前 `Application`，避免日志功能额外留下常驻生命周期 Hook。
 - 移除目标进程启动后的 Hook 成功 Toast；成功明细进入可选的详细日志，错误和必要状态始终记录，避免打断目标应用正常使用。
 - 数据预设从 UI 代码移入资源：Android 版本、SDK、DPI、网络、语言等集中维护在 `app/src/main/res/raw/presets.json`。
 - 升级 Room、MMKV、KSP、协程和序列化；移除 Accompanist、Ktor 1.x、旧 SQLite shell 及原有通用 `lib` 模块。
 - 导入导出改用 MediaStore 与系统文件选择器，移除“所有文件访问”、旧外部存储权限及明文网络配置。
-- Release 和 Guise Test 均启用 R8；Guise 的正式构建会校验 Xposed 资源入口未被 R8 改名，避免出现“模块已进入作用域但实际未加载”的静默失效。仓库不保存正式签名材料。Guise 正式版使用仓库外签名，Guise Test 为兼容既有独立测试版继续使用固定调试证书。
+- Release 和 Guise Test 均启用 R8；Guise 只保留 LSPosed 必须识别的模块入口、构造器和框架回调，私有实现及配置类仍可混淆。配置编辑状态改用显式类型安全映射，不再依赖混淆后不可靠的同名字段反射。正式构建还会自动校验入口没有被改名、内部名称没有被意外保留，避免“模块已进入作用域但实际未加载”的静默失效。
 
 ### 2. Xposed 作用域与启用逻辑
 
@@ -115,7 +115,7 @@ Guise Reborn 并非只为原版更换界面。维护版保留按应用伪装的�
 
 - 支持 Android ID/SSAID、IMEI、手机号等目标应用可读取标识的伪装。
 - **改进 IMEI Hook**：从原版仅处理带卡槽参数的 `getImei(int)`，扩展到 `getImei` 全部重载、`getPrimaryImei`、`getDeviceId` 和 TAC。当前配置仍为单值，应用按任一卡槽读取时均返回该值，因此双卡设备上的 IMEI 1/2 会相同；界面已加入说明，避免误解为只配置第一卡槽。
-- Android ID 保留 `Settings.Secure`/`Settings.System` 常用读取入口以及 WebView 等独立进程适配，配置读取已迁移到 Modern Xposed Remote Preferences。
+- Android ID 保留 `Settings.Secure`/`Settings.System` 常用读取入口以及 WebView 等独立进程适配；目标进程初始化后直接使用当前配置，不再在每次读取标识时重复访问 Remote Preferences。
 - 支持网络类型、Wi-Fi SSID、BSSID、Wi-Fi MAC 地址。
 - 支持 SIM 运营商代码、名称和国家/地区代码，并可从全球 MCC/MNC 运营商数据中搜索选择。
 - 运营商预设来自 [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list)，编码依据 [ITU-T E.212](https://www.itu.int/rec/T-REC-E.212/en)。
@@ -123,10 +123,11 @@ Guise Reborn 并非只为原版更换界面。维护版保留按应用伪装的�
 
 ### 5. 定位、语言、时区、电池与截图 Hook
 
-- 支持经纬度伪装及随机偏移。
+- 支持经纬度伪装及随机偏移。坐标伪装只改写 `Location` 经纬度读取和最近位置结果，不再伪造卫星状态、NMEA 数据或额外触发定位监听器回调。
 - 经纬度只修改目标应用读取到的 GPS 数值；应用仍可能利用 Wi-Fi 与基站推断位置。需要更完整的位置隔离时，应同时启用“使 Wi-Fi 位置信息失效”和“使基站位置信息失效”。
-- 支持目标应用读取到的语言/地区环境。
-- **新增时区 Hook**：覆盖 Java `TimeZone`、Android ICU `TimeZone` 和 `ZoneId.systemDefault()`，并设置目标进程默认时区，以兼容初始化时缓存时区的 API。时区可从系统时区库选择或单独随机，并受右上角“一键随机”控制；它只改变目标应用读取和格式化本地时间所用的时区，不修改系统时钟。
+- Wi-Fi 与基站定位失效开关彼此独立，只收窄对应定位来源；不再顺带关闭 Wi-Fi、改写 Wi-Fi 标识或屏蔽无关定位提供器。基站定位失效优先于 LAC/CID 伪装，避免同时返回“已屏蔽”和“已伪装”的矛盾结果。
+- 支持目标应用读取到的语言/地区环境。实现改为设置目标进程默认 `Locale`，不再常驻改写每个 `Locale` 实例的语言、国家与显示名称方法。
+- **新增时区 Hook**：设置目标进程默认 `java.util.TimeZone`，Android 的 `java.time`、ICU 格式化和 `ZoneId.systemDefault()` 会从该进程默认值派生；不再逐个拦截时区实例方法，因此应用显式创建的其他时区仍保持原意。时区可从系统时区库选择或单独随机，并受右上角“一键随机”控制；它只改变目标应用读取和格式化本地时间所用的默认时区，不修改系统时钟。
 - 电池电量可配置或在 0–100 范围随机，并受“一键随机”控制。
 - Fingerprint、时区、电池等可随机字段均提供就近的独立随机按钮，不必每次使用全局随机。
 - **重写强制截图 Hook**：原版只在参数恰好等于 `FLAG_SECURE` 时尝试清除，组合标志容易漏过；维护版将文本参数改为“允许强制截图”开关，覆盖 `setFlags`、`addFlags`、`setAttributes`、`WindowManager` 的 add/update 路径，并在 Activity 创建和恢复时清理已存在标志。未启用时不改变应用原有行为，DRM/受保护视频层、厂商私有渲染或应用自行遮挡仍可能无法截图。
@@ -307,14 +308,12 @@ sdk.dir=D\:\\AndroidSDK
 # Debug 构建与检查
 .\gradlew.bat assembleDebug lintDebug
 
-# Release/R8 构建；当前输出未配置正式发布签名
+# Release/R8 构建
 .\gradlew.bat :app:assembleRelease
 
 # Guise Test
 .\gradlew.bat :guise-test:assembleDebug :guise-test:lintDebug
 ```
-
-不要向仓库提交签名文件、签名口令、ROOT 产生的临时文件或本机 SDK 路径。
 
 ## 开放源代码许可
 

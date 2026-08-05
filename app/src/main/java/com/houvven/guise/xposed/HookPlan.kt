@@ -29,8 +29,15 @@ internal fun ModuleConfig.activeHookFeatures(): List<HookFeature> = buildList {
     if (batteryLevel != -1) add(HookFeature.BATTERY)
     if (language.isNotBlank()) add(HookFeature.LOCALE)
     if (timeZone.isNotBlank()) add(HookFeature.TIME_ZONE)
-    if (longitude != -1.0 || latitude != -1.0) add(HookFeature.LOCATION)
-    if (lac != -1 || cid != -1) add(HookFeature.CELL_LOCATION)
+    if (
+        longitude != -1.0 ||
+        latitude != -1.0 ||
+        makeWifiLocationFail ||
+        makeCellLocationFail
+    ) {
+        add(HookFeature.LOCATION)
+    }
+    if ((lac != -1 || cid != -1) && !makeCellLocationFail) add(HookFeature.CELL_LOCATION)
     if (
         networkType != HooksValue.NET_UNHOOK ||
         wifiSSID.isNotBlank() ||

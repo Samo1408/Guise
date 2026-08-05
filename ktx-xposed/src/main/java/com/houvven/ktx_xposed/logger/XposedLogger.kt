@@ -34,6 +34,8 @@ object XposedLogger {
     private var applicationContext: Context? = null
     private var startupCompleted = false
     private var deliveryToken: String? = null
+    private var detailedLogging = false
+    private var contextProvider: (() -> Context?)? = null
 
     val currentCategory: String
         get() = categoryContext.get() ?: DEFAULT_CATEGORY
@@ -65,30 +67,41 @@ object XposedLogger {
     }
 
     @Synchronized
-    fun attachContext(context: Context) {
-        applicationContext = context.applicationContext ?: context
-        flushPending()
+    fun initialize(contextProvider: () -> Context?) {
+        this.contextProvider = contextProvider
+        val module = ModernXposedRuntime.moduleOrNull ?: return
+        val preferences = runCatching {
+            module.getRemotePreferences(RuntimeLogProtocol.PREFERENCES_NAME)
+        }.getOrNull()
+        deliveryToken = preferences?.getString(RuntimeLogProtocol.DELIVERY_TOKEN_KEY, null)
+        detailedLogging = preferences?.getBoolean(
+            RuntimeLogProtocol.DETAILED_LOGGING_KEY,
+            false,
+        ) == true
     }
 
     @Synchronized
     fun finishStartup() {
         startupCompleted = true
+        tryAttachContextLocked()
         flushPending()
+    }
+
+    @Synchronized
+    fun needsDeliveryContext(): Boolean =
+        deliveryToken != null && pendingEvents.isNotEmpty() && applicationContext == null
+
+    @Synchronized
+    fun tryAttachContext(): Boolean {
+        tryAttachContextLocked()
+        return applicationContext != null
     }
 
     @Synchronized
     private fun basicLog(level: Char, category: String, msg: String, throwable: Throwable?) {
         val module = ModernXposedRuntime.moduleOrNull ?: return
         val context = ModernXposedRuntime.packageContextOrNull ?: return
-        val preferences = runCatching {
-            module.getRemotePreferences(RuntimeLogProtocol.PREFERENCES_NAME)
-        }.getOrNull()
-        deliveryToken = preferences?.getString(RuntimeLogProtocol.DELIVERY_TOKEN_KEY, null)
-        if (level == Level.DEBUG &&
-            preferences?.getBoolean(RuntimeLogProtocol.DETAILED_LOGGING_KEY, false) != true
-        ) {
-            return
-        }
+        if (level == Level.DEBUG && !detailedLogging) return
         val priority = when (level) {
             Level.DEBUG -> Log.DEBUG
             Level.ERROR -> Log.ERROR
@@ -101,6 +114,8 @@ object XposedLogger {
                 module.log(priority, "$TAG_PREFIX/$category", msg, throwable)
             }
         }
+
+        if (deliveryToken == null) return
 
         val now = System.currentTimeMillis()
         pendingEvents += RuntimeLogEvent(
@@ -116,7 +131,14 @@ object XposedLogger {
         while (pendingEvents.size > RuntimeLogProtocol.MAX_PENDING_EVENTS) {
             pendingEvents.removeFirst()
         }
+        tryAttachContextLocked()
         if (startupCompleted) flushPending()
+    }
+
+    private fun tryAttachContextLocked() {
+        if (applicationContext != null || deliveryToken == null || pendingEvents.isEmpty()) return
+        val context = runCatching { contextProvider?.invoke() }.getOrNull() ?: return
+        applicationContext = context.applicationContext ?: context
     }
 
     private fun flushPending() {
