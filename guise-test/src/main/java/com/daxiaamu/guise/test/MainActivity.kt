@@ -472,23 +472,21 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
 }
 
 private fun readImei(context: Context, telephony: TelephonyManager, slotIndex: Int): TestResult {
-    if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-        return TestResult(context.getString(R.string.phone_permission_not_granted))
-    }
     return try {
         TestResult(telephony.getImei(slotIndex).toDisplayValue(context))
     } catch (_: SecurityException) {
-        TestResult(context.getString(R.string.imei_access_restricted, Build.VERSION.RELEASE))
+        val message = if (
+            context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
+        ) {
+            context.getString(R.string.imei_access_restricted, Build.VERSION.RELEASE)
+        } else {
+            context.getString(R.string.phone_permission_not_granted)
+        }
+        TestResult(message)
     }
 }
 
 private fun readPhoneNumber(context: Context, telephony: TelephonyManager): TestResult {
-    val canReadPhoneNumber =
-        context.checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED ||
-            context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-    if (!canReadPhoneNumber) {
-        return TestResult(context.getString(R.string.phone_permission_not_granted))
-    }
     return try {
         val number = telephony.line1Number
         TestResult(

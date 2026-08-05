@@ -125,8 +125,17 @@ fun AppUpdateHost() {
     var error by remember(info.versionCode) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(info.versionCode) {
-        UpdateInstaller.pending(context)
-            .takeIf { it >= 0L && UpdateInstaller.isSuccessful(context, it) }
+        UpdateInstaller.pending(context, info.versionCode, info.apkSha256)
+            .takeIf {
+                it >= 0L &&
+                    UpdateInstaller.isSuccessful(context, it) &&
+                    UpdateInstaller.isVerified(
+                        context,
+                        it,
+                        info.apkSha256,
+                        info.versionCode,
+                    )
+            }
             ?.let { readyDownloadId = it }
     }
 
@@ -149,6 +158,7 @@ fun AppUpdateHost() {
                         context,
                         id,
                         updater.expectedSha256(context),
+                        info.versionCode,
                     )
                     if (!verified) {
                         val nextDownloadId = updater.retryNextDownload(context, id)
@@ -160,7 +170,12 @@ fun AppUpdateHost() {
                     downloadId = null
                     progress = null
                     readyDownloadId = id
-                    UpdateInstaller.markReady(context, id)
+                    UpdateInstaller.markReady(
+                        context = context,
+                        downloadId = id,
+                        versionCode = info.versionCode,
+                        sha256 = info.apkSha256,
+                    )
                     if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                         val installedWithRoot = UpdateInstaller.silentInstallWithRoot(context, id)
                         if (!installedWithRoot) {

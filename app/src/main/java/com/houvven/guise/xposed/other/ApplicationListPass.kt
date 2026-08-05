@@ -5,6 +5,7 @@ package com.houvven.guise.xposed.other
 import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.ComponentInfo
+import android.content.pm.LauncherActivityInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -36,6 +37,7 @@ class ApplicationListPass : LoadPackageHandler {
 
         findClassIfExists(APPLICATION_PACKAGE_MANAGER)?.let { hookPackageManager(it, true) }
         findClassIfExists(IPACKAGE_MANAGER_PROXY)?.let { hookPackageManager(it, false) }
+        findClassIfExists(LAUNCHER_APPS)?.let { hookPackageManager(it, true) }
     }
 
     private fun hookPackageManager(clazz: Class<*>, publicApiLayer: Boolean) {
@@ -148,6 +150,11 @@ class ApplicationListPass : LoadPackageHandler {
                 applicationInfo = value.applicationInfo
             }
 
+            is LauncherActivityInfo -> {
+                packageName = value.componentName.packageName
+                applicationInfo = value.applicationInfo
+            }
+
             is String -> return isKnownVisiblePackage(value)
             else -> return false
         }
@@ -183,6 +190,7 @@ class ApplicationListPass : LoadPackageHandler {
         private const val ANDROID_PACKAGE = "android"
         private const val APPLICATION_PACKAGE_MANAGER = "android.app.ApplicationPackageManager"
         private const val IPACKAGE_MANAGER_PROXY = "android.content.pm.IPackageManager\$Stub\$Proxy"
+        private const val LAUNCHER_APPS = "android.content.pm.LauncherApps"
         private const val PARCELED_LIST_SLICE = "android.content.pm.ParceledListSlice"
         private const val BASE_PARCELED_LIST_SLICE = "android.content.pm.BaseParceledListSlice"
 
@@ -191,6 +199,7 @@ class ApplicationListPass : LoadPackageHandler {
             "getInstalledApplicationsAsUser",
             "getInstalledPackages",
             "getInstalledPackagesAsUser",
+            "getActivityList",
             "getPackagesHoldingPermissions",
             "queryBroadcastReceivers",
             "queryBroadcastReceiversAsUser",

@@ -6,7 +6,6 @@ import android.telephony.CellIdentityLte
 import android.telephony.CellIdentityNr
 import android.telephony.CellIdentityTdscdma
 import android.telephony.CellIdentityWcdma
-import android.telephony.CellInfoNr
 import android.telephony.gsm.GsmCellLocation
 import com.houvven.guise.xposed.LoadPackageHandler
 import com.houvven.ktx_xposed.hook.setMethodResult
@@ -18,6 +17,7 @@ class CellLocationHook : LoadPackageHandler {
             GsmCellLocation::class.java.setMethodResult("getLac", config.lac)
             CellIdentityGsm::class.java.setMethodResult("getLac", config.lac)
             CellIdentityLte::class.java.setMethodResult("getTac", config.lac)
+            CellIdentityNr::class.java.setMethodResult("getTac", config.lac)
             CellIdentityTdscdma::class.java.setMethodResult("getLac", config.lac)
             CellIdentityCdma::class.java.setMethodResult("getNetworkId", config.lac)
             CellIdentityWcdma::class.java.setMethodResult("getLac", config.lac)
@@ -26,6 +26,7 @@ class CellLocationHook : LoadPackageHandler {
             GsmCellLocation::class.java.setMethodResult("getCid", config.cid)
             CellIdentityGsm::class.java.setMethodResult("getCid", config.cid)
             CellIdentityLte::class.java.setMethodResult("getCi", config.cid)
+            CellIdentityNr::class.java.setMethodResult("getNci", config.cid.toLong())
             CellIdentityTdscdma::class.java.setMethodResult("getCid", config.cid)
             CellIdentityCdma::class.java.setMethodResult("getBasestationId", config.cid)
             CellIdentityWcdma::class.java.setMethodResult("getCid", config.cid)

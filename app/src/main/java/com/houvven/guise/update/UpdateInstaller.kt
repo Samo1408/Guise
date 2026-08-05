@@ -60,9 +60,22 @@ class UpdateDownloadReceiver : BroadcastReceiver() {
                         context,
                         completed,
                         AppUpdater().expectedSha256(context),
+                        context.getSharedPreferences(
+                            AppUpdater.UPDATE_PREFERENCES,
+                            Context.MODE_PRIVATE,
+                        ).getInt(AppUpdater.KEY_DOWNLOAD_VERSION_CODE, -1),
                     )
                 if (verified) {
-                    UpdateInstaller.markReady(context, completed)
+                    val preferences = context.getSharedPreferences(
+                        AppUpdater.UPDATE_PREFERENCES,
+                        Context.MODE_PRIVATE,
+                    )
+                    UpdateInstaller.markReady(
+                        context = context,
+                        downloadId = completed,
+                        versionCode = preferences.getInt(AppUpdater.KEY_DOWNLOAD_VERSION_CODE, -1),
+                        sha256 = AppUpdater().expectedSha256(context),
+                    )
                     UpdateInstaller.showInstallNotification(context, completed)
                 } else {
                     AppUpdater().retryNextDownload(context, completed)
@@ -79,16 +92,33 @@ object UpdateInstaller {
     private const val NOTIFICATION_ID = 0x4755
     private const val ROOT_INSTALL_TIMEOUT_SECONDS = 180L
 
-    fun markReady(context: Context, downloadId: Long) {
+    fun markReady(
+        context: Context,
+        downloadId: Long,
+        versionCode: Int,
+        sha256: String,
+    ) {
         context.getSharedPreferences(AppUpdater.UPDATE_PREFERENCES, Context.MODE_PRIVATE)
             .edit()
             .putLong(AppUpdater.KEY_READY_DOWNLOAD_ID, downloadId)
+            .putInt(AppUpdater.KEY_READY_VERSION_CODE, versionCode)
+            .putString(AppUpdater.KEY_READY_SHA256, sha256.lowercase())
             .apply()
     }
 
-    fun pending(context: Context): Long =
-        context.getSharedPreferences(AppUpdater.UPDATE_PREFERENCES, Context.MODE_PRIVATE)
-            .getLong(AppUpdater.KEY_READY_DOWNLOAD_ID, -1L)
+    fun pending(context: Context, versionCode: Int, sha256: String): Long {
+        val preferences = context.getSharedPreferences(
+            AppUpdater.UPDATE_PREFERENCES,
+            Context.MODE_PRIVATE,
+        )
+        val matches = readyArtifactMatches(
+            expectedVersionCode = versionCode,
+            expectedSha256 = sha256,
+            readyVersionCode = preferences.getInt(AppUpdater.KEY_READY_VERSION_CODE, -1),
+            readySha256 = preferences.getString(AppUpdater.KEY_READY_SHA256, null),
+        )
+        return if (matches) preferences.getLong(AppUpdater.KEY_READY_DOWNLOAD_ID, -1L) else -1L
+    }
 
     fun isSuccessful(context: Context, downloadId: Long): Boolean {
         val manager = context.getSystemService(DownloadManager::class.java)
@@ -106,25 +136,58 @@ object UpdateInstaller {
         context: Context,
         downloadId: Long,
         expectedSha256: String,
+        expectedVersionCode: Int,
     ): Boolean = withContext(Dispatchers.IO) {
-        if (expectedSha256.isBlank()) return@withContext true
+        if (expectedVersionCode <= 0) return@withContext false
         val manager = context.getSystemService(DownloadManager::class.java)
-        runCatching {
+        val cachedApk = File(context.cacheDir, "updates/verify-$downloadId.apk")
+        try {
             val digest = MessageDigest.getInstance("SHA-256")
+            cachedApk.parentFile?.mkdirs()
             manager.openDownloadedFile(downloadId).use { descriptor ->
                 FileInputStream(descriptor.fileDescriptor).use { input ->
-                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                    while (true) {
-                        val count = input.read(buffer)
-                        if (count < 0) break
-                        digest.update(buffer, 0, count)
+                    cachedApk.outputStream().use { output ->
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        while (true) {
+                            val count = input.read(buffer)
+                            if (count < 0) break
+                            digest.update(buffer, 0, count)
+                            output.write(buffer, 0, count)
+                        }
                     }
                 }
             }
-            digest.digest().joinToString("") { byte ->
+            val actualSha256 = digest.digest().joinToString("") { byte ->
                 "%02x".format(byte.toInt() and 0xff)
-            }.equals(expectedSha256, ignoreCase = true)
-        }.getOrDefault(false)
+            }
+            val hashMatches = expectedSha256.isBlank() ||
+                actualSha256.equals(expectedSha256, ignoreCase = true)
+            val archiveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageArchiveInfo(
+                    cachedApk.absolutePath,
+                    PackageManager.PackageInfoFlags.of(0L),
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageArchiveInfo(cachedApk.absolutePath, 0)
+            }
+            val archiveVersionCode = archiveInfo?.let { info ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    info.longVersionCode
+                } else {
+                    @Suppress("DEPRECATION")
+                    info.versionCode.toLong()
+                }
+            }
+            hashMatches &&
+                archiveInfo != null &&
+                archiveInfo.packageName == context.packageName &&
+                archiveVersionCode == expectedVersionCode.toLong()
+        } catch (_: Exception) {
+            false
+        } finally {
+            cachedApk.delete()
+        }
     }
 
     fun showInstallNotification(context: Context, downloadId: Long) {
@@ -250,12 +313,22 @@ object UpdateInstaller {
     private val rootInstallingId = AtomicLong(-1L)
 }
 
+internal fun readyArtifactMatches(
+    expectedVersionCode: Int,
+    expectedSha256: String,
+    readyVersionCode: Int,
+    readySha256: String?,
+): Boolean =
+    expectedVersionCode > 0 &&
+        readyVersionCode == expectedVersionCode &&
+        expectedSha256.equals(readySha256.orEmpty(), ignoreCase = true)
+
 class UpdateInstallActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val downloadId = intent.getLongExtra(
             EXTRA_DOWNLOAD_ID,
-            UpdateInstaller.pending(this),
+            -1L,
         )
         if (downloadId < 0L) {
             finish()

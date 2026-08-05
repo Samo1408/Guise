@@ -111,6 +111,7 @@ class AppUpdater {
             urls = info.apkUrls,
             sourceIndex = 0,
             expectedSha256 = info.apkSha256,
+            expectedVersionCode = info.versionCode,
         )
     }
 
@@ -128,6 +129,7 @@ class AppUpdater {
                 context.getSystemService(DownloadManager::class.java).remove(failedDownloadId)
             }
             val expectedSha256 = preferences.getString(KEY_DOWNLOAD_SHA256, null).orEmpty()
+            val expectedVersionCode = preferences.getInt(KEY_DOWNLOAD_VERSION_CODE, -1)
             (firstNextIndex..urls.lastIndex).firstNotNullOfOrNull { sourceIndex ->
                 runCatching {
                     enqueueDownload(
@@ -135,6 +137,7 @@ class AppUpdater {
                         urls = urls,
                         sourceIndex = sourceIndex,
                         expectedSha256 = expectedSha256,
+                        expectedVersionCode = expectedVersionCode,
                     )
                 }.getOrNull()
             }
@@ -148,6 +151,7 @@ class AppUpdater {
         urls: List<String>,
         sourceIndex: Int,
         expectedSha256: String,
+        expectedVersionCode: Int,
     ): Long {
         val url = urls[sourceIndex]
         val manager = context.getSystemService(DownloadManager::class.java)
@@ -165,7 +169,10 @@ class AppUpdater {
                 .putString(KEY_DOWNLOAD_URLS, JSONArray(urls).toString())
                 .putInt(KEY_DOWNLOAD_SOURCE_INDEX, sourceIndex)
                 .putString(KEY_DOWNLOAD_SHA256, expectedSha256)
+                .putInt(KEY_DOWNLOAD_VERSION_CODE, expectedVersionCode)
                 .remove(KEY_READY_DOWNLOAD_ID)
+                .remove(KEY_READY_VERSION_CODE)
+                .remove(KEY_READY_SHA256)
                 .apply()
         }
     }
@@ -291,6 +298,9 @@ class AppUpdater {
         const val KEY_DOWNLOAD_URLS = "download_urls"
         const val KEY_DOWNLOAD_SOURCE_INDEX = "download_source_index"
         const val KEY_DOWNLOAD_SHA256 = "download_sha256"
+        const val KEY_DOWNLOAD_VERSION_CODE = "download_version_code"
+        const val KEY_READY_VERSION_CODE = "ready_version_code"
+        const val KEY_READY_SHA256 = "ready_sha256"
         const val APK_MIME = "application/vnd.android.package-archive"
         private val DOWNLOAD_PLAN_LOCK = Any()
         private val SHA256_PATTERN = Regex("[0-9a-f]{64}")

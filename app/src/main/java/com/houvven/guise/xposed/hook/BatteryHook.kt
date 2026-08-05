@@ -25,6 +25,8 @@ class BatteryHook : LoadPackageHandler {
         ) { param ->
             if (param.args[0] == BatteryManager.EXTRA_LEVEL) {
                 param.result = level
+            } else if (param.args[0] == BatteryManager.EXTRA_SCALE) {
+                param.result = 100
             }
         }
     }

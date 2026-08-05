@@ -25,23 +25,32 @@ internal class SimHook : LoadPackageHandler {
     }
 
     internal fun hookMobileType(networkType: Int) {
-        val type = when (networkType) {
+        val type = mobileTelephonyType(networkType)
+        TelephonyManager::class.java.setSomeSameNameMethodResult(
+            "getNetworkType",
+            "getDataNetworkType",
+            "getVoiceNetworkType",
+            value = type,
+        )
+    }
+
+    companion object {
+        internal fun mobileTelephonyType(networkType: Int): Int = when (networkType) {
             HooksValue.NET_MOBILE_2G -> TelephonyManager.NETWORK_TYPE_CDMA
             HooksValue.NET_MOBILE_3G -> TelephonyManager.NETWORK_TYPE_TD_SCDMA
             HooksValue.NET_MOBILE_4G -> TelephonyManager.NETWORK_TYPE_LTE
             HooksValue.NET_MOBILE_5G -> TelephonyManager.NETWORK_TYPE_NR
             else -> TelephonyManager.NETWORK_TYPE_UNKNOWN
-            // else -> networkType
         }
-        TelephonyManager::class.java.setMethodResult("getNetworkType", type)
     }
 
     private fun hookSimOperator() {
         val simOperator = config.simOperator
-        val mcc = simOperator.substring(0, 3)
-        val mnc = simOperator.substring(3)
-        val mccInt = mcc.toIntOrNull()
-        val mncInt = mnc.toIntOrNull()
+        if (simOperator.length !in 5..6 || simOperator.any { !it.isDigit() }) return
+        val mcc = simOperator.take(3)
+        val mnc = simOperator.drop(3)
+        val mccInt = mcc.toInt()
+        val mncInt = mnc.toInt()
 
         TelephonyManager::class.java.run {
             setSomeSameNameMethodResult(
@@ -49,7 +58,7 @@ internal class SimHook : LoadPackageHandler {
                 "getNetworkOperatorForPhone",
                 "getSimOperator",
                 "getNetworkOperator",
-                value = simOperator
+                value = simOperator,
             )
         }
 
@@ -81,7 +90,7 @@ internal class SimHook : LoadPackageHandler {
                 SubscriptionInfo::class.java to "getCarrierName",
                 SubscriptionInfo::class.java to "getDisplayName",
             ),
-            value = config.simOperatorName
+            value = config.simOperatorName,
         )
     }
 
@@ -92,9 +101,9 @@ internal class SimHook : LoadPackageHandler {
                 TelephonyManager::class.java to "getSimCountryIsoForPhone",
                 TelephonyManager::class.java to "getNetworkCountryIso",
                 TelephonyManager::class.java to "getNetworkCountryIsoForPhone",
-                SubscriptionInfo::class.java to "getCountryIso"
+                SubscriptionInfo::class.java to "getCountryIso",
             ),
-            value = config.simCountry
+            value = config.simCountry,
         )
     }
 }
