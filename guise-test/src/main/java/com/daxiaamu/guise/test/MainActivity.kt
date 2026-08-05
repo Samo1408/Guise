@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -62,9 +63,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -90,6 +91,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import java.util.zip.ZipFile
 
 private enum class TestKey(@StringRes val label: Int) {
     PACKAGE_NAME(R.string.package_name),
@@ -117,7 +119,8 @@ private enum class TestKey(@StringRes val label: Int) {
     CONTACTS(R.string.contacts_query), IMAGES(R.string.images_query), VIDEOS(R.string.videos_query),
     AUDIO(R.string.audio_query), INSTALLED_PACKAGES(R.string.installed_packages),
     INSTALLED_APPLICATIONS(R.string.installed_applications),
-    LAUNCHER_ACTIVITIES(R.string.launcher_activities), DIRECT_GUISE_LOOKUP(R.string.direct_guise_lookup)
+    LAUNCHER_ACTIVITIES(R.string.launcher_activities), XPOSED_MODULES(R.string.xposed_modules),
+    DIRECT_GUISE_LOOKUP(R.string.direct_guise_lookup)
 }
 
 private data class TestResult(val value: String, val detected: Boolean = false)
@@ -159,6 +162,7 @@ private val sections = listOf(
             TestKey.INSTALLED_PACKAGES,
             TestKey.INSTALLED_APPLICATIONS,
             TestKey.LAUNCHER_ACTIVITIES,
+            TestKey.XPOSED_MODULES,
             TestKey.DIRECT_GUISE_LOOKUP,
         ),
     ),
@@ -166,10 +170,14 @@ private val sections = listOf(
 
 class MainActivity : ComponentActivity() {
     private var locationUpdate by mutableStateOf<String?>(null)
+    private var screenshotProtectionRequested by mutableStateOf(true)
     private var secureFlagTick by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Guise Test is intentionally secure by default. The target app must not be able to take
+        // screenshots until Guise's "allow forced screenshots" hook removes this restriction.
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         enableEdgeToEdge()
         setContent { GuiseTestApp() }
     }
@@ -188,6 +196,16 @@ class MainActivity : ComponentActivity() {
                 }
             }, mainLooper)
         }.onFailure { locationUpdate = it.userMessage() }
+    }
+
+    private fun setScreenshotProtection(enabled: Boolean) {
+        screenshotProtectionRequested = enabled
+        if (enabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        }
+        secureFlagTick++
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -251,9 +269,9 @@ class MainActivity : ComponentActivity() {
                     }
                     item {
                         ScreenshotCard(
+                            requested = screenshotProtectionRequested,
                             secure = run { secureFlagTick; window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0 },
-                            onAdd = { window.addFlags(WindowManager.LayoutParams.FLAG_SECURE); secureFlagTick++ },
-                            onClear = { window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE); secureFlagTick++ }
+                            onRequestedChange = ::setScreenshotProtection,
                         )
                     }
                     item {
@@ -296,16 +314,24 @@ private fun ResultCard(section: TestSection, results: Map<TestKey, TestResult>) 
 }
 
 @Composable
-private fun ScreenshotCard(secure: Boolean, onAdd: () -> Unit, onClear: () -> Unit) {
+private fun ScreenshotCard(
+    requested: Boolean,
+    secure: Boolean,
+    onRequestedChange: (Boolean) -> Unit,
+) {
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.section_screenshot), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.screenshot_protection_switch))
+                Switch(checked = requested, onCheckedChange = onRequestedChange)
+            }
             Text(if (secure) stringResource(R.string.secure_enabled) else stringResource(R.string.secure_disabled), fontFamily = FontFamily.Monospace)
             Text(stringResource(R.string.screenshot_explanation), style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(onClick = onAdd) { Text(stringResource(R.string.add_secure)) }
-                FilledTonalButton(onClick = onClear) { Text(stringResource(R.string.clear_secure)) }
-            }
         }
     }
 }
@@ -428,8 +454,11 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putQuery(context, TestKey.AUDIO, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
 
     val packageManager = context.packageManager
-    this[TestKey.INSTALLED_PACKAGES] = runCatching {
-        packageManager.getInstalledPackages(0).toVisibilityResult(context) { it.packageName to it.applicationInfo }
+    val visiblePackages = runCatching {
+        packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
+    }
+    this[TestKey.INSTALLED_PACKAGES] = visiblePackages.mapCatching { packages ->
+        packages.toVisibilityResult(context) { it.packageName to it.applicationInfo }
     }.getOrElse { TestResult(it.userMessage()) }
     this[TestKey.INSTALLED_APPLICATIONS] = runCatching {
         packageManager.getInstalledApplications(0).toVisibilityResult(context) { it.packageName to it }
@@ -439,6 +468,9 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
         packageManager.queryIntentActivities(intent, 0).toVisibilityResult(context) {
             it.activityInfo.packageName to it.activityInfo.applicationInfo
         }
+    }.getOrElse { TestResult(it.userMessage()) }
+    this[TestKey.XPOSED_MODULES] = visiblePackages.mapCatching { packages ->
+        TestResult(context.getString(R.string.xposed_module_count, packages.count(PackageInfo::isXposedModule)))
     }.getOrElse { TestResult(it.userMessage()) }
     this[TestKey.DIRECT_GUISE_LOOKUP] = try {
         packageManager.getApplicationInfo(GUISE_PACKAGE, 0)
@@ -474,7 +506,30 @@ private fun <T> List<T>.toVisibilityResult(
 private fun ApplicationInfo.isSystemApp(): Boolean =
     flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
 
+private fun PackageInfo.isXposedModule(): Boolean {
+    val app = applicationInfo ?: return false
+    val metadata = app.metaData
+    if (metadata?.getBoolean("xposedmodule", false) == true ||
+        metadata?.containsKey("xposedminversion") == true ||
+        metadata?.containsKey("xposeddescription") == true
+    ) {
+        return true
+    }
+    val source = app.sourceDir?.takeIf(String::isNotBlank) ?: return false
+    return runCatching {
+        ZipFile(source).use { apk ->
+            XPOSED_APK_ENTRIES.any { apk.getEntry(it) != null }
+        }
+    }.getOrDefault(false)
+}
+
 private const val GUISE_PACKAGE = "com.houvven.guise"
+private val XPOSED_APK_ENTRIES = arrayOf(
+    "assets/xposed_init",
+    "META-INF/xposed/module.prop",
+    "META-INF/xposed/java_init.list",
+    "META-INF/xposed/native_init.list",
+)
 
 private fun MutableMap<TestKey, TestResult>.putQuery(context: Context, key: TestKey, uri: android.net.Uri) {
     this[key] = runCatching {

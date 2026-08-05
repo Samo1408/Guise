@@ -78,9 +78,8 @@
     <string name="cursor_count">cursor count = %1$d</string>
     <string name="secure_enabled">FLAG_SECURE = enabled</string>
     <string name="secure_disabled">FLAG_SECURE = disabled</string>
-    <string name="screenshot_explanation">“Disable screenshots” should make the flag enabled after launch. “Enable screenshots” should prevent or clear the flag. Also try taking a real screenshot.</string>
-    <string name="add_secure">Add flag</string>
-    <string name="clear_secure">Clear flag</string>
+    <string name="screenshot_protection_switch">Disallow screenshots</string>
+    <string name="screenshot_explanation">This switch is enabled by default. Without the hook, FLAG_SECURE should be enabled and screenshots should fail. With Guise’s “Allow forced screenshots”, the switch remains enabled while the actual flag is blocked or cleared and screenshots work. Turn it off when sharing results from other tests.</string>
     <string name="live_location">Live location callback</string>
     <string name="not_requested">Not requested</string>
     <string name="request_location">Request one GPS update</string>
@@ -89,6 +88,8 @@
     <string name="installed_applications">Installed applications</string>
     <string name="launcher_activities">Launcher activities</string>
     <string name="direct_guise_lookup">Direct Guise lookup</string>
+    <string name="xposed_modules">Visible Xposed modules</string>
+    <string name="xposed_module_count">Module count = %1$d</string>
     <string name="application_list_result">total = %1$d, system = %2$d, self = %3$d, other user apps = %4$d</string>
     <string name="package_visible">%1$s is visible</string>
     <string name="package_hidden">%1$s is hidden</string>

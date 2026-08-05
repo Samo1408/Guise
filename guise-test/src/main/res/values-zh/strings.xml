@@ -25,13 +25,15 @@
     <string name="locale_language">Locale 语言</string><string name="locale_country">Locale 国家/地区</string><string name="locale_tag">Locale 语言标签</string><string name="locale_text">Locale.toString()</string>
     <string name="contacts_query">联系人查询</string><string name="images_query">图片查询</string><string name="videos_query">视频查询</string><string name="audio_query">音频查询</string>
     <string name="null_cursor">null 游标</string><string name="cursor_count">游标数量 = %1$d</string><string name="secure_enabled">FLAG_SECURE = 已启用</string><string name="secure_disabled">FLAG_SECURE = 未启用</string>
-    <string name="screenshot_explanation">“禁止截图”应在启动后启用该标志；“允许截图”应阻止或清除该标志。还请实际尝试截屏。</string><string name="add_secure">添加标志</string><string name="clear_secure">清除标志</string>
+    <string name="screenshot_protection_switch">禁止截图</string><string name="screenshot_explanation">此开关默认开启。未 Hook 时，FLAG_SECURE 应为已启用且无法截图；开启 Guise“允许强制截图”后，开关仍保持开启，但实际标志会被阻止或清除，并且可以截图。调试其他项目并分享结果时可关闭此开关。</string>
     <string name="live_location">实时位置回调</string><string name="not_requested">尚未请求</string><string name="request_location">请求一次 GPS 更新</string>
     <string name="section_app_visibility">应用可见性</string>
     <string name="installed_packages">已安装软件包</string>
     <string name="installed_applications">已安装应用</string>
     <string name="launcher_activities">桌面应用查询</string>
     <string name="direct_guise_lookup">直接查询 Guise</string>
+    <string name="xposed_modules">可见 Xposed 模块</string>
+    <string name="xposed_module_count">模块数量 = %1$d</string>
     <string name="application_list_result">总数 = %1$d，系统应用 = %2$d，自身 = %3$d，其他用户应用 = %4$d</string>
     <string name="package_visible">可以看到 %1$s</string>
     <string name="package_hidden">已隐藏 %1$s</string>

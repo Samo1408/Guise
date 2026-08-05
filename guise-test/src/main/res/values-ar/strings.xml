@@ -24,13 +24,15 @@
     <string name="locale_language">لغة Locale</string><string name="locale_country">بلد Locale</string><string name="locale_tag">وسم لغة Locale</string><string name="locale_text">Locale.toString()</string>
     <string name="contacts_query">استعلام جهات الاتصال</string><string name="images_query">استعلام الصور</string><string name="videos_query">استعلام الفيديو</string><string name="audio_query">استعلام الصوت</string>
     <string name="null_cursor">مؤشر null</string><string name="cursor_count">عدد المؤشر = %1$d</string><string name="secure_enabled">FLAG_SECURE = مفعّل</string><string name="secure_disabled">FLAG_SECURE = معطّل</string>
-    <string name="screenshot_explanation">يفترض أن يفعّل «منع لقطات الشاشة» العلامة بعد التشغيل، وأن يمنعها أو يمحوها «السماح بلقطات الشاشة». جرّب أيضاً التقاط لقطة شاشة فعلية.</string><string name="add_secure">إضافة العلامة</string><string name="clear_secure">مسح العلامة</string>
+    <string name="screenshot_protection_switch">منع لقطات الشاشة</string><string name="screenshot_explanation">يكون هذا المفتاح مفعّلاً افتراضياً. من دون Hook يجب أن تكون FLAG_SECURE مفعّلة وأن تفشل لقطة الشاشة. مع تفعيل «السماح بلقطات الشاشة القسرية» في Guise يبقى المفتاح مفعّلاً بينما تُمنع العلامة الفعلية أو تُمسح وتنجح اللقطة. يمكن إيقافه عند مشاركة نتائج الاختبارات الأخرى.</string>
     <string name="live_location">رد الموقع المباشر</string><string name="not_requested">لم يُطلب</string><string name="request_location">طلب تحديث GPS واحد</string>
     <string name="section_app_visibility">إمكانية رؤية التطبيقات</string>
     <string name="installed_packages">الحزم المثبتة</string>
     <string name="installed_applications">التطبيقات المثبتة</string>
     <string name="launcher_activities">استعلام تطبيقات المشغّل</string>
     <string name="direct_guise_lookup">استعلام Guise مباشرة</string>
+    <string name="xposed_modules">وحدات Xposed المرئية</string>
+    <string name="xposed_module_count">عدد الوحدات = %1$d</string>
     <string name="application_list_result">الإجمالي = %1$d، النظام = %2$d، التطبيق نفسه = %3$d، تطبيقات مستخدم أخرى = %4$d</string>
     <string name="package_visible">%1$s ظاهر</string>
     <string name="package_hidden">%1$s مخفي</string>
