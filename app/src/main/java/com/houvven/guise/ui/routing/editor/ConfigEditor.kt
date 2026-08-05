@@ -114,8 +114,16 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
                 override val label: String = it.value
                 override val value: String = it.key
             }
-        }
+        },
+        setValue = { value ->
+            val previousBrand = state.brand.value
+            state.brand.value = value
+            if (state.manufacturer.value.isBlank() || state.manufacturer.value == previousBrand) {
+                state.manufacturer.value = value
+            }
+        },
     )
+    InputBox(state.manufacturer, stringResource(R.string.device_manufacturer))
     PresetInputBox(
         state = state.model,
         label = stringResource(R.string.device_model),
@@ -127,20 +135,26 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
                     else "${it.modelName!!} (${it.verName.removePrefix("#")})"
                     object : PresetAdapter {
                         override val label: String = "$name · ${it.model}"
-                        override val value: String = "${it.model!!}:${it.codeAlias ?: ""}"
+                        override val value: String =
+                            "${it.model!!}:${it.codeAlias?.takeIf(String::isNotBlank) ?: it.code.orEmpty()}"
                     }
                 }
         },
         showOperateIcon = allBrands.keys.any { it.equals(state.brand.value, ignoreCase = true) },
         setValue = { value ->
+            val previousDevice = state.device.value
             state.model.value = value.substringBefore(":")
             state.device.value = value.substringAfter(":", missingDelimiterValue = "")
+            if (state.product.value.isBlank() || state.product.value == previousDevice) {
+                state.product.value = state.device.value
+            }
         }
     )
     InputBox(state.device, stringResource(R.string.device_device))
     InputBox(state.product, stringResource(R.string.device_product))
     InputBox(state.board, stringResource(R.string.device_board))
     InputBox(state.hardware, stringResource(R.string.device_cpu))
+    InputBox(state.buildId, stringResource(R.string.device_build_id))
     PresetInputBox(
         state.androidVersion,
         stringResource(R.string.device_system_android_version),
@@ -166,7 +180,17 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
     RandomInputBox(
         state.fingerPrint,
         stringResource(R.string.device_system_finger_print),
-    ) { Randoms.randomFingerPrint() }
+    ) {
+        val generatedBuildId = Randoms.randomBuildId(state.androidVersion.value)
+        state.buildId.value = generatedBuildId
+        Randoms.randomFingerprint(
+            brand = state.brand.value,
+            product = state.product.value,
+            device = state.device.value,
+            androidVersion = state.androidVersion.value,
+            buildId = generatedBuildId,
+        )
+    }
 
 
     Title(text = stringResource(R.string.title_net_info))
@@ -206,7 +230,9 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         state.phoneNum,
         stringResource(R.string.id_phone_num)
     ) { Randoms.randomPhoneNum() }
-    RandomInputBox(state.androidId, stringResource(R.string.id_ssaid)) { Randoms.randomIMEI() }
+    RandomInputBox(state.androidId, stringResource(R.string.id_ssaid)) {
+        Randoms.randomAndroidId()
+    }
 
 
     Title(text = stringResource(R.string.title_cell_location))

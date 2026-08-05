@@ -41,6 +41,7 @@
     <string name="title_other">Other</string>
     <string name="title_blank_pass">Blank Pass</string>
     <string name="device_brand">Brand</string>
+    <string name="device_manufacturer">Manufacturer</string>
     <string name="device_model">Model</string>
     <string name="device_product">Product</string>
     <string name="device_device">Device Code</string>
@@ -52,6 +53,7 @@
     <string name="device_display_density_summary_with_dp">Higher values make elements larger · About %1$d dp for Developer options “Minimum width”</string>
     <string name="device_system_finger_print" translatable="false">FingerPrint</string>
     <string name="device_cpu">CPU Code</string>
+    <string name="device_build_id" translatable="false">Build ID</string>
     <string name="net_type">Internet Type</string>
     <string name="net_wifi_ssid">WiFi-SSID</string>
     <string name="net_wifi_bssid" translatable="false">WiFi-BSSID</string>

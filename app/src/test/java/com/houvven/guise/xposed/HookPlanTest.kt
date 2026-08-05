@@ -80,4 +80,16 @@ class HookPlanTest {
             ).activeHookFeatures(),
         )
     }
+
+    @Test
+    fun independentManufacturerAndBuildIdActivateDeviceSpoofing() {
+        assertEquals(
+            listOf(HookFeature.OS_BUILD),
+            ModuleConfig(manufacturer = "Xiaomi").activeHookFeatures(),
+        )
+        assertEquals(
+            listOf(HookFeature.OS_BUILD),
+            ModuleConfig(buildId = "AP3A.250101.001").activeHookFeatures(),
+        )
+    }
 }

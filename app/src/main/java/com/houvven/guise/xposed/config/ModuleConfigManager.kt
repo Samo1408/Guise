@@ -205,11 +205,13 @@ private constructor(
 
     private fun updateConfigFromState(target: ModuleConfig) = with(target) {
         brand = state.brand.value
+        manufacturer = state.manufacturer.value
         model = state.model.value
         product = state.product.value
         device = state.device.value
         board = state.board.value
         hardware = state.hardware.value
+        buildId = state.buildId.value
         androidVersion = state.androidVersion.value
         sdkInt = state.sdkInt.value.toIntOrNull() ?: -1
         densityDpi = state.densityDpi.value.toIntOrNull() ?: -1

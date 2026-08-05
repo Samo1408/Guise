@@ -36,6 +36,7 @@
     <string name="title_other">他の</string>
     <string name="title_blank_pass">ブランクパス</string>
     <string name="device_brand">ブランド</string>
+    <string name="device_manufacturer">メーカー</string>
     <string name="device_model">モデル</string>
     <string name="device_product">製品コード</string>
     <string name="device_device">デバイスコード</string>

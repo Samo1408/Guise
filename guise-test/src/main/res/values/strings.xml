@@ -34,6 +34,7 @@
     <string name="board">Board</string>
     <string name="hardware">Hardware</string>
     <string name="fingerprint">Build fingerprint</string>
+    <string name="build_id" translatable="false">Build ID</string>
     <string name="sdk">SDK level</string>
     <string name="release">Android release</string>
     <string name="base_os">Base OS</string>

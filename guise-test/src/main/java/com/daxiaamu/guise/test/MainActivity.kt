@@ -97,7 +97,8 @@ private enum class TestKey(@StringRes val label: Int) {
     PACKAGE_VERSION(R.string.package_manager_version),
     BRAND(R.string.brand), MANUFACTURER(R.string.manufacturer), MODEL(R.string.model),
     PRODUCT(R.string.product), DEVICE(R.string.device), BOARD(R.string.board),
-    HARDWARE(R.string.hardware), FINGERPRINT(R.string.fingerprint), SDK(R.string.sdk),
+    HARDWARE(R.string.hardware), FINGERPRINT(R.string.fingerprint), BUILD_ID(R.string.build_id),
+    SDK(R.string.sdk),
     RELEASE(R.string.release), BASE_OS(R.string.base_os), DISPLAY_DENSITY(R.string.display_density),
     ANDROID_ID_SECURE(R.string.android_id_secure),
     ANDROID_ID_SYSTEM(R.string.android_id_system), IMEI(R.string.imei),
@@ -124,7 +125,7 @@ private data class TestSection(@StringRes val title: Int, val keys: List<TestKey
 
 private val sections = listOf(
     TestSection(R.string.section_version, listOf(TestKey.PACKAGE_NAME, TestKey.COMPILED_VERSION, TestKey.PACKAGE_VERSION)),
-    TestSection(R.string.section_device, listOf(TestKey.BRAND, TestKey.MANUFACTURER, TestKey.MODEL, TestKey.PRODUCT, TestKey.DEVICE, TestKey.BOARD, TestKey.HARDWARE, TestKey.FINGERPRINT, TestKey.SDK, TestKey.RELEASE, TestKey.BASE_OS, TestKey.DISPLAY_DENSITY)),
+    TestSection(R.string.section_device, listOf(TestKey.BRAND, TestKey.MANUFACTURER, TestKey.MODEL, TestKey.PRODUCT, TestKey.DEVICE, TestKey.BOARD, TestKey.HARDWARE, TestKey.FINGERPRINT, TestKey.BUILD_ID, TestKey.SDK, TestKey.RELEASE, TestKey.BASE_OS, TestKey.DISPLAY_DENSITY)),
     TestSection(
         R.string.section_identifiers,
         listOf(
@@ -351,6 +352,7 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putSafe(TestKey.MODEL) { Build.MODEL }; putSafe(TestKey.PRODUCT) { Build.PRODUCT }
     putSafe(TestKey.DEVICE) { Build.DEVICE }; putSafe(TestKey.BOARD) { Build.BOARD }
     putSafe(TestKey.HARDWARE) { Build.HARDWARE }; putSafe(TestKey.FINGERPRINT) { Build.FINGERPRINT }
+    putSafe(TestKey.BUILD_ID) { Build.ID }
     putSafe(TestKey.SDK) { Build.VERSION.SDK_INT }; putSafe(TestKey.RELEASE) { Build.VERSION.RELEASE }
     putSafe(TestKey.BASE_OS) { Build.VERSION.BASE_OS }
     putSafe(TestKey.DISPLAY_DENSITY) {

@@ -6,11 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
 
     val brand = mutableStateOf(moduleConfig.brand)
+    val manufacturer = mutableStateOf(moduleConfig.manufacturer)
     val model = mutableStateOf(moduleConfig.model)
     val product = mutableStateOf(moduleConfig.product)
     val device = mutableStateOf(moduleConfig.device)
     val board = mutableStateOf(moduleConfig.board)
     val hardware = mutableStateOf(moduleConfig.hardware)
+    val buildId = mutableStateOf(moduleConfig.buildId)
     val androidVersion = mutableStateOf(moduleConfig.androidVersion)
     val sdkInt = mutableStateOf(moduleConfig.sdkInt.display(-1))
     val densityDpi = mutableStateOf(moduleConfig.densityDpi.display(-1))
@@ -60,7 +62,8 @@ class ModuleConfigState private constructor(moduleConfig: ModuleConfig) {
 
     private val stringStates: List<MutableState<String>>
         get() = listOf(
-            brand, model, product, device, board, hardware, androidVersion, sdkInt, densityDpi,
+            brand, manufacturer, model, product, device, board, hardware, buildId,
+            androidVersion, sdkInt, densityDpi,
             fingerPrint,
             networkType, wifiSSID, wifiBSSID, wifiMacAddress, simOperator, simOperatorName,
             simCountry, imei, phoneNum, androidId, lac, cid, longitude, latitude, versionCode,

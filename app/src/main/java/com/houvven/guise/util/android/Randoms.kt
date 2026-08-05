@@ -1,13 +1,16 @@
 package com.houvven.guise.util.android
 
-import android.graphics.Point
-import android.graphics.PointF
-import java.util.Random
 import java.util.UUID
-import kotlin.math.roundToInt
+import java.util.Locale
+import kotlin.math.round
+import kotlin.random.Random
 
 
 object Randoms {
+
+    private const val ALPHANUMERIC =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    private const val HEX = "0123456789abcdef"
 
     /**
      * 生成一个指定长度的随机字符串
@@ -15,41 +18,17 @@ object Randoms {
      * @return 随机字符串
      */
     fun randomString(length: Int): String {
-        val random = Random()
-        val sb = StringBuilder()
-        (0 until length).forEach { _ ->
-            val number = random.nextInt(3)
-            var result: Long = 0
-            when (number) {
-                0 -> result = (Math.random() * 25 + 65).roundToInt().toLong()
-                1 -> result = (Math.random() * 25 + 97).roundToInt().toLong()
-                2 -> result = (Math.random() * 9 + 48).roundToInt().toLong()
-            }
-            sb.append(result.toInt().toChar())
+        require(length >= 0)
+        return buildString(length) {
+            repeat(length) { append(ALPHANUMERIC.random()) }
         }
-        return sb.toString()
-    }
-
-    /**
-     * 生成一个指定长度的随机数字
-     * @param length 长度
-     * @return 随机数字
-     */
-    fun randomInt(length: Int): Int {
-        val random = Random()
-        val sb = StringBuilder()
-        (0 until length).forEach { _ ->
-            val number = random.nextInt(9)
-            sb.append(number)
-        }
-        return sb.toString().toInt()
     }
 
     /**
      * 生成一个随机长度的随机字符串 长度在[10, 100]内
      */
     fun randomString(): String {
-        return randomString(randomInt(2))
+        return randomString(Random.nextInt(10, 101))
     }
 
 
@@ -68,12 +47,10 @@ object Randoms {
      * 随机生成Mac地址
      */
     fun randomMacAddress(): String {
-        val mac = StringBuilder()
-        (0 until 6).forEach { _ ->
-            mac.append(randomString(2))
-            mac.append(":")
-        }
-        return mac.substring(0, mac.length - 1)
+        val octets = IntArray(6) { Random.nextInt(256) }
+        // Locally administered unicast address: valid for spoofing without claiming a vendor OUI.
+        octets[0] = (octets[0] or 0x02) and 0xFE
+        return octets.joinToString(":") { it.toString(16).padStart(2, '0') }
     }
 
 
@@ -81,49 +58,82 @@ object Randoms {
      * 随机生成IMEI
      */
     fun randomIMEI(): String {
-        val imei = StringBuilder()
-        (0 until 15).forEach { _ ->
-            imei.append(randomInt(1))
-        }
-        return imei.toString()
+        val body = randomDigits(14)
+        return body + imeiCheckDigit(body)
+    }
+
+    /** Android ID/SSAID is conventionally exposed as 16 lower-case hexadecimal characters. */
+    fun randomAndroidId(): String = buildString(16) {
+        repeat(16) { append(HEX.random()) }
     }
 
     fun randomPhoneNum(): String {
-        val phoneNum = StringBuilder()
-        phoneNum.append("1")
-        (0 until 10).forEach { _ ->
-            phoneNum.append(randomInt(1))
+        return "1${randomDigits(10)}"
+    }
+
+    fun randomBuildId(androidVersion: String = ""): String {
+        val major = androidVersion.substringBefore('.').toIntOrNull()
+        val (prefix, firstYear) = when (major) {
+            10 -> "QP1A" to 19
+            11 -> "RP1A" to 20
+            12 -> "SP1A" to 21
+            13 -> "TP1A" to 22
+            14 -> "UP1A" to 23
+            15 -> "AP3A" to 24
+            16 -> "BP2A" to 25
+            17 -> "CP1A" to 26
+            else -> "GU1A" to 24
         }
-        return phoneNum.toString()
+        return String.format(
+            Locale.ROOT,
+            "$prefix.%02d%02d%02d.%03d",
+            Random.nextInt(firstYear, firstYear + 2),
+            Random.nextInt(1, 13),
+            Random.nextInt(1, 29),
+            Random.nextInt(1_000),
+        )
     }
 
-    fun randomFingerPrint(): String {
-        val random = Random()
-        val fingerprint = StringBuilder()
-        fingerprint.append(randomString(5))
-        fingerprint.append("/")
-        fingerprint.append(randomString(6))
-        fingerprint.append("/")
-        fingerprint.append(randomString(4))
-        fingerprint.append(":")
-        fingerprint.append(randomInt(1))
-        fingerprint.append("/")
-        fingerprint.append(randomString(4))
-        fingerprint.append("/")
-        fingerprint.append(randomString(4))
-        fingerprint.append(":")
-        fingerprint.append("user/release-keys")
-        return fingerprint.toString()
+    fun randomFingerprint(
+        brand: String,
+        product: String,
+        device: String,
+        androidVersion: String,
+        buildId: String,
+    ): String {
+        val safeBrand = brand.fingerprintPart("generic")
+        val safeDevice = device.fingerprintPart("device")
+        val safeProduct = product.fingerprintPart(safeDevice)
+        val safeRelease = androidVersion.fingerprintPart("16")
+        val safeBuildId = buildId.fingerprintPart(randomBuildId(androidVersion))
+        return "$safeBrand/$safeProduct/$safeDevice:$safeRelease/$safeBuildId/" +
+            "${randomDigits(7)}:user/release-keys"
     }
 
-    fun randomBatteryLevel(): Int = Random().nextInt(101)
+    fun randomBatteryLevel(): Int = Random.nextInt(101)
 
-
-    fun randomLatLac(): PointF {
-        val random = Random()
-        val lat = random.nextInt(120) + random.nextFloat()
-        val lac = random.nextInt(30) + random.nextFloat()
-        return PointF(lat, lac)
+    fun randomCoordinates(): Pair<Double, Double> {
+        val latitude = round(Random.nextDouble(-90.0, 90.0) * 1_000_000) / 1_000_000
+        val longitude = round(Random.nextDouble(-180.0, 180.0) * 1_000_000) / 1_000_000
+        return latitude to longitude
     }
+
+    private fun randomDigits(length: Int): String = buildString(length) {
+        repeat(length) { append(Random.nextInt(10)) }
+    }
+
+    private fun imeiCheckDigit(body: String): Int {
+        require(body.length == 14 && body.all(Char::isDigit))
+        val sum = body.mapIndexed { index, char ->
+            val digit = char.digitToInt()
+            if (index % 2 == 1) (digit * 2).let { if (it > 9) it - 9 else it } else digit
+        }.sum()
+        return (10 - sum % 10) % 10
+    }
+
+    private fun String.fingerprintPart(fallback: String): String =
+        trim().takeIf(String::isNotEmpty)
+            ?.replace(Regex("[\\s/:]+"), "_")
+            ?: fallback
 
 }

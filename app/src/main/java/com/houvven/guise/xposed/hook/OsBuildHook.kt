@@ -9,12 +9,14 @@ class OsBuildHook : LoadPackageHandler {
     override fun onHook() {
         config.run {
             mapOf(
-                arrayOf("BRAND", "MANUFACTURER") to brand,
+                arrayOf("BRAND") to brand,
+                arrayOf("MANUFACTURER") to manufacturer.ifBlank { brand },
                 arrayOf("MODEL") to model,
                 arrayOf("PRODUCT") to product,
                 arrayOf("DEVICE") to device,
                 arrayOf("BOARD") to board,
                 arrayOf("HARDWARE") to hardware,
+                arrayOf("ID") to buildId,
                 arrayOf("FINGERPRINT") to fingerPrint,
             ).forEach { (fields, value) ->
                 if (value.isNotBlank()) fields.forEach { field ->

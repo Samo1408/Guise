@@ -255,7 +255,9 @@ fun DeployConfigEditScreen(
                             stringResource(R.string.one_click_random),
                             onClick = {
                                 expanded = false
-                                oneClickRandom(moduleConfigManager.state, context)
+                                coroutineScope.launch {
+                                    oneClickRandom(moduleConfigManager.state, context)
+                                }
                             }
                         )
                         SimplifyDropdownMenuItem(

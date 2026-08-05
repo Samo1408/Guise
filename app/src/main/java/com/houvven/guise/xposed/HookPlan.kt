@@ -51,11 +51,13 @@ internal fun ModuleConfig.activeHookFeatures(): List<HookFeature> = buildList {
     }
     if (
         brand.isNotBlank() ||
+        manufacturer.isNotBlank() ||
         model.isNotBlank() ||
         product.isNotBlank() ||
         device.isNotBlank() ||
         board.isNotBlank() ||
         hardware.isNotBlank() ||
+        buildId.isNotBlank() ||
         fingerPrint.isNotBlank() ||
         androidVersion.isNotBlank() ||
         sdkInt != -1

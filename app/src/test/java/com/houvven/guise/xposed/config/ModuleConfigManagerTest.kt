@@ -15,6 +15,8 @@ class ModuleConfigManagerTest {
         assertFalse(manager.hasUnsavedChanges())
 
         manager.state.timeZone.value = "Asia/Calcutta"
+        manager.state.manufacturer.value = "Xiaomi"
+        manager.state.buildId.value = "AP3A.250101.001"
         manager.state.densityDpi.value = "480"
         manager.state.longitude.value = "116.4074"
         manager.state.randomOffset.value = true
@@ -25,6 +27,8 @@ class ModuleConfigManagerTest {
         manager.updateConfigFromState()
 
         assertEquals("Asia/Calcutta", config.timeZone)
+        assertEquals("Xiaomi", config.manufacturer)
+        assertEquals("AP3A.250101.001", config.buildId)
         assertEquals(480, config.densityDpi)
         assertEquals(116.4074, config.longitude, 0.0)
         assertTrue(config.randomOffset)
