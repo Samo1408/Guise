@@ -12,13 +12,23 @@ android {
         applicationId = namespace
         minSdk = 29
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
 
     buildTypes {
         debug {
             isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            setProguardFiles(
+                listOf(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+            )
+        }
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             setProguardFiles(
