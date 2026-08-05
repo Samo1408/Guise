@@ -1,23 +1,23 @@
 {
-  "versionCode": 19,
-  "versionName": "2.0.0-beta.5",
+  "versionCode": 20,
+  "versionName": "2.0.0-beta.6",
   "prerelease": true,
-  "title": "Guise Reborn 2.0.0-beta.5",
-  "notes": "Guise Reborn 2.0.0-beta.5 重点改进了预测性返回、运行日志、模板应用列表与强制截图。\n\n## 日志系统\n\n- 重构运行日志模块，不迁移旧版日志数据。\n- 修复 Hook 已生效但日志页为空的问题：目标进程不再尝试写入只读的 Xposed Remote Preferences，改为向 Guise 显式批量投递，并由 Room 归档。\n- 日志接收端校验发送 UID，兼容目标应用的包可见性限制，同时防止其他应用伪造记录。\n- Hook 分类名不再受 R8 混淆影响，保持 `BuildConfig`、`ApplicationList`、`BlankPass` 等稳定可读名称。\n- “调试/信息/错误”改为独立级别徽标；普通日志不再显示无效展开按钮，仅存在异常堆栈时提供“查看异常详情”。\n\n## 强制截图\n\n- 修复应用将 `FLAG_SECURE` 与其他窗口标志组合设置时未被清除的问题。\n- 补充 `setFlags`、`addFlags`、`setAttributes` 以及 `WindowManager` 直接更新路径，并在 Activity 生命周期内清理已存在的安全窗口标志。\n- 继续只 Hook 用户勾选的目标应用，不引入系统框架作用域，也不改写安全 Surface，避免破坏 DRM 播放。\n- 界面补充简洁说明：受 DRM 保护的内容仍可能无法截图。\n\n## 交互与模板\n\n- 统一各页预测性返回的前景、背景、遮罩、视差与缩放层级。\n- 修复模板选择应用后关联未可靠保存、再次进入时应用显示为未选中的问题。\n- 修复模板应用选择页下拉刷新后不显示新安装应用的问题。\n\n## 更新与发布\n\n- 正式版仅检测正式更新；Pre-release 可同时检测后续 Pre-release 和正式版。\n- 继续通过 GitHub Actions 生成带 SHA-256 校验和多 CDN 候选的 `latest-prerelease.json`。\n- 新增 Release 附件下载量自动统计，不区分正式版和 Pre-release。\n\n## 兼容性与验证\n\n- 最低 Android 10 / API 29，目标 Android 17 / API 37。\n- 仅提供 `arm64-v8a` APK，支持 Modern Xposed API 102。\n- Release 启用 R8、资源收缩、Baseline Profile 和 Xposed 入口校验。\n- 已在 Android 真机验证日志投递、模板刷新和强制截图；微信付款页的标准 `FLAG_SECURE` 路径可正常处理。\n\n## 文件校验\n\n- `Guise-2.0.0-beta.5.apk`\n- SHA-256：`C89B234EEE81DBD3E6A825FEA138DC2CA9990892DEF17EB86D57A957F14C73FC`\n- 正式签名证书 SHA-256：`A3278D7A7A11754FE8D8042A0E2666CAEF60505DBD97DB7A1127B88BB622C7F9`\n\n> 这是 Pre-release，仅进入预发布更新通道，正式版用户不会检测到本版本。",
-  "releaseUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/tag/v2.0.0-beta.5",
+  "title": "Guise Reborn 2.0.0-beta.6",
+  "notes": "Guise Reborn 2.0.0-beta.6 重点改进了目标进程运行痕迹、设备身份一致性、随机数据质量和模板应用选择体验。\n\n## 设备身份与随机数据\n\n- 新增独立的“制造商”和“Build ID”配置，`Build.BRAND` 与 `Build.MANUFACTURER` 不再被视为同一字段。\n- 一键随机现在会成组生成品牌、制造商、型号、设备/产品代号、Android 版本、SDK、Build ID 与 Fingerprint，减少互相矛盾的设备信息。\n- Fingerprint 单独随机时会同步生成相应 Build ID。\n- 修复随机 Android ID 误用 IMEI 格式、MAC 地址可能含非十六进制字符、IMEI 缺少有效校验位以及纬度可能越界的问题。\n- 随机 Android ID 使用 16 位十六进制，MAC 使用合法的本地管理单播地址，IMEI 带 Luhn 校验位。\n\n## Hook 与兼容性\n\n- 按实际配置编译最小 Hook 计划，未启用的功能不再初始化对应 Hook 组。\n- 进一步缩小设备、版本、唯一标识、显示密度和窗口标志等方法的拦截签名范围。\n- 日志改为按需获取目标应用 Context；关闭详细日志且没有事件时不再安装额外生命周期 Hook。\n- 语言和时区改为设置目标进程默认值，不再持续改写每个 Locale/TimeZone 实例。\n- 坐标伪装只改写目标应用读取的经纬度和最近位置，不再伪造 GNSS、NMEA 或额外触发定位监听器。\n- Wi-Fi/基站定位失效逻辑不再顺带关闭 Wi-Fi、改写无关标识或屏蔽无关定位提供器。\n- Release 只保留 Modern Xposed 必需入口；内部 Hook、配置和辅助类型继续由 R8 混淆，并增加构建期入口校验。\n\n## 模板与界面\n\n- 模板应用选择页加入搜索、系统应用和包名搜索菜单选项。\n- 应用改为根据屏幕宽度自适应多列展示，兼顾手机、折叠屏和平板；卡片内容和底部留白进一步压缩。\n- README 重新融合整理外观交互、底层重构、兼容性变化、Hook 改进、数据规模和发布链路。\n\n## 性能与数据兼容\n\n- 一键随机的设备库和运营商数据读取移到 IO 协程，避免阻塞配置界面。\n- 新增字段与旧配置兼容；旧配置没有制造商时继续回退到原有品牌值。\n- 新增字段共用设备构建 Hook 组，不增加常驻 Hook。\n\n## 验证\n\n- 18 个单元测试全部通过。\n- Release/R8、资源收缩、Lint 和混淆后 Xposed 入口校验通过。\n- 正式签名构建已在 Android 真机安装、启动并核对新增配置布局。\n- 最低 Android 10 / API 29，目标 Android 17 / API 37，仅提供 `arm64-v8a`。\n\n## 文件校验\n\n- `Guise-2.0.0-beta.6.apk`\n- SHA-256：`70CC4EEBF66632956F01F04AD64BF5239DBC9F88AA0382E0B05D6C46DC1FB33D`\n- 正式签名证书 SHA-256：`A3278D7A7A11754FE8D8042A0E2666CAEF60505DBD97DB7A1127B88BB622C7F9`\n\n> 这是 Pre-release，仅进入预发布更新通道；正式版用户不会检测到本版本。",
+  "releaseUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/tag/v2.0.0-beta.6",
   "apkUrls": [
-    "https://gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://ghfast.top/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://ghproxy.net/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk?sha=c89b234eee81dbd3e6a825fea138dc2ca9990892def17eb86d57a957f14c73fc",
-    "https://gh.jasonzeng.dev/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://gh.3w.pm/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://v6.gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://v6.gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://xget.xi-xu.me/gh/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-    "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk"
+    "https://gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://ghfast.top/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://ghproxy.net/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk?sha=70cc4eebf66632956f01f04ad64bf5239dbc9f88aa0382e0b05d6c46dc1fb33d",
+    "https://gh.jasonzeng.dev/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://gh.3w.pm/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://v6.gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://v6.gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://gh-proxy.org/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://xget.xi-xu.me/gh/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+    "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk"
   ],
-  "apkUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.5/Guise-2.0.0-beta.5.apk",
-  "apkSha256": "c89b234eee81dbd3e6a825fea138dc2ca9990892def17eb86d57a957f14c73fc"
+  "apkUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.6/Guise-2.0.0-beta.6.apk",
+  "apkSha256": "70cc4eebf66632956f01f04ad64bf5239dbc9f88aa0382e0b05d6c46dc1fb33d"
 }
