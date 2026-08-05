@@ -188,37 +188,57 @@ class ApplicationListPass : LoadPackageHandler {
 
         private val LIST_METHODS = setOf(
             "getInstalledApplications",
+            "getInstalledApplicationsAsUser",
             "getInstalledPackages",
+            "getInstalledPackagesAsUser",
             "getPackagesHoldingPermissions",
             "queryBroadcastReceivers",
+            "queryBroadcastReceiversAsUser",
             "queryContentProviders",
             "queryIntentActivities",
+            "queryIntentActivitiesAsUser",
             "queryIntentActivityOptions",
             "queryIntentContentProviders",
+            "queryIntentContentProvidersAsUser",
             "queryIntentServices",
+            "queryIntentServicesAsUser",
         )
 
         private val PACKAGE_NAME_ARRAY_METHODS = setOf("getPackagesForUid")
 
         private val INFO_METHODS = setOf(
             "getActivityInfo",
+            "getActivityInfoAsUser",
             "getApplicationInfo",
+            "getApplicationInfoAsUser",
             "getPackageInfo",
+            "getPackageInfoAsUser",
             "getProviderInfo",
+            "getProviderInfoAsUser",
             "getReceiverInfo",
+            "getReceiverInfoAsUser",
             "getServiceInfo",
+            "getServiceInfoAsUser",
             "resolveActivity",
+            "resolveActivityAsUser",
             "resolveContentProvider",
             "resolveService",
+            "resolveServiceAsUser",
         )
 
         private val NAME_NOT_FOUND_METHODS = setOf(
             "getActivityInfo",
+            "getActivityInfoAsUser",
             "getApplicationInfo",
+            "getApplicationInfoAsUser",
             "getPackageInfo",
+            "getPackageInfoAsUser",
             "getProviderInfo",
+            "getProviderInfoAsUser",
             "getReceiverInfo",
+            "getReceiverInfoAsUser",
             "getServiceInfo",
+            "getServiceInfoAsUser",
         )
     }
 }
