@@ -13,6 +13,10 @@
     <string name="permissions_explanation">電話、位置情報、連絡先、付近のデバイス、メディアの権限は、テスト対象の Android API を呼び出すためだけに使用します。拒否または非対応の場合は、クラッシュせずエラーを表示します。</string>
     <string name="grant_permissions">テスト権限を許可</string><string name="permission_required">位置情報の権限が必要です</string><string name="waiting">位置情報の更新を待機中…</string>
     <string name="not_available">利用不可</string><string name="null_value">null</string>
+    <string name="empty_string_value">空文字列</string>
+    <string name="phone_permission_not_granted">電話の権限が許可されていません</string>
+    <string name="imei_access_restricted">Android %1$s はこのアプリによる IMEI の取得を制限しています</string>
+    <string name="phone_number_unavailable">システムまたは SIM から電話番号が提供されていません</string>
     <string name="section_version">アプリのバージョン</string><string name="section_device">デバイスとシステム</string><string name="section_identifiers">固有識別子</string>
     <string name="section_network">ネットワークと Wi-Fi</string><string name="section_sim">SIM と基地局</string><string name="section_location">位置情報</string><string name="section_battery">バッテリー</string><string name="section_locale">言語と地域</string><string name="section_blank_pass">空データ化</string><string name="section_screenshot">スクリーンショットフラグ</string>
     <string name="package_name">パッケージ名</string><string name="compiled_version">コンパイル時の BuildConfig バージョン</string><string name="package_manager_version">PackageManager バージョン</string>

@@ -361,7 +361,7 @@ private fun dangerousPermissions(): Array<String> = buildList {
 
 private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMap {
     fun putSafe(key: TestKey, block: () -> Any?) {
-        put(key, runCatching { TestResult(block()?.toString() ?: context.getString(R.string.null_value)) }
+        put(key, runCatching { TestResult(block().toDisplayValue(context)) }
             .getOrElse { TestResult(it.userMessage()) })
     }
     putSafe(TestKey.PACKAGE_NAME) { context.packageName }
@@ -390,9 +390,9 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     putSafe(TestKey.ANDROID_ID_SYSTEM) { Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID) }
 
     val telephony = context.getSystemService(TelephonyManager::class.java)
-    putSafe(TestKey.IMEI) { telephony.getImei(0) }
-    putSafe(TestKey.IMEI_SLOT_1) { telephony.getImei(1) }
-    putSafe(TestKey.PHONE_NUMBER) { telephony.line1Number }
+    this[TestKey.IMEI] = readImei(context, telephony, 0)
+    this[TestKey.IMEI_SLOT_1] = readImei(context, telephony, 1)
+    this[TestKey.PHONE_NUMBER] = readPhoneNumber(context, telephony)
 
     val connectivity = context.getSystemService(ConnectivityManager::class.java)
     putSafe(TestKey.NETWORK_LEGACY) { connectivity.activeNetworkInfo?.let { "${it.typeName} (${it.type}), subtype=${it.subtypeName}" } }
@@ -469,6 +469,40 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     this[TestKey.XPOSED_MODULES] = visiblePackages.mapCatching { packages ->
         TestResult(context.getString(R.string.xposed_module_count, packages.count(PackageInfo::isXposedModule)))
     }.getOrElse { TestResult(it.userMessage()) }
+}
+
+private fun readImei(context: Context, telephony: TelephonyManager, slotIndex: Int): TestResult {
+    if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        return TestResult(context.getString(R.string.phone_permission_not_granted))
+    }
+    return try {
+        TestResult(telephony.getImei(slotIndex).toDisplayValue(context))
+    } catch (_: SecurityException) {
+        TestResult(context.getString(R.string.imei_access_restricted, Build.VERSION.RELEASE))
+    }
+}
+
+private fun readPhoneNumber(context: Context, telephony: TelephonyManager): TestResult {
+    val canReadPhoneNumber =
+        context.checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
+    if (!canReadPhoneNumber) {
+        return TestResult(context.getString(R.string.phone_permission_not_granted))
+    }
+    return try {
+        val number = telephony.line1Number
+        TestResult(
+            if (number.isNullOrEmpty()) context.getString(R.string.phone_number_unavailable) else number,
+        )
+    } catch (_: SecurityException) {
+        TestResult(context.getString(R.string.phone_permission_not_granted))
+    }
+}
+
+private fun Any?.toDisplayValue(context: Context): String = when (this) {
+    null -> context.getString(R.string.null_value)
+    is String -> if (isEmpty()) context.getString(R.string.empty_string_value) else this
+    else -> toString()
 }
 
 private fun <T> List<T>.toVisibilityResult(

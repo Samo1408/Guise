@@ -13,6 +13,10 @@
     <string name="permissions_explanation">تُستخدم أذونات الهاتف والموقع وجهات الاتصال والأجهزة القريبة والوسائط فقط لاستدعاء واجهات Android قيد الاختبار. يُعرض الخطأ بدلاً من التعطل عند الرفض أو عدم الدعم.</string>
     <string name="grant_permissions">منح أذونات الاختبار</string><string name="permission_required">إذن الموقع مطلوب</string><string name="waiting">بانتظار تحديث الموقع…</string>
     <string name="not_available">غير متاح</string><string name="null_value">null</string>
+    <string name="empty_string_value">سلسلة فارغة</string>
+    <string name="phone_permission_not_granted">لم يتم منح إذن الهاتف</string>
+    <string name="imei_access_restricted">يقيّد Android %1$s وصول هذا التطبيق إلى IMEI</string>
+    <string name="phone_number_unavailable">لم يوفر النظام أو شريحة SIM رقم هاتف</string>
     <string name="section_version">إصدار التطبيق</string><string name="section_device">الجهاز والنظام</string><string name="section_identifiers">المعرّفات الفريدة</string>
     <string name="section_network">الشبكة وWi-Fi</string><string name="section_sim">SIM والخلية</string><string name="section_location">الموقع</string><string name="section_battery">البطارية</string><string name="section_locale">اللغة والمنطقة</string><string name="section_blank_pass">تمرير فارغ</string><string name="section_screenshot">علامة لقطة الشاشة</string>
     <string name="package_name">اسم الحزمة</string><string name="compiled_version">إصدار BuildConfig وقت البناء</string><string name="package_manager_version">إصدار PackageManager</string>

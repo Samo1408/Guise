@@ -12,6 +12,10 @@
     <string name="waiting">Waiting for a location update…</string>
     <string name="not_available">Not available</string>
     <string name="null_value">null</string>
+    <string name="empty_string_value">Empty string</string>
+    <string name="phone_permission_not_granted">Phone permission is not granted</string>
+    <string name="imei_access_restricted">Android %1$s restricts this app from accessing IMEI</string>
+    <string name="phone_number_unavailable">The system or SIM did not provide a phone number</string>
     <string name="section_version">App version</string>
     <string name="section_device">Device and system</string>
     <string name="section_identifiers">Unique identifiers</string>
