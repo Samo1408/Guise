@@ -3,13 +3,13 @@
   "versionName": "2.0.0-beta.7",
   "prerelease": true,
   "title": "Guise 2.0.0-beta.7",
-  "notes": "## Guise 2.0.0-beta.7\n\n### 应用列表空白通行证\n\n- 补充 Android 新版 PackageManager 的 `…AsUser` 查询入口过滤。\n- 保持目标应用进程内 Hook，不引入系统框架 Hook。\n- 真机验证已安装包、桌面应用查询和直接包名查询：仅保留系统应用与目标应用自身，其他用户应用及 Guise 均不可见。\n\n### 配套测试\n\n- 配合 Guise Test 1.2.1，可显示可见 Xposed 模块数量，并通过默认开启的“禁止截图”开关验证强制截图 Hook。\n\n> 本版本为预发布版本。",
+  "notes": "## Guise 2.0.0-beta.7\n\n### 更新安装\n\n- 修复检测到新版本后复用旧版本下载缓存，导致“安装”按钮再次安装当前旧版本的问题。\n- 已下载 APK 现在与目标 `versionCode` 和 SHA-256 绑定；旧缓存与当前更新不一致时会自动重新下载。\n- 安装前额外解析 APK 本体并核对包名、实际版本号和 SHA-256，避免 CDN 缓存或下载记录串版。\n\n### 伪装接口一致性\n\n- 补齐 IMEI 卡槽接口，以及 `TelephonyManager`、`SubscriptionManager`、`SubscriptionInfo` 的手机号码读取入口。\n- 补齐传统及现代网络类型、数据/语音网络制式、“无网络”状态和 5G NR TAC/NCI。\n- 统一电量广播的百分比与量程，并增强 SIM 运营商代码校验。\n- 应用列表空白通行证补充 `LauncherApps` 查询面过滤。\n\n### 应用列表空白通行证\n\n- 补充 Android 新版 PackageManager 的 `…AsUser` 查询入口过滤。\n- 保持目标应用进程内 Hook，不引入系统框架 Hook。\n- 真机验证已安装包、桌面应用查询和直接包名查询：仅保留系统应用与目标应用自身，其他用户应用及 Guise 均不可见。\n\n### 配套测试\n\n- Guise Test 改为实际调用 IMEI 和手机号码 API 后展示系统返回值或异常，可直接验证 Guise 的短路结果。\n- 配合 Guise Test 1.2.1，可显示可见 Xposed 模块数量，并通过默认开启的“禁止截图”开关验证强制截图 Hook。\n\n> 本版本为预发布版本。",
   "releaseUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/tag/v2.0.0-beta.7",
   "apkUrls": [
     "https://gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
     "https://ghfast.top/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
     "https://ghproxy.net/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
-    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk?sha=76b1c1056e149f29547d6bc242d43ec8c8e0c01005e9b43462953f9019d8161c",
+    "https://ghproxy.vip/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk?sha=9a0391bfb079e1a28ec15f0a43f9f2a0bed1efd9a6e0271fba58510b8ac45348",
     "https://gh.jasonzeng.dev/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
     "https://gh.3w.pm/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
     "https://v6.gh-proxy.com/https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
@@ -19,5 +19,5 @@
     "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk"
   ],
   "apkUrl": "https://github.com/daxiaamu/Guise_Reborn/releases/download/v2.0.0-beta.7/Guise-2.0.0-beta.7.apk",
-  "apkSha256": "76b1c1056e149f29547d6bc242d43ec8c8e0c01005e9b43462953f9019d8161c"
+  "apkSha256": "9a0391bfb079e1a28ec15f0a43f9f2a0bed1efd9a6e0271fba58510b8ac45348"
 }
