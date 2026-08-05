@@ -30,10 +30,7 @@
     <string name="installed_packages">インストール済みパッケージ</string>
     <string name="installed_applications">インストール済みアプリ</string>
     <string name="launcher_activities">ランチャーアプリの検索</string>
-    <string name="direct_guise_lookup">Guise の直接検索</string>
     <string name="xposed_modules">表示可能な Xposed モジュール</string>
     <string name="xposed_module_count">モジュール数 = %1$d</string>
     <string name="application_list_result">合計 = %1$d、システム = %2$d、自身 = %3$d、その他のユーザーアプリ = %4$d</string>
-    <string name="package_visible">%1$s は表示されています</string>
-    <string name="package_hidden">%1$s は非表示です</string>
 </resources>

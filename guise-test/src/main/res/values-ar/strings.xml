@@ -30,10 +30,7 @@
     <string name="installed_packages">الحزم المثبتة</string>
     <string name="installed_applications">التطبيقات المثبتة</string>
     <string name="launcher_activities">استعلام تطبيقات المشغّل</string>
-    <string name="direct_guise_lookup">استعلام Guise مباشرة</string>
     <string name="xposed_modules">وحدات Xposed المرئية</string>
     <string name="xposed_module_count">عدد الوحدات = %1$d</string>
     <string name="application_list_result">الإجمالي = %1$d، النظام = %2$d، التطبيق نفسه = %3$d، تطبيقات مستخدم أخرى = %4$d</string>
-    <string name="package_visible">%1$s ظاهر</string>
-    <string name="package_hidden">%1$s مخفي</string>
 </resources>

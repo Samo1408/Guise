@@ -119,8 +119,7 @@ private enum class TestKey(@StringRes val label: Int) {
     CONTACTS(R.string.contacts_query), IMAGES(R.string.images_query), VIDEOS(R.string.videos_query),
     AUDIO(R.string.audio_query), INSTALLED_PACKAGES(R.string.installed_packages),
     INSTALLED_APPLICATIONS(R.string.installed_applications),
-    LAUNCHER_ACTIVITIES(R.string.launcher_activities), XPOSED_MODULES(R.string.xposed_modules),
-    DIRECT_GUISE_LOOKUP(R.string.direct_guise_lookup)
+    LAUNCHER_ACTIVITIES(R.string.launcher_activities), XPOSED_MODULES(R.string.xposed_modules)
 }
 
 private data class TestResult(val value: String)
@@ -163,7 +162,6 @@ private val sections = listOf(
             TestKey.INSTALLED_APPLICATIONS,
             TestKey.LAUNCHER_ACTIVITIES,
             TestKey.XPOSED_MODULES,
-            TestKey.DIRECT_GUISE_LOOKUP,
         ),
     ),
 )
@@ -471,14 +469,6 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     this[TestKey.XPOSED_MODULES] = visiblePackages.mapCatching { packages ->
         TestResult(context.getString(R.string.xposed_module_count, packages.count(PackageInfo::isXposedModule)))
     }.getOrElse { TestResult(it.userMessage()) }
-    this[TestKey.DIRECT_GUISE_LOOKUP] = try {
-        packageManager.getApplicationInfo(GUISE_PACKAGE, 0)
-        TestResult(context.getString(R.string.package_visible, GUISE_PACKAGE))
-    } catch (_: PackageManager.NameNotFoundException) {
-        TestResult(context.getString(R.string.package_hidden, GUISE_PACKAGE))
-    } catch (error: Throwable) {
-        TestResult(error.userMessage())
-    }
 }
 
 private fun <T> List<T>.toVisibilityResult(
@@ -519,7 +509,6 @@ private fun PackageInfo.isXposedModule(): Boolean {
     }.getOrDefault(false)
 }
 
-private const val GUISE_PACKAGE = "com.houvven.guise"
 private val XPOSED_APK_ENTRIES = arrayOf(
     "assets/xposed_init",
     "META-INF/xposed/module.prop",

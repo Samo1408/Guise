@@ -31,10 +31,7 @@
     <string name="installed_packages">已安装软件包</string>
     <string name="installed_applications">已安装应用</string>
     <string name="launcher_activities">桌面应用查询</string>
-    <string name="direct_guise_lookup">直接查询 Guise</string>
     <string name="xposed_modules">可见 Xposed 模块</string>
     <string name="xposed_module_count">模块数量 = %1$d</string>
     <string name="application_list_result">总数 = %1$d，系统应用 = %2$d，自身 = %3$d，其他用户应用 = %4$d</string>
-    <string name="package_visible">可以看到 %1$s</string>
-    <string name="package_hidden">已隐藏 %1$s</string>
 </resources>
