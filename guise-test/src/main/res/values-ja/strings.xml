@@ -5,14 +5,14 @@
     <string name="time_zone_java_time">タイムゾーン（java.time）</string>
     <string name="time_zone_icu">タイムゾーン（Android ICU）</string>
     <string name="app_name">Guise テスト</string>
-    <string name="app_description">Guise の偽装効果が有効かを確認するための「ターゲットアプリ」です。</string>
+    <string name="app_description">Android API が実際に返す値を表示する「ターゲットアプリ」です。</string>
     <string name="refresh">更新</string>
     <string name="test_instructions_title">テスト方法</string>
     <string name="test_instructions">このアプリ（com.daxiaamu.guise.test）を Guise に追加し、判別しやすい偽装値を設定してスコープを同期します。その後、アプリを強制停止して再度開き、以下の値を Guise の設定と比較してください。</string>
     <string name="hook_toast_hint">「Hook 成功通知」が有効な場合、コールドスタート時に Guise のトーストも表示されます。</string>
     <string name="permissions_explanation">電話、位置情報、連絡先、付近のデバイス、メディアの権限は、テスト対象の Android API を呼び出すためだけに使用します。拒否または非対応の場合は、クラッシュせずエラーを表示します。</string>
     <string name="grant_permissions">テスト権限を許可</string><string name="permission_required">位置情報の権限が必要です</string><string name="waiting">位置情報の更新を待機中…</string>
-    <string name="not_available">利用不可</string><string name="null_value">null</string><string name="hook_detected">Guise Hook の効果を検出しました</string>
+    <string name="not_available">利用不可</string><string name="null_value">null</string>
     <string name="section_version">アプリのバージョン</string><string name="section_device">デバイスとシステム</string><string name="section_identifiers">固有識別子</string>
     <string name="section_network">ネットワークと Wi-Fi</string><string name="section_sim">SIM と基地局</string><string name="section_location">位置情報</string><string name="section_battery">バッテリー</string><string name="section_locale">言語と地域</string><string name="section_blank_pass">空データ化</string><string name="section_screenshot">スクリーンショットフラグ</string>
     <string name="package_name">パッケージ名</string><string name="compiled_version">コンパイル時の BuildConfig バージョン</string><string name="package_manager_version">PackageManager バージョン</string>

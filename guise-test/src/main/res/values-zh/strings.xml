@@ -5,14 +5,14 @@
     <string name="time_zone_java_time">时区（java.time）</string>
     <string name="time_zone_icu">时区（Android ICU）</string>
     <string name="app_name">Guise 测试</string>
-    <string name="app_description">用于检测 Guise 伪装效果是否生效的“靶应用”。</string>
+    <string name="app_description">用于展示 Android API 实际返回值的“靶应用”。</string>
     <string name="refresh">刷新</string>
     <string name="test_instructions_title">测试方法</string>
     <string name="test_instructions">将本应用（com.daxiaamu.guise.test）加入 Guise，配置容易识别的伪装值并同步作用域，然后强行停止并重新打开本应用。请将下列结果与 Guise 配置对照。</string>
     <string name="hook_toast_hint">若启用了“Hook 成功提示”，冷启动时还应出现 Guise Toast。</string>
     <string name="permissions_explanation">电话、位置、联系人、附近设备和媒体权限只用于调用待测 Android API。权限被拒或设备不支持时会显示错误，不会崩溃。</string>
     <string name="grant_permissions">授予测试权限</string><string name="permission_required">需要位置权限</string><string name="waiting">正在等待位置更新…</string>
-    <string name="not_available">不可用</string><string name="null_value">null</string><string name="hook_detected">已检测到 Guise Hook 生效</string>
+    <string name="not_available">不可用</string><string name="null_value">null</string>
     <string name="section_version">应用版本</string><string name="section_device">设备与系统</string><string name="section_identifiers">唯一标识</string>
     <string name="section_network">网络与 Wi-Fi</string><string name="section_sim">SIM 与基站</string><string name="section_location">位置</string>
     <string name="section_battery">电池</string><string name="section_locale">语言与地区</string><string name="section_blank_pass">空白通行</string><string name="section_screenshot">截图标志</string>

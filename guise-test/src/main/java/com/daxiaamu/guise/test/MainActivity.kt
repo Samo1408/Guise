@@ -123,7 +123,7 @@ private enum class TestKey(@StringRes val label: Int) {
     DIRECT_GUISE_LOOKUP(R.string.direct_guise_lookup)
 }
 
-private data class TestResult(val value: String, val detected: Boolean = false)
+private data class TestResult(val value: String)
 private data class TestSection(@StringRes val title: Int, val keys: List<TestKey>)
 
 private val sections = listOf(
@@ -305,8 +305,7 @@ private fun ResultCard(section: TestSection, results: Map<TestKey, TestResult>) 
                 val result = results[key] ?: TestResult(stringResource(R.string.not_available))
                 Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                     Text(stringResource(key.label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(result.value, fontFamily = FontFamily.Monospace, color = if (result.detected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
-                    if (result.detected) Text(stringResource(R.string.hook_detected), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(result.value, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -372,7 +371,7 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
     this[TestKey.PACKAGE_VERSION] = runCatching {
         val info = context.packageManager.getPackageInfo(context.packageName, 0)
         val text = "${info.versionName} (${info.longVersionCode})"
-        TestResult(text, info.versionName != BuildConfig.VERSION_NAME || info.longVersionCode != BuildConfig.VERSION_CODE.toLong())
+        TestResult(text)
     }.getOrElse { TestResult(it.userMessage()) }
     putSafe(TestKey.BRAND) { Build.BRAND }; putSafe(TestKey.MANUFACTURER) { Build.MANUFACTURER }
     putSafe(TestKey.MODEL) { Build.MODEL }; putSafe(TestKey.PRODUCT) { Build.PRODUCT }
@@ -476,7 +475,7 @@ private fun collectResults(context: Context): Map<TestKey, TestResult> = buildMa
         packageManager.getApplicationInfo(GUISE_PACKAGE, 0)
         TestResult(context.getString(R.string.package_visible, GUISE_PACKAGE))
     } catch (_: PackageManager.NameNotFoundException) {
-        TestResult(context.getString(R.string.package_hidden, GUISE_PACKAGE), detected = true)
+        TestResult(context.getString(R.string.package_hidden, GUISE_PACKAGE))
     } catch (error: Throwable) {
         TestResult(error.userMessage())
     }
@@ -497,10 +496,7 @@ private fun <T> List<T>.toVisibilityResult(
             else -> otherUser++
         }
     }
-    return TestResult(
-        context.getString(R.string.application_list_result, size, system, self, otherUser),
-        detected = self > 0 && otherUser == 0,
-    )
+    return TestResult(context.getString(R.string.application_list_result, size, system, self, otherUser))
 }
 
 private fun ApplicationInfo.isSystemApp(): Boolean =
@@ -534,7 +530,7 @@ private val XPOSED_APK_ENTRIES = arrayOf(
 private fun MutableMap<TestKey, TestResult>.putQuery(context: Context, key: TestKey, uri: android.net.Uri) {
     this[key] = runCatching {
         val cursor = context.contentResolver.query(uri, arrayOf("_id"), null, null, null)
-            ?: return@runCatching TestResult(context.getString(R.string.null_cursor), detected = true)
+            ?: return@runCatching TestResult(context.getString(R.string.null_cursor))
         cursor.use { TestResult(context.getString(R.string.cursor_count, it.count)) }
     }.getOrElse { TestResult(it.userMessage()) }
 }

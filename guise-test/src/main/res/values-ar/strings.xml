@@ -5,14 +5,14 @@
     <string name="time_zone_java_time">المنطقة الزمنية (java.time)</string>
     <string name="time_zone_icu">المنطقة الزمنية (Android ICU)</string>
     <string name="app_name">اختبار Guise</string>
-    <string name="app_description">تطبيق «هدف» للتحقق من أن تأثيرات التمويه في Guise تعمل.</string>
+    <string name="app_description">تطبيق «هدف» يعرض القيم الفعلية التي تعيدها واجهات Android API.</string>
     <string name="refresh">تحديث</string>
     <string name="test_instructions_title">طريقة الاختبار</string>
     <string name="test_instructions">أضف هذا التطبيق (com.daxiaamu.guise.test) إلى Guise، واضبط قيماً مزيّفة يسهل تمييزها، ثم زامن النطاق وأوقف التطبيق بالقوة وافتحه مجدداً. قارن القيم أدناه بإعدادات Guise.</string>
     <string name="hook_toast_hint">إذا كان «إشعار نجاح Hook» مفعّلاً، فيفترض أن تظهر أيضاً رسالة Guise عند التشغيل البارد.</string>
     <string name="permissions_explanation">تُستخدم أذونات الهاتف والموقع وجهات الاتصال والأجهزة القريبة والوسائط فقط لاستدعاء واجهات Android قيد الاختبار. يُعرض الخطأ بدلاً من التعطل عند الرفض أو عدم الدعم.</string>
     <string name="grant_permissions">منح أذونات الاختبار</string><string name="permission_required">إذن الموقع مطلوب</string><string name="waiting">بانتظار تحديث الموقع…</string>
-    <string name="not_available">غير متاح</string><string name="null_value">null</string><string name="hook_detected">تم اكتشاف تأثير Guise Hook</string>
+    <string name="not_available">غير متاح</string><string name="null_value">null</string>
     <string name="section_version">إصدار التطبيق</string><string name="section_device">الجهاز والنظام</string><string name="section_identifiers">المعرّفات الفريدة</string>
     <string name="section_network">الشبكة وWi-Fi</string><string name="section_sim">SIM والخلية</string><string name="section_location">الموقع</string><string name="section_battery">البطارية</string><string name="section_locale">اللغة والمنطقة</string><string name="section_blank_pass">تمرير فارغ</string><string name="section_screenshot">علامة لقطة الشاشة</string>
     <string name="package_name">اسم الحزمة</string><string name="compiled_version">إصدار BuildConfig وقت البناء</string><string name="package_manager_version">إصدار PackageManager</string>

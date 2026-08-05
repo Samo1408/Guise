@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Guise Test</string>
-    <string name="app_description">A “target app” for checking whether Guise spoofing effects are active.</string>
+    <string name="app_description">A “target app” that displays the actual values returned by Android APIs.</string>
     <string name="refresh">Refresh</string>
     <string name="test_instructions_title">How to test</string>
     <string name="test_instructions">Add this app (com.daxiaamu.guise.test) to Guise, configure known spoofed values, sync the scope, then force stop and reopen this app. Compare the values below with your Guise configuration.</string>
@@ -12,7 +12,6 @@
     <string name="waiting">Waiting for a location update…</string>
     <string name="not_available">Not available</string>
     <string name="null_value">null</string>
-    <string name="hook_detected">Guise hook effect detected</string>
     <string name="section_version">App version</string>
     <string name="section_device">Device and system</string>
     <string name="section_identifiers">Unique identifiers</string>
