@@ -22,7 +22,7 @@
     <string name="id_imei_summary">应用读取任一卡槽时均返回此值；双卡设备的 IMEI 1/2 将相同</string>
     <string name="title_cell_location">基站信息</string>
     <string name="title_location_info">位置信息</string>
-    <string name="location_info_summary">经纬度仅修改 GPS 数值，但大多数应用仍可通过 Wi-Fi 定位和基站定位获取位置信息。建议同时开启下方两个“位置信息失效”选项</string>
+    <string name="location_info_summary">以下修改只作用于目标应用读取到的数据，不会改变系统定位开关或其他应用</string>
     <string name="title_other">其他</string>
     <string name="title_blank_pass">空白通行证</string>
     <string name="device_brand">品牌</string>
@@ -46,7 +46,10 @@
     <string name="location_lng">经度</string>
     <string name="location_lat">纬度</string>
     <string name="location_offset">随机偏移</string>
-    <string name="location_wifi_fail">使WiFi位置信息失效</string>
+    <string name="location_coordinates_summary">修改 Android Location 对象返回的坐标，覆盖 GPS、网络和融合定位；不影响 IP 定位、厂商私有接口或远程服务结果</string>
+    <string name="location_offset_summary">目标应用进程每次启动时，在所填坐标附近生成一次小范围随机偏移</string>
+    <string name="location_wifi_fail">隐藏 Wi-Fi 定位信息</string>
+    <string name="location_wifi_fail_summary">隐藏附近 Wi-Fi 扫描结果及当前连接的 SSID、BSSID、MAC 等标识，并优先于上方自定义 Wi-Fi 配置；不会关闭 Wi-Fi，也不会阻止定位服务返回位置</string>
     <string name="other_battery_level">电量</string>
     <string name="other_language">语言</string>
     <string name="other_time_zone">时区</string>
@@ -178,7 +181,8 @@
     <string name="clear_logs_message">将删除本地保存的全部模块运行时日志。</string>
     <string name="clear">清空</string>
     <string name="operation_successful">操作成功</string>
-    <string name="location_cell_fail">使基站位置信息失效</string>
+    <string name="location_cell_fail">隐藏基站定位信息</string>
+    <string name="location_cell_fail_summary">隐藏基站列表及 LAC、CID、TAC、NCI 等位置标识，并优先于上方 LAC/CID 配置；不会关闭移动网络，也不修改运营商和信号状态</string>
     <string name="xposed_service_not_connected">尚未连接 Xposed 服务</string>
     <string name="manual_force_stop_required">Guise 尚未加载到此进程，请点“强行停止”，再打开应用使 Hook 生效</string>
     <string name="xposed_target_process_exit_failed">目标进程未能退出，请手动停止</string>

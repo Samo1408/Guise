@@ -245,10 +245,26 @@ private fun ConfigEditorItems(state: ModuleConfigState, launch: () -> Unit) {
         supportingText = stringResource(R.string.location_info_summary),
     )
     InputBox(state.longitude, stringResource(R.string.location_lng))
-    InputBox(state.latitude, stringResource(R.string.location_lat))
-    ContainerSwitch(state.randomOffset, stringResource(R.string.location_offset))
-    ContainerSwitch(state.makeWifiLocationFail, stringResource(R.string.location_wifi_fail))
-    ContainerSwitch(state.makeCellLocationFail, stringResource(R.string.location_cell_fail))
+    InputBox(
+        state.latitude,
+        stringResource(R.string.location_lat),
+        supportingText = stringResource(R.string.location_coordinates_summary),
+    )
+    ContainerSwitch(
+        state.randomOffset,
+        stringResource(R.string.location_offset),
+        supportingText = stringResource(R.string.location_offset_summary),
+    )
+    ContainerSwitch(
+        state.makeWifiLocationFail,
+        stringResource(R.string.location_wifi_fail),
+        supportingText = stringResource(R.string.location_wifi_fail_summary),
+    )
+    ContainerSwitch(
+        state.makeCellLocationFail,
+        stringResource(R.string.location_cell_fail),
+        supportingText = stringResource(R.string.location_cell_fail_summary),
+    )
 
 
     Title(text = stringResource(R.string.title_build_config))

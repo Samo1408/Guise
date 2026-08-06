@@ -36,7 +36,7 @@
     <string name="title_unique_id">Unique ID</string>
     <string name="title_cell_location">Cell Location</string>
     <string name="title_location_info">Location Info</string>
-    <string name="location_info_summary">Latitude and longitude change GPS values only. Most apps can still locate you through Wi-Fi and cell towers. Enable both location-failure options below as well</string>
+    <string name="location_info_summary">These changes affect only data read by the target app; they do not change system location settings or other apps</string>
     <string name="title_build_config" translatable="false">Build Config</string>
     <string name="title_other">Other</string>
     <string name="title_blank_pass">Blank Pass</string>
@@ -70,7 +70,10 @@
     <string name="location_lng">Longitude</string>
     <string name="location_lat">Latitude</string>
     <string name="location_offset">Random offset</string>
-    <string name="location_wifi_fail">Invalidate WiFi location</string>
+    <string name="location_coordinates_summary">Changes coordinates returned by Android Location objects for GPS, network, and fused locations; IP geolocation, vendor APIs, and remote services are unaffected</string>
+    <string name="location_offset_summary">Generates one small random offset around the configured coordinates each time the target app process starts</string>
+    <string name="location_wifi_fail">Hide Wi-Fi location data</string>
+    <string name="location_wifi_fail_summary">Hides nearby Wi-Fi scans and connected SSID, BSSID, MAC, and related identifiers, taking priority over the custom Wi-Fi values above; it does not disable Wi-Fi or stop location services from returning a location</string>
 
     <string name="build_config_version_name">Version Name</string>
     <string name="build_config_version_code">Version Code</string>
@@ -195,7 +198,8 @@
     <string name="clear_logs_message">All locally stored runtime logs will be deleted.</string>
     <string name="clear">Clear</string>
     <string name="operation_successful">Success</string>
-    <string name="location_cell_fail">Invalidate cell location</string>
+    <string name="location_cell_fail">Hide cell location data</string>
+    <string name="location_cell_fail_summary">Hides cell lists and location identifiers such as LAC, CID, TAC, and NCI, taking priority over the LAC/CID values above; it does not disable mobile data or change carrier and signal state</string>
     <string name="xposed_service_not_connected">Xposed service is not connected</string>
     <string name="manual_force_stop_required">Guise has not been loaded into this process yet. Tap Force stop, then open the app again to activate the hook.</string>
     <string name="xposed_target_process_exit_failed">The target process did not exit. Please stop it manually.</string>

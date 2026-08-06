@@ -6,6 +6,8 @@ import com.houvven.ktx_xposed.hook.setMethodResult
 
 internal class WifiHook : LoadPackageHandler {
     override fun onHook() {
+        // LocationHook owns these values when Wi-Fi-derived identifiers are intentionally hidden.
+        if (config.makeWifiLocationFail) return
         WifiInfo::class.java.run {
             if (config.wifiSSID.isNotBlank()) setMethodResult("getSSID", "\"${config.wifiSSID}\"")
             if (config.wifiBSSID.isNotBlank()) setMethodResult("getBSSID", config.wifiBSSID)

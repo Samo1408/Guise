@@ -32,7 +32,7 @@
     <string name="title_unique_id">一意のID</string>
     <string name="id_imei_summary">どの端末スロットから読み取ってもこの値を返します。デュアル SIM 端末では IMEI 1/2 が同じ値になります</string>
     <string name="title_location_info">位置情報</string>
-    <string name="location_info_summary">緯度と経度で変更されるのは GPS の値のみです。多くのアプリは Wi-Fi や基地局からも位置を取得できます。下の 2 つの「位置情報を無効化」も有効にしてください</string>
+    <string name="location_info_summary">以下の変更は対象アプリが読み取るデータだけに作用し、システムの位置情報設定や他のアプリには影響しません</string>
     <string name="title_other">他の</string>
     <string name="title_blank_pass">ブランクパス</string>
     <string name="device_brand">ブランド</string>
@@ -56,7 +56,10 @@
     <string name="location_lng">経度</string>
     <string name="location_lat">緯度</string>
     <string name="location_offset">ランダムオフセット</string>
-    <string name="location_wifi_fail">WiFi ロケーションを無効にする</string>
+    <string name="location_coordinates_summary">Android Location オブジェクトが返す GPS、ネットワーク、統合測位の座標を変更します。IP 測位、メーカー独自 API、リモートサービスには影響しません</string>
+    <string name="location_offset_summary">対象アプリのプロセスを起動するたびに、設定した座標の周辺へ小さなランダムオフセットを一度生成します</string>
+    <string name="location_wifi_fail">Wi-Fi 位置情報を非表示</string>
+    <string name="location_wifi_fail_summary">周辺 Wi-Fi のスキャン結果と接続中の SSID、BSSID、MAC などを非表示にし、上のカスタム Wi-Fi 設定より優先します。Wi-Fi を無効にしたり、位置情報サービスの結果を遮断したりはしません</string>
     <string name="other_battery_level">バッテリー残量</string>
     <string name="other_language">言語</string>
     <string name="other_time_zone">タイムゾーン</string>
@@ -179,7 +182,8 @@
     <string name="clear_logs_message">端末に保存されているすべての実行ログを削除します。</string>
     <string name="clear">消去</string>
     <string name="operation_successful">操作が完了しました</string>
-    <string name="location_cell_fail">基地局の位置情報を無効化</string>
+    <string name="location_cell_fail">基地局位置情報を非表示</string>
+    <string name="location_cell_fail_summary">基地局一覧と LAC、CID、TAC、NCI などの位置識別子を非表示にし、上の LAC/CID 設定より優先します。モバイル通信を無効にせず、通信事業者や信号状態も変更しません</string>
     <string name="xposed_service_not_connected">Xposed サービスに接続されていません</string>
     <string name="manual_force_stop_required">Guise はまだこのプロセスに読み込まれていません。「強制停止」をタップしてからアプリを開き直し、フックを有効にしてください</string>
     <string name="xposed_target_process_exit_failed">対象プロセスを終了できませんでした。手動で停止してください</string>

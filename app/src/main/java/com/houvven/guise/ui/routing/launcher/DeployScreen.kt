@@ -1,5 +1,6 @@
 package com.houvven.guise.ui.routing.launcher
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +60,7 @@ import com.houvven.guise.R
 import com.houvven.guise.constant.AppConfigKey
 import com.houvven.guise.module.apps.AppInfo
 import com.houvven.guise.module.apps.AppSortTypes
+import com.houvven.guise.module.ktx.showToast
 import com.houvven.guise.ui.components.AppIcon
 import com.houvven.guise.ui.components.simplify.NoBtnAlertDialog
 import com.houvven.guise.ui.components.simplify.SimplifyIcon
@@ -199,6 +202,7 @@ private fun AppCard(
 @Composable
 fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
 
+    val context = LocalContext.current
     var displayMenu by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
     var refreshing by rememberSaveable { mutableStateOf(false) }
@@ -364,23 +368,23 @@ fun DeployScreen(onOpenConfig: (AppInfo) -> Unit) {
                             )
                             if (enabled) {
                                 manager.setEnabled(true)
-                                com.houvven.guise.ui.GlobalSnackbarHost.showByDismissPrevious(
-                                    restartToApplyMessage
-                                )
+                                context.showToast(restartToApplyMessage, Toast.LENGTH_LONG)
                             } else {
                                 coroutineScope.launch {
                                     val stopResult = manager.stopIfHooked()
                                     manager.setEnabled(false)
                                     stopResult.fold(
                                         onSuccess = {
-                                            com.houvven.guise.ui.GlobalSnackbarHost
-                                                .showByDismissPrevious(restartToApplyMessage)
+                                            context.showToast(
+                                                restartToApplyMessage,
+                                                Toast.LENGTH_LONG,
+                                            )
                                         },
                                         onFailure = {
-                                            com.houvven.guise.ui.GlobalSnackbarHost
-                                                .showOnErrorByDismissPrevious(
-                                                    "$restartToApplyMessage\n${it.message ?: it}"
-                                                )
+                                            context.showToast(
+                                                "$restartToApplyMessage\n${it.message ?: it}",
+                                                Toast.LENGTH_LONG,
+                                            )
                                         },
                                     )
                                 }

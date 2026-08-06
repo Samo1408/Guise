@@ -1,6 +1,7 @@
 package com.houvven.guise.ui.routing.editor
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
@@ -43,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
+import com.houvven.guise.module.ktx.showToast
 import com.houvven.guise.ui.GlobalSnackbarHost
 import com.houvven.guise.ui.components.SaveTemplate
 import com.houvven.guise.ui.components.simplify.SimplifyDropdownMenuItem
@@ -132,8 +134,10 @@ fun DeployConfigEditScreen(
         exitDialog = EditorExitDialog.NONE
         coroutineScope.launch {
             action().onFailure {
-                GlobalSnackbarHost.showOnErrorByDismissPrevious(
-                    it.message ?: it.toString()
+                // The fallback opens the system app-info page, where Guise's Snackbar is invisible.
+                context.showToast(
+                    it.message ?: it.toString(),
+                    Toast.LENGTH_LONG,
                 )
             }
             onExit()
