@@ -25,3 +25,9 @@ jobs:
 
       - name: Build and lint
         run: ./gradlew assembleDebug lintDebug
+
+      - name: Upload Guise To Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+         name: Guise-beta
+         path: Guise-beta.zip
